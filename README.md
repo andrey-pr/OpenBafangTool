@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
-[![Issues][issues-shield]][https://github.com/andrey-pr/OpenBafangTool/issues]
-[![MIT License][license-shield]][LICENSE.txt]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
 
 <br />
 <div align="center">
@@ -125,5 +125,7 @@ Project Link: [https://github.com/andrey-pr/OpenBafangTool](https://github.com/a
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
+[issues-shield]: https://img.shields.io/github/issues/andrey-pr/OpenBafangTool.svg?style=for-the-badge
+[issues-url]: https://github.com/andrey-pr/OpenBafangTool/issues
+[license-shield]: https://img.shields.io/github/license/andrey-pr/OpenBafangTool.svg?style=for-the-badge
+[license-url]: LICENSE.txt
