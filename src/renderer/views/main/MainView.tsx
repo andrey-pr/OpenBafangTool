@@ -32,14 +32,14 @@ const menuItems = {
             label: 'Back',
         },
         {
-            key: 'info',
+            key: 'bafang_motor_info',
             icon: <FileOutlined />,
             label: 'Info',
         },
         {
-            key: 'settings',
+            key: 'bafang_motor_settings',
             icon: <SettingOutlined />,
-            label: 'Settings',
+            label: 'Parameters',
         },
         // {
         //     key: 'diagnostics',
@@ -47,7 +47,7 @@ const menuItems = {
         //     label: 'Diagnostics',
         // },
         {
-            key: 'manual',
+            key: 'bafang_motor_manual',
             icon: <BookOutlined />,
             label: 'Manual',
             children: [
@@ -60,12 +60,12 @@ const menuItems = {
                     label: 'Parameters',
                 },
                 {
-                    key: `manual_${DocPages.BafangUartProtocolDocument}`,
-                    label: 'UART Protocol',
-                },
-                {
                     key: `manual_${DocPages.BafangUartMotorAPIDocument}`,
                     label: 'Motor Protocol',
+                },
+                {
+                    key: `manual_${DocPages.BafangUartProtocolDocument}`,
+                    label: 'UART Protocol',
                 },
             ],
         },
@@ -82,7 +82,7 @@ const menuItems = {
 class MainView extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
-        this.state = { tab: menuItems[props.connection.deviceType][1].key };
+        this.state = { tab: menuItems[props.connection.deviceName][1].key };
         this.switchTab = this.switchTab.bind(this);
         const { connection } = this.props;
         connection.loadData();
@@ -117,24 +117,24 @@ class MainView extends React.Component<MainProps, MainState> {
                         theme="dark"
                         mode="inline"
                         defaultSelectedKeys={[
-                            menuItems[connection.deviceType][1].key,
+                            menuItems[connection.deviceName][1].key,
                         ]}
-                        items={menuItems[connection.deviceType]}
+                        items={menuItems[connection.deviceName]}
                         onSelect={this.switchTab}
                     />
                 </Sider>
                 <Layout style={{ marginLeft: 200, backgroundColor: 'white' }}>
-                    {tab === 'info' && (
+                    {tab === 'bafang_motor_info' && (
                         <BafangUartMotorInfoView
                             connection={connection as BafangUartMotor}
                         />
                     )}
-                    {tab === 'settings' && (
+                    {tab === 'bafang_motor_settings' && (
                         <BafangUartMotorSettingsView
                             connection={connection as BafangUartMotor}
                         />
                     )}
-                    {tab === 'diagnostics' && <p>Under construction</p>}
+                    {tab === 'bafang_motor_diagnostics' && <p>Under construction</p>}
                     {tab.indexOf('manual') === 0 && (
                         <DocumentationView page={tab.substring(7)} />
                     )}
