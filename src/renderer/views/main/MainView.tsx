@@ -6,15 +6,14 @@ import {
     ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
-import BafangUartMotorInfoView from '../panels/BafangUartMotorInfoView';
-import BafangUartMotorSettingsView from '../panels/BafangUartMotorSettingsView';
+import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
+import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
 import IConnection from '../../device/Connection';
 import BafangUartMotor from '../../device/BafangUartMotor';
-import DocumentationView from '../panels/DocumentationView';
+import DocumentationView from '../panels/common/DocumentationView';
 import { DocPages } from '../../../docs/document_resolver';
 import DifficultyLevel from '../../models/DifficultyLevel';
-import BafangUartMotorInfoSimplifiedView from '../panels/BafangUartMotorInfoSimplifiedView';
-import BafangUartMotorSettingsSimplifiedView from '../panels/BafangUartMotorSettingsSimplifiedView';
+import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView';
 
 const { Sider } = Layout;
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import MarkdownPreview from '@uiw/react-markdown-preview';
-import { getDocumentById } from '../../../docs/document_resolver';
-import { getImage } from '../../../docs/img_resolver';
+import { getDocumentById } from '../../../../docs/document_resolver';
+import { getImage } from '../../../../docs/img_resolver';
 
 type InfoProps = {
     page: string;

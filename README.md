@@ -86,8 +86,8 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
   - [ ] Beta
   - [ ] Stable
 - [ ] Add support of Yamaha systems
-  - [x] Find hardware
-  - [ ] Research protocol - in progress
+  - [ ] Find hardware
+  - [x] Research protocol - in progress
   - [ ] Alpha
   - [ ] Beta
   - [ ] Stable

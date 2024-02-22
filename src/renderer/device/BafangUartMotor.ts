@@ -166,20 +166,11 @@ export default class BafangUartMotor implements IConnection {
     private processWriteAnswerPacket(packet: Uint8Array): void {
         if (ParameterCodes[packet[0]] !== undefined) {
             if (ParameterCodes[packet[0]].parameters.length <= packet[1]) {
-                console.log(
-                    ParameterCodes[packet[0]].name,
-                    ' parameters written successfully',
-                );
                 this.emitter.emit(
                     'write-success',
                     `${ParameterCodes[packet[0]].name}`,
                 );
             } else {
-                console.log(
-                    ParameterCodes[packet[0]].name,
-                    ' parameters write error: ',
-                    ParameterCodes[packet[0]].parameters[packet[1]],
-                );
                 this.emitter.emit(
                     'write-error',
                     `${ParameterCodes[packet[0]].parameters[packet[1]]}`,
