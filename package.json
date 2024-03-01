@@ -24,7 +24,9 @@
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && npm run build:dll",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build && npm run build:dll",
+    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build -lw && npm run build:dll",
+    "appimage": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --linux appimage && npm run build:dll",
+    "flatpak": "ts-node ./.erb/scripts/clean.js dist && npm run build && env DEBUG=\"@malept/flatpak-bundler\" electron-builder build --linux flatpak && npm run build:dll",
     "clean": "ts-node ./.erb/scripts/clean.js dist",
     "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
@@ -166,7 +168,7 @@
   },
   "build": {
     "productName": "OpenBafangTool",
-    "appId": "org.OpenBafangTool",
+    "appId": "org.test.OpenBafangTool",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -210,9 +212,14 @@
     },
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "flatpak"
       ],
       "category": "Development"
+    },
+    "flatpak": {
+      "baseVersion": "23.08",
+      "runtimeVersion": "23.08"
     },
     "directories": {
       "app": "release/app",
