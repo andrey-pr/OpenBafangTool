@@ -51,7 +51,6 @@ export default class BafangUartMotor implements IBafangUartConnection {
             serial_number: '',
             model: '',
             manufacturer: '',
-            power_specification_code: '',
             system_code: '',
             firmware_version: '',
             hardware_version: '',
@@ -195,11 +194,6 @@ export default class BafangUartMotor implements IBafangUartConnection {
             case 0x50:
                 this.info.firmware_version = String.fromCharCode(...data);
                 break;
-            case 0x12:
-                this.info.power_specification_code = String.fromCharCode(
-                    ...data,
-                );
-                break;
             case 0x13:
                 this.info.system_code = String.fromCharCode(...data);
                 break;
@@ -336,7 +330,6 @@ export default class BafangUartMotor implements IBafangUartConnection {
                 serial_number: '201608080001',
                 model: 'SW06',
                 manufacturer: 'SZBF',
-                power_specification_code: 'MAX_DS48V250W',
                 system_code: 'MAX01_V2.2_DS',
                 firmware_version: 'CRX10B4812E010026.3',
                 hardware_version: '2.2',
@@ -390,7 +383,6 @@ export default class BafangUartMotor implements IBafangUartConnection {
             [0x11, 0x53],
             [0x11, 0x54],
             [0x11, 0x50],
-            [0x14, 0x12],
             [0x14, 0x13],
             [0x14, 0x14],
             [0x14, 0x16],
