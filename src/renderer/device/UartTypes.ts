@@ -4,7 +4,6 @@ export type BafangUartMotorInfo = {
     serial_number: string;
     model: string;
     manufacturer: string;
-    power_specification_code: string;
     system_code: string;
     firmware_version: string;
     hardware_version: string;

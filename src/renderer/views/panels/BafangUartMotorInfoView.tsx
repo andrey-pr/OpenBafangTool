@@ -47,11 +47,6 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                 children: info.manufacturer,
             },
             {
-                key: 'power_specification_code',
-                label: 'Power specification code',
-                children: info.power_specification_code,
-            },
-            {
                 key: 'system_code',
                 label: 'System code',
                 children: info.system_code,
