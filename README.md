@@ -52,11 +52,11 @@ Minimal set of hardware that you need to use this program (also possible to test
 
 Programming cable for bafang - you can buy it on Aliexpress for 5$ or in local shops.
 
-![Motor](docs/assets/readme/motor.jpeg)
+![Motor](docs/assets/readme/motor.avif)
 
 Motor that you want to configure.
 
-![USB isolator](docs/assets/readme/usb-isolator.webp)
+![USB isolator](docs/assets/readme/usb-isolator.jpg)
 
 Also better to have USB isolator, that will protect your computer in case when motor or connection cable is broken and put battery voltage (usually 36V or 48V) on USB connector.
 
