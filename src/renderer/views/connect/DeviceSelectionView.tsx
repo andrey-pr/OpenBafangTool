@@ -12,11 +12,15 @@ import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import DeviceType from '../../models/DeviceType';
 import IConnection from '../../device/Connection';
 import BafangUartMotor from '../../device/BafangUartMotor';
+import DifficultyLevel from '../../models/DifficultyLevel';
 
 const { Option } = Select;
 
 interface DeviceSelectionProps {
-    deviceSelectionHook: (connection: IConnection) => void;
+    deviceSelectionHook: (
+        connection: IConnection,
+        difficulty_level: DifficultyLevel,
+    ) => void;
 }
 
 function DeviceSelectionView(props: DeviceSelectionProps) {
@@ -32,6 +36,11 @@ function DeviceSelectionView(props: DeviceSelectionProps) {
     );
 
     const { deviceSelectionHook } = props;
+
+    const onDifficultyLevelChange = (value: string) => {
+        form.setFieldsValue({ difficulty_level: value });
+        setConnectionChecked(false);
+    };
 
     const onPortChange = (value: string) => {
         form.setFieldsValue({ port: value });
@@ -89,16 +98,43 @@ function DeviceSelectionView(props: DeviceSelectionProps) {
                 form={form}
                 name="device-selection"
                 onFinish={() => {
-                    deviceSelectionHook(connection as IConnection);
+                    deviceSelectionHook(
+                        connection as IConnection,
+                        form.getFieldValue('difficulty_level'),
+                    );
                 }}
             >
                 <Typography.Title level={3}>Select device</Typography.Title>
+                <Form.Item
+                    name="difficulty_level"
+                    label="Diffuculty level"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Diffuculty level is required',
+                        },
+                    ]}
+                >
+                    <Select
+                        onChange={onDifficultyLevelChange}
+                        allowClear
+                        style={{ minWidth: '150px' }}
+                    >
+                        <Option value={DifficultyLevel.Simplified}>
+                            Simplified
+                        </Option>
+                        <Option value={DifficultyLevel.Pro}>
+                            Pro
+                        </Option>
+                    </Select>
+                </Form.Item>
                 <Form.Item
                     name="device_type"
                     label="Device type"
                     rules={[
                         { required: true, message: 'Device type is required' },
                     ]}
+                    initialValue={DeviceType.BafangUartMotor}
                 >
                     <Select
                         onChange={onTypeChange}
@@ -108,8 +144,8 @@ function DeviceSelectionView(props: DeviceSelectionProps) {
                         <Option value={DeviceType.BafangUartMotor}>
                             Motor
                         </Option>
-                        <Option value={DeviceType.BafangUartDisplay}>
-                            Display
+                        <Option value={DeviceType.BafangUartDisplay} disabled>
+                            Display - not yet supported
                         </Option>
                     </Select>
                 </Form.Item>
@@ -221,6 +257,8 @@ function DeviceSelectionView(props: DeviceSelectionProps) {
                                     });
                             }}
                             disabled={
+                                form.getFieldValue('difficulty_level') ==
+                                    null ||
                                 form.getFieldValue('port') == null ||
                                 form.getFieldValue('type') == null
                             }

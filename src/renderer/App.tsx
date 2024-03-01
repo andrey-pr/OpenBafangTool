@@ -3,6 +3,7 @@ import React from 'react';
 import DeviceSelectionView from './views/connect/DeviceSelectionView';
 import MainView from './views/main/MainView';
 import IConnection from './device/Connection';
+import DifficultyLevel from './models/DifficultyLevel';
 
 type AppProps = {};
 
@@ -22,7 +23,7 @@ class App extends React.Component<AppProps, AppState> {
         this.toDeviceSelector = this.toDeviceSelector.bind(this);
     }
 
-    deviceSelectionHook(newConnection: IConnection): void {
+    deviceSelectionHook(newConnection: IConnection, difficultyLevel: DifficultyLevel): void {
         const { connection } = this.state;
         if (connection != null) {
             connection.disconnect();
