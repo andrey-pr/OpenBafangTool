@@ -111,11 +111,11 @@ class DeviceSelectionView extends React.Component<
                     <Typography.Title level={3}>Select device</Typography.Title>
                     <Form.Item
                         name="difficulty_level"
-                        label="Diffuculty level"
+                        label="Difficulty level"
                         rules={[
                             {
                                 required: true,
-                                message: 'Diffuculty level is required',
+                                message: 'Difficulty level is required',
                             },
                         ]}
                     >

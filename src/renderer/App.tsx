@@ -10,6 +10,7 @@ type AppProps = {};
 type AppState = {
     view: string;
     connection: IConnection | null;
+    difficultyLevel: DifficultyLevel | null;
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -18,6 +19,7 @@ class App extends React.Component<AppProps, AppState> {
         this.state = {
             view: 'device_selector',
             connection: null,
+            difficultyLevel: null,
         };
         this.deviceSelectionHook = this.deviceSelectionHook.bind(this);
         this.toDeviceSelector = this.toDeviceSelector.bind(this);
@@ -42,6 +44,7 @@ class App extends React.Component<AppProps, AppState> {
         this.setState({
             view: 'main_view',
             connection: newConnection,
+            difficultyLevel: difficultyLevel
         });
     }
 
@@ -55,7 +58,7 @@ class App extends React.Component<AppProps, AppState> {
 
     render() {
         const { view } = this.state;
-        const { connection } = this.state;
+        const { connection, difficultyLevel } = this.state;
         if (view === 'device_selector') {
             return (
                 <DeviceSelectionView
@@ -66,6 +69,7 @@ class App extends React.Component<AppProps, AppState> {
             return (
                 <MainView
                     connection={connection as IConnection}
+                    difficultyLevel={difficultyLevel}
                     backHook={this.toDeviceSelector}
                 />
             );
