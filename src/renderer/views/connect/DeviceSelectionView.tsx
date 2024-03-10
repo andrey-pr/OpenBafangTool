@@ -16,17 +16,22 @@ import {
     Space,
     message,
 } from 'antd';
+import DifficultyLevel from '../../models/DifficultyLevel';
 
 const { Option } = Select;
 
 type DeviceSelectionProps = {
-    deviceSelectionHook: (connection: IConnection) => void;
+    deviceSelectionHook: (
+        connection: IConnection,
+        difficulty_level: DifficultyLevel,
+    ) => void;
 };
 
 type DeviceSelectionState = {
     portList: string[];
     connectionChecked: boolean;
     connection: IConnection | null;
+    difficulty_level: DifficultyLevel | null;
     device_brand: DeviceBrand | null;
     device_interface: DeviceInterface | null;
     device_type: DeviceType | null;
@@ -45,7 +50,8 @@ class DeviceSelectionView extends React.Component<
             portList: [],
             connectionChecked: false,
             connection: null,
-            device_brand: null,
+            difficulty_level: null,
+            device_brand: DeviceBrand.Bafang,
             device_interface: DeviceInterface.UART,
             device_type: DeviceType.Motor,
             device_port: null,
@@ -68,6 +74,7 @@ class DeviceSelectionView extends React.Component<
             portList,
             connectionChecked,
             connection,
+            difficulty_level,
             device_brand,
             device_interface,
             device_type,
@@ -95,10 +102,39 @@ class DeviceSelectionView extends React.Component<
                 <Form
                     name="device-selection"
                     onFinish={() => {
-                        deviceSelectionHook(connection as IConnection);
+                        deviceSelectionHook(
+                            connection as IConnection,
+                            difficulty_level,
+                        );
                     }}
                 >
                     <Typography.Title level={3}>Select device</Typography.Title>
+                    <Form.Item
+                        name="difficulty_level"
+                        label="Diffuculty level"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Diffuculty level is required',
+                            },
+                        ]}
+                    >
+                        <Select
+                            onChange={(value: DifficultyLevel) => {
+                                this.setState({
+                                    difficulty_level: value,
+                                    connectionChecked: false,
+                                });
+                            }}
+                            allowClear
+                            style={{ minWidth: '150px' }}
+                        >
+                            <Option value={DifficultyLevel.Simplified}>
+                                Simplified
+                            </Option>
+                            <Option value={DifficultyLevel.Pro}>Pro</Option>
+                        </Select>
+                    </Form.Item>
                     <Form.Item
                         name="device_brand"
                         label="Device brand"
@@ -108,6 +144,7 @@ class DeviceSelectionView extends React.Component<
                                 message: 'Device brand is required',
                             },
                         ]}
+                        initialValue={DeviceBrand.Bafang}
                     >
                         <Select
                             onChange={(value: DeviceBrand) => {
@@ -186,32 +223,32 @@ class DeviceSelectionView extends React.Component<
                             </Form.Item>
                         )}
                     {device_brand == DeviceBrand.Bafang &&
-                            device_interface == DeviceInterface.UART && (
-                        <Form.Item
-                            name="port"
-                            label="Serial port"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Serial port is required',
-                                },
-                            ]}
-                        >
-                            <Select
-                                onChange={(value: string) => {
-                                    this.setState({
-                                        device_port: value,
-                                        connectionChecked: false,
-                                    });
-                                }}
-                                allowClear
-                                style={{ minWidth: '150px' }}
+                        device_interface == DeviceInterface.UART && (
+                            <Form.Item
+                                name="port"
+                                label="Serial port"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Serial port is required',
+                                    },
+                                ]}
                             >
-                                <Option value="simulator">Simulator</Option>
-                                {portComponents}
-                            </Select>
-                        </Form.Item>
-                    )}
+                                <Select
+                                    onChange={(value: string) => {
+                                        this.setState({
+                                            device_port: value,
+                                            connectionChecked: false,
+                                        });
+                                    }}
+                                    allowClear
+                                    style={{ minWidth: '150px' }}
+                                >
+                                    <Option value="simulator">Simulator</Option>
+                                    {portComponents}
+                                </Select>
+                            </Form.Item>
+                        )}
                     <Form.Item
                         name="local_laws_agreement"
                         label=""
@@ -330,7 +367,8 @@ class DeviceSelectionView extends React.Component<
                                     device_port == null ||
                                     (device_brand == DeviceBrand.Bafang &&
                                         (device_interface == null ||
-                                            device_type == null))
+                                            device_type == null)) ||
+                                    difficulty_level == null
                                 }
                             >
                                 Check connection
