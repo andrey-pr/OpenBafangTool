@@ -84,6 +84,8 @@ export enum PedalType {
     DoubleSignal24 = 3,
 }
 
+export const PedalSensorSignals = {0: 1, 1: 12, 2: 32, 3: 24};
+
 export enum AssistLevel {
     AssistLevel0 = 0,
     AssistLevel1 = 1,

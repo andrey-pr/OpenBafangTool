@@ -6,6 +6,7 @@ import {
     Select,
     FloatButton,
     message,
+    Radio,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
@@ -16,10 +17,15 @@ import {
     BafangUartMotorPedalParameters,
     BafangUartMotorThrottleParameters,
     ParameterNames,
+    PedalSensorSignals,
     SpeedLimitByDisplay,
     ThrottleMode,
 } from '../../device/UartTypes';
-import { lowVoltageLimits } from '../../constants/parameter_limits';
+import {
+    BatteryTypes,
+    LowVoltageLimitsByBatteryType,
+    lowVoltageLimits,
+} from '../../constants/parameter_limits';
 import ParameterInputComponent from '../components/ParameterInput';
 
 const { Title } = Typography;
@@ -31,9 +37,6 @@ type AssistTableRow = {
     assist_level: number;
     current: number;
     speed: number;
-    tip: string;
-    recommended_min: number;
-    recommended_max: number;
 };
 
 type SettingsProps = {
@@ -44,8 +47,6 @@ type SettingsState = BafangUartMotorInfo &
     BafangUartMotorBasicParameters &
     BafangUartMotorPedalParameters &
     BafangUartMotorThrottleParameters & {
-        pedal_speed_limit_unit: string;
-        throttle_speed_limit_unit: string;
         lastUpdateTime: number;
     };
 
@@ -77,16 +78,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             ...this.initial_basic_parameters,
             ...this.initial_pedal_parameters,
             ...this.initial_throttle_parameters,
-            pedal_speed_limit_unit:
-                this.initial_pedal_parameters.pedal_speed_limit ===
-                SpeedLimitByDisplay
-                    ? 'by_display'
-                    : 'kmh',
-            throttle_speed_limit_unit:
-                this.initial_throttle_parameters.throttle_speed_limit ===
-                SpeedLimitByDisplay
-                    ? 'by_display'
-                    : 'kmh',
             lastUpdateTime: 0,
         };
         this.getInfoItems = this.getInfoItems.bind(this);
@@ -124,7 +115,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         return [
             {
                 key: 'serial_number',
-                label: 'Serial number',
+                label: (
+                    <>
+                        Serial number
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            Note, that serial number is changeable, so its not a
+                            secure anti-theft feature
+                        </Typography.Text>
+                    </>
+                ),
                 children: info.serial_number,
             },
             {
@@ -134,7 +135,31 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             },
             {
                 key: 'max_current',
-                label: 'Max current TODO add disclaimer',
+                label: (
+                    <>
+                        Max current
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            Note, that Voltage*Max Current is a maximal
+                            <br />
+                            power, but not nominal. If you have legal motor
+                            <br />
+                            certified as 250W, and Voltage*Max Current is twice
+                            <br />
+                            or even triple bigger its normal - 250W is a nominal
+                            <br />
+                            (continuous) power, and its legal to use device that
+                            <br />
+                            can have bigger maximal power. For example, some of
+                            <br />
+                            Shimano STEPS motors that certified for 250W
+                            pedelecs have
+                            <br />
+                            600W of max power.
+                        </Typography.Text>
+                    </>
+                ),
                 children: info.max_current,
             },
         ];
@@ -142,24 +167,60 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
 
     getElectricalParameterItems(): DescriptionsProps['items'] {
         const { voltage, low_battery_protection } = this.state;
+        const voltageLimits = [
+            {
+                label: `Leave old value - ${this.initial_basic_parameters.low_battery_protection}V`,
+                value: this.initial_basic_parameters.low_battery_protection,
+            },
+        ];
+        if (LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiIon] !== -1) {
+            voltageLimits.push({
+                label: `Li-Ion (normal) - ${
+                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiIon]
+                }V`,
+                value: LowVoltageLimitsByBatteryType[voltage][
+                    BatteryTypes.LiIon
+                ],
+            });
+        }
+        if (LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiPo] !== -1) {
+            voltageLimits.push({
+                label: `Li-Po - ${
+                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiPo]
+                }V`,
+                value: LowVoltageLimitsByBatteryType[voltage][
+                    BatteryTypes.LiPo
+                ],
+            });
+        }
+        if (
+            LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiFePo4] !== -1
+        ) {
+            voltageLimits.push({
+                label: `LiFePo4 - ${
+                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiFePo4]
+                }V`,
+                value: LowVoltageLimitsByBatteryType[voltage][
+                    BatteryTypes.LiFePo4
+                ],
+            });
+        }
+
         return [
             {
                 key: 'low_voltage_protection',
-                label: 'Low voltage battery protection TODO replace with battery type constants',
+                label: 'Low voltage battery protection',
                 children: (
-                    <ParameterInputComponent
-                        value={low_battery_protection}
-                        unit="V"
-                        min={0}
-                        max={100}
-                        onNewValue={(e) => {
+                    <Radio.Group
+                        options={voltageLimits}
+                        onChange={(e) => {
                             this.setState({
-                                low_battery_protection: e,
+                                low_battery_protection: e.target.value,
                             });
                         }}
-                        warningText={`Its not recommended to set low voltage battery protection lower than ${lowVoltageLimits[voltage].min}V and higher that ${lowVoltageLimits[voltage].max}V on your system`}
-                        warningBelow={lowVoltageLimits[voltage].min}
-                        warningAbove={lowVoltageLimits[voltage].max}
+                        value={low_battery_protection}
+                        optionType="button"
+                        buttonStyle="solid"
                     />
                 ),
             },
@@ -197,81 +258,109 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             pedal_speed_limit,
             pedal_signals_before_start,
             pedal_time_to_stop,
-            pedal_speed_limit_unit,
+            pedal_type,
         } = this.state;
         return [
             {
                 key: 'pedal_speed_limit',
-                label: 'Pedal speed limit TODO replace with region constant buttons',
+                label: (
+                    <>
+                        Pedal speed limit
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            Note that its illegal to set bigger speed limit that
+                            <br />
+                            its allowed in your country. Check your local laws
+                            <br />
+                            before changing it
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
-                    <ParameterInputComponent
-                        value={
-                            pedal_speed_limit === SpeedLimitByDisplay
-                                ? null
-                                : pedal_speed_limit
-                        }
-                        unit={
-                            <Select
-                                style={{ minWidth: '100px' }}
-                                defaultValue={
-                                    pedal_speed_limit === SpeedLimitByDisplay
-                                        ? 'by_display'
-                                        : 'kmh'
-                                }
-                                options={[
-                                    { value: 'kmh', label: 'km/h' },
-                                    {
-                                        value: 'by_display',
-                                        label: 'By display',
-                                    },
-                                ]}
-                                onChange={(value) =>
-                                    this.setState({
-                                        pedal_speed_limit: SpeedLimitByDisplay,
-                                        pedal_speed_limit_unit: value,
-                                    })
-                                }
-                            />
-                        }
-                        min={1}
-                        max={60}
-                        onNewValue={(e) => {
+                    <Radio.Group
+                        options={[
+                            {
+                                label: `Leave old value - ${
+                                    this.initial_pedal_parameters
+                                        .pedal_speed_limit ==
+                                    SpeedLimitByDisplay
+                                        ? 'By display'
+                                        : this.initial_pedal_parameters
+                                              .pedal_speed_limit + ' km/h'
+                                }`,
+                                value: this.initial_pedal_parameters
+                                    .pedal_speed_limit,
+                            },
+                            { label: '25 km/h (EU region)', value: 25 },
+                            { label: '32 km/h (USA region)', value: 32 },
+                            {
+                                label: 'By limit in display module',
+                                value: SpeedLimitByDisplay,
+                            },
+                        ]}
+                        onChange={(e) => {
                             this.setState({
-                                pedal_speed_limit:
-                                    pedal_speed_limit_unit === 'by_display'
-                                        ? SpeedLimitByDisplay
-                                        : e,
+                                pedal_speed_limit: e.target.value,
                             });
                         }}
-                        warningText="Its illegal in most countries to set speed limit bigger than 25km/h"
-                        warningBelow={0}
-                        warningAbove={25}
-                        disabled={pedal_speed_limit_unit === 'by_display'}
+                        value={pedal_speed_limit}
+                        optionType="button"
+                        buttonStyle="solid"
                     />
                 ),
             },
             {
                 key: 'signals_before_assist',
-                label: 'Signals before assist (Start Degree, Signal No.) TODO replace with degree constants',
+                label: 'Signals before assist (Start Degree, Signal No.)',
                 children: (
-                    <ParameterInputComponent
-                        value={pedal_signals_before_start}
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
+                    <Radio.Group
+                        options={[
+                            {
+                                label: `Leave old value - ${
+                                    PedalSensorSignals[pedal_type] *
+                                    this.initial_pedal_parameters
+                                        .pedal_signals_before_start
+                                }°`,
+                                value: this.initial_pedal_parameters
+                                    .pedal_signals_before_start,
+                            },
+                            {
+                                label: '90°',
+                                value: PedalSensorSignals[pedal_type] / 4,
+                            },
+                            {
+                                label: '180°',
+                                value: PedalSensorSignals[pedal_type] / 2,
+                            },
+                            {
+                                label: '270°',
+                                value:
+                                    270 /
+                                    (360 / PedalSensorSignals[pedal_type]),
+                            },
+                        ]}
+                        onChange={(e) => {
                             this.setState({
-                                pedal_signals_before_start: e,
+                                pedal_signals_before_start: e.target.value,
                             });
                         }}
-                        warningText="Its not recommended to set this parameter lower than 2 and bigger than number of signals per one rotation for your pedal sensor"
-                        warningBelow={2}
-                        warningAbove={32}
+                        value={pedal_signals_before_start}
+                        optionType="button"
+                        buttonStyle="solid"
+                        disabled={pedal_type < 1 || pedal_type > 3}
                     />
                 ),
             },
             {
                 key: 'time_before_end_of_assist',
-                label: 'Time before end of assist (Time Of Stop, Stop Delay) TODO replace with constants ot calculator',
+                label: (
+                    <>
+                        Time before end of assist (Time Of Stop, Stop Delay)
+                        <br />
+                        TODO replace with constants ot calculator
+                    </>
+                ),
                 children: (
                     <ParameterInputComponent
                         value={pedal_time_to_stop}
@@ -298,7 +387,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             throttle_end_voltage,
             throttle_mode,
             throttle_speed_limit,
-            throttle_speed_limit_unit,
         } = this.state;
         return [
             {
@@ -370,50 +458,23 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'throttle_speed_limit',
                 label: 'Throttle speed limit',
                 children: (
-                    <ParameterInputComponent
-                        value={
-                            throttle_speed_limit === SpeedLimitByDisplay
-                                ? null
-                                : throttle_speed_limit
-                        }
-                        unit={
-                            <Select
-                                style={{ minWidth: '100px' }}
-                                defaultValue={
-                                    throttle_speed_limit === SpeedLimitByDisplay
-                                        ? 'by_display'
-                                        : 'kmh'
-                                }
-                                options={[
-                                    { value: 'kmh', label: 'km/h' },
-                                    {
-                                        value: 'by_display',
-                                        label: 'By display',
-                                    },
-                                ]}
-                                onChange={(value) =>
-                                    this.setState({
-                                        throttle_speed_limit:
-                                            SpeedLimitByDisplay,
-                                        throttle_speed_limit_unit: value,
-                                    })
-                                }
-                            />
-                        }
-                        min={1}
-                        max={60}
-                        onNewValue={(e) => {
+                    <Radio.Group
+                        options={[
+                            { label: '25 km/h', value: 25 },
+                            { label: '32 km/h', value: 32 },
+                            {
+                                label: 'By limit in display module',
+                                value: SpeedLimitByDisplay,
+                            },
+                        ]}
+                        onChange={(e) => {
                             this.setState({
-                                throttle_speed_limit:
-                                    throttle_speed_limit_unit === 'by_display'
-                                        ? SpeedLimitByDisplay
-                                        : e,
+                                throttle_speed_limit: e.target.value,
                             });
                         }}
-                        warningText="Its illegal in most countries to use throttle"
-                        warningBelow={0}
-                        warningAbove={0}
-                        disabled={throttle_speed_limit_unit === 'by_display'}
+                        value={throttle_speed_limit}
+                        optionType="button"
+                        buttonStyle="solid"
                     />
                 ),
             },
@@ -425,12 +486,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         let i = 0;
         return assist_profiles.map((profile) => {
             return {
-                tip:
-                    i === 0
-                        ? 'Its strongly recommended to set current limit on zero level of assist to 0'
-                        : '',
-                recommended_min: 0,
-                recommended_max: i === 0 ? 0 : 100,
                 key: i,
                 assist_level: i++,
                 current: profile.current_limit,
@@ -541,9 +596,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                         assist_profiles,
                                     });
                                 }}
-                                warningText={record.tip}
-                                warningBelow={record.recommended_min}
-                                warningAbove={record.recommended_max}
                                 disabled={record.assist_level == 0}
                             />
                         )}
