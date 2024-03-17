@@ -177,7 +177,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'low_voltage_protection',
                 label: (
                     <>
-                        'Battery cutoff voltage'
+                        Battery cutoff voltage
                         <br />
                         <br />
                         <Typography.Text italic>
@@ -353,7 +353,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'signals_before_assist',
                 label: (
                     <>
-                        'Start Degree'
+                        Start Degree
                         <br />
                         <br />
                         <Typography.Text italic>
@@ -457,7 +457,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'throttle_start_voltage',
                 label: (
                     <>
-                        'Throttle start voltage'
+                        Throttle start voltage
                         <br />
                         <br />
                         <Typography.Text italic>
@@ -487,7 +487,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'throttle_end_voltage',
                 label: (
                     <>
-                        'Throttle end voltage'
+                        Throttle end voltage
                         <br />
                         <br />
                         <Typography.Text italic>
@@ -515,7 +515,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'throttle_mode',
                 label: (
                     <>
-                        'Throttle mode'
+                        Throttle mode
                         <br />
                         <br />
                         <Typography.Text italic>
