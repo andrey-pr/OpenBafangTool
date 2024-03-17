@@ -24,7 +24,7 @@ export function getDocumentById(id: string): string {
             return BafangUartMotorParameters;
         case DocPages.BafangUartMotorGeneralManualDocument:
             return GeneralManual;
-            case DocPages.BafangUartMotorParamsSimplifiedDocument:
+        case DocPages.BafangUartMotorParamsSimplifiedDocument:
         case DocPages.TestPage:
             return Test;
         default:
