@@ -7,6 +7,7 @@ import {
     FloatButton,
     message,
     Radio,
+    Switch,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
@@ -24,7 +25,6 @@ import {
 import {
     BatteryTypes,
     LowVoltageLimitsByBatteryType,
-    lowVoltageLimits,
 } from '../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 
@@ -48,6 +48,7 @@ type SettingsState = BafangUartMotorInfo &
     BafangUartMotorPedalParameters &
     BafangUartMotorThrottleParameters & {
         lastUpdateTime: number;
+        throttle_on: boolean;
     };
 
 /* eslint-disable camelcase */
@@ -79,6 +80,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             ...this.initial_pedal_parameters,
             ...this.initial_throttle_parameters,
             lastUpdateTime: 0,
+            throttle_on:
+                this.initial_throttle_parameters.throttle_start_voltage <
+                this.initial_throttle_parameters.throttle_end_voltage,
         };
         this.getInfoItems = this.getInfoItems.bind(this);
         this.getElectricalParameterItems =
@@ -167,61 +171,100 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
 
     getElectricalParameterItems(): DescriptionsProps['items'] {
         const { voltage, low_battery_protection } = this.state;
-        const voltageLimits = [
-            {
-                label: `Leave old value - ${this.initial_basic_parameters.low_battery_protection}V`,
-                value: this.initial_basic_parameters.low_battery_protection,
-            },
-        ];
-        if (LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiIon] !== -1) {
-            voltageLimits.push({
-                label: `Li-Ion (normal) - ${
-                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiIon]
-                }V`,
-                value: LowVoltageLimitsByBatteryType[voltage][
-                    BatteryTypes.LiIon
-                ],
-            });
-        }
-        if (LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiPo] !== -1) {
-            voltageLimits.push({
-                label: `Li-Po - ${
-                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiPo]
-                }V`,
-                value: LowVoltageLimitsByBatteryType[voltage][
-                    BatteryTypes.LiPo
-                ],
-            });
-        }
-        if (
-            LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiFePo4] !== -1
-        ) {
-            voltageLimits.push({
-                label: `LiFePo4 - ${
-                    LowVoltageLimitsByBatteryType[voltage][BatteryTypes.LiFePo4]
-                }V`,
-                value: LowVoltageLimitsByBatteryType[voltage][
-                    BatteryTypes.LiFePo4
-                ],
-            });
-        }
 
         return [
             {
                 key: 'low_voltage_protection',
-                label: 'Low voltage battery protection',
+                label: (
+                    <>
+                        'Battery cutoff voltage'
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            Change it if you have custom battery made not from usual Li-Ion cells
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
                     <Radio.Group
-                        options={voltageLimits}
                         onChange={(e) => {
                             this.setState({
                                 low_battery_protection: e.target.value,
                             });
                         }}
                         value={low_battery_protection}
-                        optionType="button"
-                        buttonStyle="solid"
-                    />
+                    >
+                        <Radio
+                            value={
+                                this.initial_basic_parameters
+                                    .low_battery_protection
+                            }
+                        >
+                            Leave old value -&nbsp;
+                            {
+                                this.initial_basic_parameters
+                                    .low_battery_protection
+                            }
+                            V
+                        </Radio>
+                        {LowVoltageLimitsByBatteryType[voltage][
+                            BatteryTypes.LiIon
+                        ] !== -1 && (
+                            <Radio
+                                value={
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiIon
+                                    ]
+                                }
+                            >
+                                Li-Ion (normal) -&nbsp;
+                                {
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiIon
+                                    ]
+                                }
+                                V
+                            </Radio>
+                        )}
+                        {LowVoltageLimitsByBatteryType[voltage][
+                            BatteryTypes.LiPo
+                        ] !== -1 && (
+                            <Radio
+                                value={
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiPo
+                                    ]
+                                }
+                            >
+                                Li-Po -&nbsp;
+                                {
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiPo
+                                    ]
+                                }
+                                V
+                            </Radio>
+                        )}
+                        {LowVoltageLimitsByBatteryType[voltage][
+                            BatteryTypes.LiFePo4
+                        ] !== -1 && (
+                            <Radio
+                                value={
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiFePo4
+                                    ]
+                                }
+                            >
+                                LiFePo4 - &nbsp;
+                                {
+                                    LowVoltageLimitsByBatteryType[voltage][
+                                        BatteryTypes.LiFePo4
+                                    ]
+                                }
+                                V
+                            </Radio>
+                        )}
+                    </Radio.Group>
                 ),
             },
         ];
@@ -279,103 +322,124 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 ),
                 children: (
                     <Radio.Group
-                        options={[
-                            {
-                                label: `Leave old value - ${
-                                    this.initial_pedal_parameters
-                                        .pedal_speed_limit ==
-                                    SpeedLimitByDisplay
-                                        ? 'By display'
-                                        : this.initial_pedal_parameters
-                                              .pedal_speed_limit + ' km/h'
-                                }`,
-                                value: this.initial_pedal_parameters
-                                    .pedal_speed_limit,
-                            },
-                            { label: '25 km/h (EU region)', value: 25 },
-                            { label: '32 km/h (USA region)', value: 32 },
-                            {
-                                label: 'By limit in display module',
-                                value: SpeedLimitByDisplay,
-                            },
-                        ]}
                         onChange={(e) => {
                             this.setState({
                                 pedal_speed_limit: e.target.value,
                             });
                         }}
                         value={pedal_speed_limit}
-                        optionType="button"
-                        buttonStyle="solid"
-                    />
+                    >
+                        <Radio
+                            value={
+                                this.initial_pedal_parameters.pedal_speed_limit
+                            }
+                        >
+                            Leave old value -&nbsp;
+                            {this.initial_pedal_parameters.pedal_speed_limit ==
+                            SpeedLimitByDisplay
+                                ? 'By display'
+                                : this.initial_pedal_parameters
+                                      .pedal_speed_limit + ' km/h'}
+                        </Radio>
+                        <Radio value={25}>25 km/h (EU region)</Radio>
+                        <Radio value={32}>32 km/h (USA region)</Radio>
+                        <Radio value={SpeedLimitByDisplay}>
+                            By limit in display module
+                        </Radio>
+                    </Radio.Group>
                 ),
             },
             {
                 key: 'signals_before_assist',
-                label: 'Signals before assist (Start Degree, Signal No.)',
+                label: (
+                    <>
+                        'Start Degree'
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            This parameter means on how big angle do you have to
+                            turn pedals to start motor
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
                     <Radio.Group
-                        options={[
-                            {
-                                label: `Leave old value - ${
-                                    PedalSensorSignals[pedal_type] *
-                                    this.initial_pedal_parameters
-                                        .pedal_signals_before_start
-                                }°`,
-                                value: this.initial_pedal_parameters
-                                    .pedal_signals_before_start,
-                            },
-                            {
-                                label: '90°',
-                                value: PedalSensorSignals[pedal_type] / 4,
-                            },
-                            {
-                                label: '180°',
-                                value: PedalSensorSignals[pedal_type] / 2,
-                            },
-                            {
-                                label: '270°',
-                                value:
-                                    270 /
-                                    (360 / PedalSensorSignals[pedal_type]),
-                            },
-                        ]}
                         onChange={(e) => {
                             this.setState({
                                 pedal_signals_before_start: e.target.value,
                             });
                         }}
                         value={pedal_signals_before_start}
-                        optionType="button"
-                        buttonStyle="solid"
                         disabled={pedal_type < 1 || pedal_type > 3}
-                    />
+                    >
+                        <Radio
+                            value={
+                                this.initial_pedal_parameters
+                                    .pedal_signals_before_start
+                            }
+                        >
+                            Leave old value -&nbsp;
+                            {(360 / PedalSensorSignals[pedal_type]) *
+                                this.initial_pedal_parameters
+                                    .pedal_signals_before_start}
+                            °
+                        </Radio>
+                        <Radio value={PedalSensorSignals[pedal_type] / 4}>
+                            90°
+                        </Radio>
+                        <Radio value={PedalSensorSignals[pedal_type] / 2}>
+                            180°
+                        </Radio>
+                        <Radio
+                            value={270 / (360 / PedalSensorSignals[pedal_type])}
+                        >
+                            270°
+                        </Radio>
+                    </Radio.Group>
                 ),
             },
             {
                 key: 'time_before_end_of_assist',
                 label: (
                     <>
-                        Time before end of assist (Time Of Stop, Stop Delay)
+                        Stop Delay
                         <br />
-                        TODO replace with constants ot calculator
+                        <br />
+                        <Typography.Text italic>
+                            This parameter means time between last signal from
+                            pedal sensor and motor stop. If parameter is too
+                            low, motor may work unstable on low cadence. If
+                            parameter is too big, braking distance will increase
+                            (so too big value is not available in Simplified
+                            mode)
+                        </Typography.Text>
                     </>
                 ),
                 children: (
-                    <ParameterInputComponent
-                        value={pedal_time_to_stop}
-                        unit="ms"
-                        min={1}
-                        max={1000}
-                        onNewValue={(e) => {
+                    <Radio.Group
+                        onChange={(e) => {
                             this.setState({
-                                pedal_time_to_stop: e - (e % 10),
+                                pedal_time_to_stop:
+                                    e.target.value - (e.target.value % 10),
                             });
                         }}
-                        warningText="Its not recommended to set this parameter lower than 50 and bigger than 250"
-                        warningBelow={50}
-                        warningAbove={250}
-                    />
+                        value={pedal_time_to_stop}
+                    >
+                        <Radio
+                            value={
+                                this.initial_pedal_parameters.pedal_time_to_stop
+                            }
+                        >
+                            Leave old value -&nbsp;
+                            {this.initial_pedal_parameters.pedal_time_to_stop}
+                            ms
+                        </Radio>
+                        <Radio value={50}>50ms</Radio>
+                        <Radio value={100}>100ms</Radio>
+                        <Radio value={150}>150ms</Radio>
+                        <Radio value={200}>200ms</Radio>
+                        <Radio value={250}>250ms</Radio>
+                    </Radio.Group>
                 ),
             },
         ];
@@ -391,13 +455,23 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         return [
             {
                 key: 'throttle_start_voltage',
-                label: 'Throttle start voltage',
+                label: (
+                    <>
+                        'Throttle start voltage'
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            This parameter means voltage from throttle lever
+                            that will start motor
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
                     <ParameterInputComponent
                         value={throttle_start_voltage}
                         unit="V"
                         min={1}
-                        max={100}
+                        max={4.2}
                         onNewValue={(e) => {
                             this.setState({
                                 throttle_start_voltage: e,
@@ -411,27 +485,45 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             },
             {
                 key: 'throttle_end_voltage',
-                label: 'Throttle end voltage',
+                label: (
+                    <>
+                        'Throttle end voltage'
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            This parameter means maximal voltage from throttle
+                            lever
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
                     <ParameterInputComponent
                         value={throttle_end_voltage}
                         unit="V"
                         min={1}
-                        max={100}
+                        max={4.2}
                         onNewValue={(e) => {
                             this.setState({
                                 throttle_end_voltage: e,
                             });
                         }}
-                        warningText="Its not recommended to set lower end voltage than 1.1V"
-                        warningBelow={1.1}
                         decimalPlaces={1}
                     />
                 ),
             },
             {
                 key: 'throttle_mode',
-                label: 'Throttle mode',
+                label: (
+                    <>
+                        'Throttle mode'
+                        <br />
+                        <br />
+                        <Typography.Text italic>
+                            This parameter if throttle lever will control speed
+                            or current
+                        </Typography.Text>
+                    </>
+                ),
                 children: (
                     <Select
                         value={throttle_mode}
@@ -459,23 +551,32 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 label: 'Throttle speed limit',
                 children: (
                     <Radio.Group
-                        options={[
-                            { label: '25 km/h', value: 25 },
-                            { label: '32 km/h', value: 32 },
-                            {
-                                label: 'By limit in display module',
-                                value: SpeedLimitByDisplay,
-                            },
-                        ]}
                         onChange={(e) => {
                             this.setState({
                                 throttle_speed_limit: e.target.value,
                             });
                         }}
                         value={throttle_speed_limit}
-                        optionType="button"
-                        buttonStyle="solid"
-                    />
+                    >
+                        <Radio
+                            value={
+                                this.initial_throttle_parameters
+                                    .throttle_speed_limit
+                            }
+                        >
+                            Leave old value -&nbsp;
+                            {this.initial_throttle_parameters
+                                .throttle_speed_limit == SpeedLimitByDisplay
+                                ? 'By display'
+                                : this.initial_throttle_parameters
+                                      .throttle_speed_limit + ' km/h'}
+                        </Radio>
+                        <Radio value={25}>25 km/h</Radio>
+                        <Radio value={32}>32 km/h</Radio>
+                        <Radio value={SpeedLimitByDisplay}>
+                            By limit in display module
+                        </Radio>
+                    </Radio.Group>
                 ),
             },
         ];
@@ -535,10 +636,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
 
     render() {
         const { connection } = this.props;
+        const { throttle_on } = this.state;
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Simplified Settings
+                    Settings
                 </Typography.Title>
                 <br />
                 <br />
@@ -634,12 +736,40 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
-                <Descriptions
-                    bordered
-                    title="Throttle TODO hide under button"
-                    items={this.getThrottleItems()}
-                    column={1}
+                <Typography.Title level={5} style={{ margin: 0 }}>
+                    Turn throttle on
+                </Typography.Title>
+                <Typography.Text italic>
+                    (WARNING! Its illegal in most countries, check your local
+                    rules before installing throttle lever!) &nbsp;&nbsp;
+                </Typography.Text>
+                <Switch
+                    checked={throttle_on}
+                    onChange={(value) => {
+                        this.setState({
+                            throttle_on: value,
+                            throttle_start_voltage: value
+                                ? this.initial_throttle_parameters
+                                      .throttle_start_voltage
+                                : this.initial_throttle_parameters
+                                      .throttle_end_voltage,
+                            throttle_end_voltage:
+                                this.initial_throttle_parameters
+                                    .throttle_end_voltage,
+                        });
+                    }}
                 />
+                {throttle_on && (
+                    <>
+                        <br />
+                        <br />
+                        <Descriptions
+                            bordered
+                            items={this.getThrottleItems()}
+                            column={1}
+                        />
+                    </>
+                )}
                 <FloatButton
                     icon={<SyncOutlined />}
                     type="primary"
