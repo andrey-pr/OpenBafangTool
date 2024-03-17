@@ -1,7 +1,7 @@
 enum DifficultyLevel {
     Simplified = 'simplified',
     Normal = 'normal',
-    Pro = 'pro'
+    Pro = 'pro',
 }
 
 export default DifficultyLevel;

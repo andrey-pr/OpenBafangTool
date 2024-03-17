@@ -264,11 +264,12 @@ export default class BafangUartMotor implements IConnection {
         });
         this.unsubscribe = window.electron.ipcRenderer.on(
             'read-from-serial-port',
-            (arg: { path: string; data: Uint8Array }) => {
-                if (arg.path === this.port) {
+            (arg) => {
+                let data = arg as { path: string; data: Uint8Array };
+                if (data.path === this.port) {
                     this.portBuffer = new Uint8Array([
                         ...Array.from(this.portBuffer),
-                        ...Array.from(arg.data),
+                        ...Array.from(data.data),
                     ]);
                     this.processBuffer();
                 }

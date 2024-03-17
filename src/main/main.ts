@@ -11,7 +11,6 @@
 
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, globalShortcut } from 'electron';
-import { autoUpdater } from 'electron-updater';
 import log from 'electron-log/main';
 import getAppDataPath from 'appdata-path';
 import MenuBuilder from './menu';
