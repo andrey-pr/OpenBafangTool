@@ -11,7 +11,7 @@ import {
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../device/BafangUartMotor';
+import BafangUartMotor from '../../../../device/BafangUartMotor';
 import {
     AssistLevel,
     BafangUartMotorBasicParameters,
@@ -23,10 +23,10 @@ import {
     SpeedLimitByDisplay,
     SpeedmeterType,
     ThrottleMode,
-} from '../../device/UartTypes';
-import { lowVoltageLimits } from '../../constants/parameter_limits';
-import ParameterInputComponent from '../components/ParameterInput';
-import StringInputComponent from '../components/StringInput';
+} from '../../../../device/UartTypes';
+import { lowVoltageLimits } from '../../../../constants/parameter_limits';
+import ParameterInputComponent from '../../../components/ParameterInput';
+import StringInputComponent from '../../../components/StringInput';
 
 const { Title } = Typography;
 

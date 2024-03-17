@@ -1,8 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
 import log from 'electron-log/renderer';
-import DeviceType from '../models/DeviceType';
-import IBafangUartConnection from './BafangUartConnection';
+import { DeviceName } from '../models/DeviceType';
 import {
     AssistLevel,
     BafangUartMotorBasicParameters,
@@ -20,13 +19,14 @@ import {
     checkPedalParameters,
     checkThrottleParameters,
 } from './UartTypes';
+import IConnection from './Connection';
 
 const sleep = (ms: number) =>
     new Promise((resolve) => {
         setTimeout(resolve, ms);
     });
 
-export default class BafangUartMotor implements IBafangUartConnection {
+export default class BafangUartMotor implements IConnection {
     private port: string;
 
     private info: BafangUartMotorInfo;
@@ -37,7 +37,7 @@ export default class BafangUartMotor implements IBafangUartConnection {
 
     private throttle_parameters: BafangUartMotorThrottleParameters;
 
-    readonly deviceType: DeviceType = DeviceType.BafangUartMotor;
+    readonly deviceName: DeviceName = DeviceName.BafangUartMotor;
 
     public emitter: EventEmitter;
 
@@ -166,20 +166,11 @@ export default class BafangUartMotor implements IBafangUartConnection {
     private processWriteAnswerPacket(packet: Uint8Array): void {
         if (ParameterCodes[packet[0]] !== undefined) {
             if (ParameterCodes[packet[0]].parameters.length <= packet[1]) {
-                console.log(
-                    ParameterCodes[packet[0]].name,
-                    ' parameters written successfully',
-                );
                 this.emitter.emit(
                     'write-success',
                     `${ParameterCodes[packet[0]].name}`,
                 );
             } else {
-                console.log(
-                    ParameterCodes[packet[0]].name,
-                    ' parameters write error: ',
-                    ParameterCodes[packet[0]].parameters[packet[1]],
-                );
                 this.emitter.emit(
                     'write-error',
                     `${ParameterCodes[packet[0]].parameters[packet[1]]}`,
