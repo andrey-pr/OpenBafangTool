@@ -111,11 +111,11 @@ class DeviceSelectionView extends React.Component<
                     <Typography.Title level={3}>Select device</Typography.Title>
                     <Form.Item
                         name="difficulty_level"
-                        label="Difficulty level"
+                        label="Interface type"
                         rules={[
                             {
                                 required: true,
-                                message: 'Difficulty level is required',
+                                message: 'Interface type is required',
                             },
                         ]}
                     >
@@ -132,7 +132,7 @@ class DeviceSelectionView extends React.Component<
                             <Option value={DifficultyLevel.Simplified}>
                                 Simplified
                             </Option>
-                            <Option value={DifficultyLevel.Pro}>Pro</Option>
+                            <Option value={DifficultyLevel.Pro}>Full</Option>
                         </Select>
                     </Form.Item>
                     <Form.Item

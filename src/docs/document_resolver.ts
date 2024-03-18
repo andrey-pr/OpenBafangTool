@@ -3,6 +3,7 @@ import Test from '../../docs/inner-pages/Test page.md';
 import BafangUartProtocol from '../../docs/Bafang UART protocol.md';
 import BafangUartMotorAPI from '../../docs/Bafang UART motor API.md';
 import BafangUartMotorParameters from '../../docs/Bafang UART motor parameters.md';
+import BafangUartSimplifiedMotorParameters from '../../docs/Bafang UART motor parameters in simplified mode.md';
 import GeneralManual from '../../docs/General manual.md';
 
 export enum DocPages {
@@ -25,6 +26,7 @@ export function getDocumentById(id: string): string {
         case DocPages.BafangUartMotorGeneralManualDocument:
             return GeneralManual;
         case DocPages.BafangUartMotorParamsSimplifiedDocument:
+            return BafangUartSimplifiedMotorParameters;
         case DocPages.TestPage:
             return Test;
         default:
