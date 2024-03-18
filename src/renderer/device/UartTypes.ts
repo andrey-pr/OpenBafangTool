@@ -84,7 +84,7 @@ export enum PedalType {
     DoubleSignal24 = 3,
 }
 
-export const PedalSensorSignals = {0: 1, 1: 12, 2: 32, 3: 24};
+export const PedalSensorSignals = { 0: 1, 1: 12, 2: 32, 3: 24 };
 
 export enum AssistLevel {
     AssistLevel0 = 0,
@@ -225,7 +225,14 @@ export function checkThrottleParameters(
     return true;
 }
 
-export const ParameterCodes = {
+interface ParameterCodesStruct {
+    [key: number]: {
+        name: string;
+        parameters: string[];
+    };
+}
+
+export const ParameterCodes: ParameterCodesStruct = {
     0x52: {
         name: 'basic',
         parameters: [
@@ -284,7 +291,11 @@ export const ParameterCodes = {
     },
 };
 
-export const ParameterNames = {
+interface ParameterNamesStruct {
+    [key: string]: string;
+}
+
+export const ParameterNames: ParameterNamesStruct = {
     basic: 'Basic parameters',
     pedal: 'Pedal parameters',
     throttle: 'Throttle parameters',

@@ -4,7 +4,6 @@ import {
     Descriptions,
     Table,
     Select,
-    // Tooltip,
     FloatButton,
     message,
     Switch,

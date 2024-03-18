@@ -18,7 +18,11 @@ import SimplifiedWarning from '../../docs/assets/general_manual/simplified_warni
 
 // TODO this file is a very big kludge, made as temporal solution for assets import problem
 
-const images = {
+interface Image {
+    [key: string]: string;
+}
+
+const images: Image = {
     'assets/general_manual/connection_buttons.png': ConnectionButtons,
     'assets/general_manual/control_buttons.png': ControlButtons,
     'assets/general_manual/device_selection_view.png': DeviceSelectionView,

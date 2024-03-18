@@ -25,7 +25,10 @@ class App extends React.Component<AppProps, AppState> {
         this.toDeviceSelector = this.toDeviceSelector.bind(this);
     }
 
-    deviceSelectionHook(newConnection: IConnection, difficultyLevel: DifficultyLevel): void {
+    deviceSelectionHook(
+        newConnection: IConnection,
+        difficultyLevel: DifficultyLevel,
+    ): void {
         const { connection } = this.state;
         if (connection != null) {
             connection.disconnect();
@@ -44,7 +47,7 @@ class App extends React.Component<AppProps, AppState> {
         this.setState({
             view: 'main_view',
             connection: newConnection,
-            difficultyLevel: difficultyLevel
+            difficultyLevel: difficultyLevel,
         });
     }
 
@@ -69,7 +72,7 @@ class App extends React.Component<AppProps, AppState> {
             return (
                 <MainView
                     connection={connection as IConnection}
-                    difficultyLevel={difficultyLevel}
+                    difficultyLevel={difficultyLevel as DifficultyLevel}
                     backHook={this.toDeviceSelector}
                 />
             );

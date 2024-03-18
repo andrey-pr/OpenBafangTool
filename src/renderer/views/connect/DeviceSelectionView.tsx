@@ -1,12 +1,5 @@
 import React from 'react';
-import IConnection from '../../device/Connection';
-import BafangUartMotor from '../../device/BafangUartMotor';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
-import {
-    DeviceBrand,
-    DeviceInterface,
-    DeviceType,
-} from '../../models/DeviceType';
 import {
     Button,
     Checkbox,
@@ -16,6 +9,13 @@ import {
     Space,
     message,
 } from 'antd';
+import IConnection from '../../device/Connection';
+import BafangUartMotor from '../../device/BafangUartMotor';
+import {
+    DeviceBrand,
+    DeviceInterface,
+    DeviceType,
+} from '../../models/DeviceType';
 import DifficultyLevel from '../../models/DifficultyLevel';
 
 const { Option } = Select;
@@ -31,13 +31,13 @@ type DeviceSelectionState = {
     portList: string[];
     connectionChecked: boolean;
     connection: IConnection | null;
-    difficulty_level: DifficultyLevel | null;
-    device_brand: DeviceBrand | null;
-    device_interface: DeviceInterface | null;
-    device_type: DeviceType | null;
-    device_port: string | null;
-    local_laws_agreement: boolean | null;
-    disclaimer_agreement: boolean | null;
+    difficultyLevel: DifficultyLevel | null;
+    deviceBrand: DeviceBrand | null;
+    deviceInterface: DeviceInterface | null;
+    deviceType: DeviceType | null;
+    devicePort: string | null;
+    localLawsAgreement: boolean | null;
+    disclaimerAgreement: boolean | null;
 };
 
 class DeviceSelectionView extends React.Component<
@@ -50,16 +50,16 @@ class DeviceSelectionView extends React.Component<
             portList: [],
             connectionChecked: false,
             connection: null,
-            difficulty_level: null,
-            device_brand: DeviceBrand.Bafang,
-            device_interface: DeviceInterface.UART,
-            device_type: DeviceType.Motor,
-            device_port: null,
-            local_laws_agreement: false,
-            disclaimer_agreement: false,
+            difficultyLevel: null,
+            deviceBrand: DeviceBrand.Bafang,
+            deviceInterface: DeviceInterface.UART,
+            deviceType: DeviceType.Motor,
+            devicePort: null,
+            localLawsAgreement: false,
+            disclaimerAgreement: false,
         };
 
-        const interval = setInterval(() => {
+        setInterval(() => {
             window.electron.ipcRenderer.sendMessage('list-serial-ports', []);
 
             window.electron.ipcRenderer.once('list-serial-ports', (arg) => {
@@ -74,11 +74,11 @@ class DeviceSelectionView extends React.Component<
             portList,
             connectionChecked,
             connection,
-            difficulty_level,
-            device_brand,
-            device_interface,
-            device_type,
-            device_port,
+            difficultyLevel,
+            deviceBrand,
+            deviceInterface,
+            deviceType,
+            devicePort,
         } = this.state;
 
         const portComponents = portList.map((item) => {
@@ -104,7 +104,7 @@ class DeviceSelectionView extends React.Component<
                     onFinish={() => {
                         deviceSelectionHook(
                             connection as IConnection,
-                            difficulty_level,
+                            difficultyLevel as DifficultyLevel,
                         );
                     }}
                 >
@@ -122,7 +122,7 @@ class DeviceSelectionView extends React.Component<
                         <Select
                             onChange={(value: DifficultyLevel) => {
                                 this.setState({
-                                    difficulty_level: value,
+                                    difficultyLevel: value,
                                     connectionChecked: false,
                                 });
                             }}
@@ -149,7 +149,7 @@ class DeviceSelectionView extends React.Component<
                         <Select
                             onChange={(value: DeviceBrand) => {
                                 this.setState({
-                                    device_brand: value,
+                                    deviceBrand: value,
                                     connectionChecked: false,
                                 });
                             }}
@@ -159,7 +159,7 @@ class DeviceSelectionView extends React.Component<
                             <Option value={DeviceBrand.Bafang}>Bafang</Option>
                         </Select>
                     </Form.Item>
-                    {device_brand == DeviceBrand.Bafang && (
+                    {deviceBrand === DeviceBrand.Bafang && (
                         <Form.Item
                             name="device_interface"
                             label="Device interface"
@@ -174,7 +174,7 @@ class DeviceSelectionView extends React.Component<
                             <Select
                                 onChange={(value: DeviceInterface) => {
                                     this.setState({
-                                        device_interface: value,
+                                        deviceInterface: value,
                                         connectionChecked: false,
                                     });
                                 }}
@@ -190,8 +190,8 @@ class DeviceSelectionView extends React.Component<
                             </Select>
                         </Form.Item>
                     )}
-                    {device_brand == DeviceBrand.Bafang &&
-                        device_interface == DeviceInterface.UART && (
+                    {deviceBrand === DeviceBrand.Bafang &&
+                        deviceInterface === DeviceInterface.UART && (
                             <Form.Item
                                 name="device_type"
                                 label="Device type"
@@ -206,7 +206,7 @@ class DeviceSelectionView extends React.Component<
                                 <Select
                                     onChange={(value: DeviceType) => {
                                         this.setState({
-                                            device_type: value,
+                                            deviceType: value,
                                             connectionChecked: false,
                                         });
                                     }}
@@ -222,8 +222,8 @@ class DeviceSelectionView extends React.Component<
                                 </Select>
                             </Form.Item>
                         )}
-                    {device_brand == DeviceBrand.Bafang &&
-                        device_interface == DeviceInterface.UART && (
+                    {deviceBrand === DeviceBrand.Bafang &&
+                        deviceInterface === DeviceInterface.UART && (
                             <Form.Item
                                 name="port"
                                 label="Serial port"
@@ -237,7 +237,7 @@ class DeviceSelectionView extends React.Component<
                                 <Select
                                     onChange={(value: string) => {
                                         this.setState({
-                                            device_port: value,
+                                            devicePort: value,
                                             connectionChecked: false,
                                         });
                                     }}
@@ -250,7 +250,7 @@ class DeviceSelectionView extends React.Component<
                             </Form.Item>
                         )}
                     <Form.Item
-                        name="local_laws_agreement"
+                        name="localLawsAgreement"
                         label=""
                         initialValue={false}
                         valuePropName="checked"
@@ -270,7 +270,7 @@ class DeviceSelectionView extends React.Component<
                         <Checkbox
                             onChange={(value: CheckboxChangeEvent) => {
                                 this.setState({
-                                    local_laws_agreement: value.target.checked,
+                                    localLawsAgreement: value.target.checked,
                                 });
                             }}
                             style={{ fontSize: '12px' }}
@@ -282,7 +282,7 @@ class DeviceSelectionView extends React.Component<
                         </Checkbox>
                     </Form.Item>
                     <Form.Item
-                        name="disclaimer"
+                        name="disclaimer_agreement"
                         label=""
                         initialValue={false}
                         valuePropName="checked"
@@ -302,7 +302,7 @@ class DeviceSelectionView extends React.Component<
                         <Checkbox
                             onChange={(value: CheckboxChangeEvent) => {
                                 this.setState({
-                                    disclaimer_agreement: value.target.checked,
+                                    disclaimerAgreement: value.target.checked,
                                 });
                             }}
                             style={{ fontSize: '12px' }}
@@ -323,14 +323,14 @@ class DeviceSelectionView extends React.Component<
                                 onClick={() => {
                                     let newConnection: IConnection;
                                     if (
-                                        device_brand === DeviceBrand.Bafang &&
-                                        device_interface ===
+                                        deviceBrand === DeviceBrand.Bafang &&
+                                        deviceInterface ===
                                             DeviceInterface.UART &&
-                                        device_type === DeviceType.Motor &&
-                                        device_port !== null
+                                        deviceType === DeviceType.Motor &&
+                                        devicePort !== null
                                     ) {
                                         newConnection = new BafangUartMotor(
-                                            device_port,
+                                            devicePort,
                                         );
                                     } else {
                                         message.info(
@@ -363,12 +363,12 @@ class DeviceSelectionView extends React.Component<
                                         });
                                 }}
                                 disabled={
-                                    device_brand == null ||
-                                    device_port == null ||
-                                    (device_brand == DeviceBrand.Bafang &&
-                                        (device_interface == null ||
-                                            device_type == null)) ||
-                                    difficulty_level == null
+                                    deviceBrand === null ||
+                                    devicePort === null ||
+                                    (deviceBrand === DeviceBrand.Bafang &&
+                                        (deviceInterface === null ||
+                                            deviceType === null)) ||
+                                    difficultyLevel === null
                                 }
                             >
                                 Check connection

@@ -181,7 +181,8 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Change it if you have custom battery made not from usual Li-Ion cells
+                            Change it if you have custom battery made not from
+                            usual Li-Ion cells
                         </Typography.Text>
                     </>
                 ),
@@ -335,11 +336,10 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             }
                         >
                             Leave old value -&nbsp;
-                            {this.initial_pedal_parameters.pedal_speed_limit ==
+                            {this.initial_pedal_parameters.pedal_speed_limit ===
                             SpeedLimitByDisplay
                                 ? 'By display'
-                                : this.initial_pedal_parameters
-                                      .pedal_speed_limit + ' km/h'}
+                                : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`}
                         </Radio>
                         <Radio value={25}>25 km/h (EU region)</Radio>
                         <Radio value={32}>32 km/h (USA region)</Radio>
@@ -566,10 +566,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         >
                             Leave old value -&nbsp;
                             {this.initial_throttle_parameters
-                                .throttle_speed_limit == SpeedLimitByDisplay
+                                .throttle_speed_limit === SpeedLimitByDisplay
                                 ? 'By display'
-                                : this.initial_throttle_parameters
-                                      .throttle_speed_limit + ' km/h'}
+                                : `${this.initial_throttle_parameters.throttle_speed_limit} km/h`}
                         </Radio>
                         <Radio value={25}>25 km/h</Radio>
                         <Radio value={32}>32 km/h</Radio>
@@ -698,7 +697,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                         assist_profiles,
                                     });
                                 }}
-                                disabled={record.assist_level == 0}
+                                disabled={record.assist_level === 0}
                             />
                         )}
                     />
@@ -724,7 +723,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                         assist_profiles,
                                     });
                                 }}
-                                disabled={record.assist_level == 0}
+                                disabled={record.assist_level === 0}
                             />
                         )}
                     />
