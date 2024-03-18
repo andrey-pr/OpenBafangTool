@@ -94,7 +94,7 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
 
 - [ ] Add support of Bafang motors with UART
   - [x] Find hardware
-  - [ ] Alpha
+  - [x] Alpha
   - [x] Beta
   - [ ] Stable
 - [ ] Add support of Yamaha systems
