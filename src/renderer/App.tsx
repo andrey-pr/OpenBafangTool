@@ -3,14 +3,14 @@ import React from 'react';
 import DeviceSelectionView from './views/connect/DeviceSelectionView';
 import MainView from './views/main/MainView';
 import IConnection from './device/Connection';
-import DifficultyLevel from './models/DifficultyLevel';
+import InterfaceType from './models/InterfaceType';
 
 type AppProps = {};
 
 type AppState = {
     view: string;
     connection: IConnection | null;
-    difficultyLevel: DifficultyLevel | null;
+    interfaceType: InterfaceType | null;
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -19,7 +19,7 @@ class App extends React.Component<AppProps, AppState> {
         this.state = {
             view: 'device_selector',
             connection: null,
-            difficultyLevel: null,
+            interfaceType: null,
         };
         this.deviceSelectionHook = this.deviceSelectionHook.bind(this);
         this.toDeviceSelector = this.toDeviceSelector.bind(this);
@@ -27,7 +27,7 @@ class App extends React.Component<AppProps, AppState> {
 
     deviceSelectionHook(
         newConnection: IConnection,
-        difficultyLevel: DifficultyLevel,
+        interfaceType: InterfaceType,
     ): void {
         const { connection } = this.state;
         if (connection != null) {
@@ -47,7 +47,7 @@ class App extends React.Component<AppProps, AppState> {
         this.setState({
             view: 'main_view',
             connection: newConnection,
-            difficultyLevel: difficultyLevel,
+            interfaceType: interfaceType,
         });
     }
 
@@ -61,7 +61,7 @@ class App extends React.Component<AppProps, AppState> {
 
     render() {
         const { view } = this.state;
-        const { connection, difficultyLevel } = this.state;
+        const { connection, interfaceType } = this.state;
         if (view === 'device_selector') {
             return (
                 <DeviceSelectionView
@@ -72,7 +72,7 @@ class App extends React.Component<AppProps, AppState> {
             return (
                 <MainView
                     connection={connection as IConnection}
-                    difficultyLevel={difficultyLevel as DifficultyLevel}
+                    interfaceType={interfaceType as InterfaceType}
                     backHook={this.toDeviceSelector}
                 />
             );

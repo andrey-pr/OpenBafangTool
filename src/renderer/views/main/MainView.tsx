@@ -12,14 +12,14 @@ import IConnection from '../../device/Connection';
 import BafangUartMotor from '../../device/BafangUartMotor';
 import DocumentationView from '../panels/common/DocumentationView';
 import { DocPages } from '../../../docs/document_resolver';
-import DifficultyLevel from '../../models/DifficultyLevel';
+import InterfaceType from '../../models/InterfaceType';
 import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView';
 
 const { Sider } = Layout;
 
 type MainProps = {
     connection: IConnection;
-    difficultyLevel: DifficultyLevel;
+    interfaceType: InterfaceType;
     backHook: () => void;
 };
 
@@ -56,19 +56,7 @@ const menuItems = {
                 ],
             },
         ],
-        normal: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: '1',
-                icon: <SettingOutlined />,
-                label: 'nav 1',
-            },
-        ],
-        pro: [
+        full: [
             {
                 key: 'back',
                 icon: <ArrowLeftOutlined />,
@@ -128,25 +116,7 @@ const menuItems = {
                 ],
             },
         ],
-        normal: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                ],
-            },
-        ],
-        pro: [
+        full: [
             {
                 key: 'back',
                 icon: <ArrowLeftOutlined />,
@@ -171,9 +141,8 @@ class MainView extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
         this.state = {
-            tab: menuItems[props.connection.deviceName][
-                props.difficultyLevel
-            ][1].key,
+            tab: menuItems[props.connection.deviceName][props.interfaceType][1]
+                .key,
         };
         this.switchTab = this.switchTab.bind(this);
         const { connection } = this.props;
@@ -189,7 +158,7 @@ class MainView extends React.Component<MainProps, MainState> {
     }
 
     render() {
-        const { connection, difficultyLevel } = this.props;
+        const { connection, interfaceType } = this.props;
         const { tab } = this.state;
         return (
             <Layout hasSider>
@@ -209,12 +178,10 @@ class MainView extends React.Component<MainProps, MainState> {
                         theme="dark"
                         mode="inline"
                         defaultSelectedKeys={[
-                            menuItems[connection.deviceName][difficultyLevel][1]
+                            menuItems[connection.deviceName][interfaceType][1]
                                 .key,
                         ]}
-                        items={
-                            menuItems[connection.deviceName][difficultyLevel]
-                        }
+                        items={menuItems[connection.deviceName][interfaceType]}
                         onSelect={this.switchTab}
                     />
                 </Sider>

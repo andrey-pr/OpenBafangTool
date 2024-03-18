@@ -16,14 +16,14 @@ import {
     DeviceInterface,
     DeviceType,
 } from '../../models/DeviceType';
-import DifficultyLevel from '../../models/DifficultyLevel';
+import InterfaceType from '../../models/InterfaceType';
 
 const { Option } = Select;
 
 type DeviceSelectionProps = {
     deviceSelectionHook: (
         connection: IConnection,
-        difficulty_level: DifficultyLevel,
+        interfaceType: InterfaceType,
     ) => void;
 };
 
@@ -31,7 +31,7 @@ type DeviceSelectionState = {
     portList: string[];
     connectionChecked: boolean;
     connection: IConnection | null;
-    difficultyLevel: DifficultyLevel | null;
+    interfaceType: InterfaceType | null;
     deviceBrand: DeviceBrand | null;
     deviceInterface: DeviceInterface | null;
     deviceType: DeviceType | null;
@@ -50,7 +50,7 @@ class DeviceSelectionView extends React.Component<
             portList: [],
             connectionChecked: false,
             connection: null,
-            difficultyLevel: null,
+            interfaceType: null,
             deviceBrand: DeviceBrand.Bafang,
             deviceInterface: DeviceInterface.UART,
             deviceType: DeviceType.Motor,
@@ -74,7 +74,7 @@ class DeviceSelectionView extends React.Component<
             portList,
             connectionChecked,
             connection,
-            difficultyLevel,
+            interfaceType,
             deviceBrand,
             deviceInterface,
             deviceType,
@@ -104,13 +104,13 @@ class DeviceSelectionView extends React.Component<
                     onFinish={() => {
                         deviceSelectionHook(
                             connection as IConnection,
-                            difficultyLevel as DifficultyLevel,
+                            interfaceType as InterfaceType,
                         );
                     }}
                 >
                     <Typography.Title level={3}>Select device</Typography.Title>
                     <Form.Item
-                        name="difficulty_level"
+                        name="interface_type"
                         label="Interface type"
                         rules={[
                             {
@@ -120,19 +120,19 @@ class DeviceSelectionView extends React.Component<
                         ]}
                     >
                         <Select
-                            onChange={(value: DifficultyLevel) => {
+                            onChange={(value: InterfaceType) => {
                                 this.setState({
-                                    difficultyLevel: value,
+                                    interfaceType: value,
                                     connectionChecked: false,
                                 });
                             }}
                             allowClear
                             style={{ minWidth: '150px' }}
                         >
-                            <Option value={DifficultyLevel.Simplified}>
+                            <Option value={InterfaceType.Simplified}>
                                 Simplified
                             </Option>
-                            <Option value={DifficultyLevel.Pro}>Full</Option>
+                            <Option value={InterfaceType.Full}>Full</Option>
                         </Select>
                     </Form.Item>
                     <Form.Item
@@ -368,7 +368,7 @@ class DeviceSelectionView extends React.Component<
                                     (deviceBrand === DeviceBrand.Bafang &&
                                         (deviceInterface === null ||
                                             deviceType === null)) ||
-                                    difficultyLevel === null
+                                    interfaceType === null
                                 }
                             >
                                 Check connection
