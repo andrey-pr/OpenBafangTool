@@ -146,9 +146,9 @@ No unit.
 
 #### Time before end of assist (Time Of Stop, Stop Delay)
 
-> ⚠️ Warning: use this parameter carefully. Too big value can be dangerous for life.
+> ⚠️ Warning: use this parameter carefully. Too big value can inccrease braking distance.
 
-Time from end of pedalling to stop. Usual value from factory is `250ms`. Recommended value is `50ms`. Setting too big value can be dangerous for life. Value can not be lower that `50ms` (PAS will not work with smaller value).\
+Time from end of pedalling to stop. Usual value from factory is `250ms`. Recommended value is `50ms`. Setting too big value can increase braking distance. Value can not be lower that `50ms` (PAS will not work with smaller value).\
 \
 Unit: In usual view: `ms`. In old style view: `10ms`=`0.01s`.
 

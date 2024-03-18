@@ -20,7 +20,7 @@ Maximal current, that controller physically can operate. Sometimes `Voltage * Ma
 
 #### Battery cutoff voltage
 
-Setting of minimum voltage for your kind of battery. For example, recommended minimum for `48V` Li-Ion battery is `41V`.
+Setting to avoid battery voltage cutoff (your battery likely has a Battery Management System (BMS) that will disconnect power when the voltage drops too low). If your battery turns off before reaching this value, you should raise it. Too low value can reduce battery lifetime. Recommened value depends on system voltage and battery type. For example, range for 48V systems is `38-43V` and recommended value is `41V` for Li-ion battery.\
 \
 Unit: volts.
 

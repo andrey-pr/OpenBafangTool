@@ -25,6 +25,7 @@ import {
 import {
     BatteryTypes,
     LowVoltageLimitsByBatteryType,
+    lowVoltageLimits,
 } from '../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 
@@ -181,91 +182,22 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Change it if you have custom battery made not from
-                            usual Li-Ion cells
+                            Increase it if you system shuts down unexpectedly by BMS inside of battery
                         </Typography.Text>
                     </>
                 ),
                 children: (
-                    <Radio.Group
-                        onChange={(e) => {
-                            this.setState({
-                                low_battery_protection: e.target.value,
-                            });
-                        }}
-                        value={low_battery_protection}
-                    >
-                        <Radio
-                            value={
-                                this.initial_basic_parameters
-                                    .low_battery_protection
-                            }
-                        >
-                            Leave old value -&nbsp;
-                            {
-                                this.initial_basic_parameters
-                                    .low_battery_protection
-                            }
-                            V
-                        </Radio>
-                        {LowVoltageLimitsByBatteryType[voltage][
-                            BatteryTypes.LiIon
-                        ] !== -1 && (
-                            <Radio
-                                value={
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiIon
-                                    ]
-                                }
-                            >
-                                Li-Ion (normal) -&nbsp;
-                                {
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiIon
-                                    ]
-                                }
-                                V
-                            </Radio>
-                        )}
-                        {LowVoltageLimitsByBatteryType[voltage][
-                            BatteryTypes.LiPo
-                        ] !== -1 && (
-                            <Radio
-                                value={
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiPo
-                                    ]
-                                }
-                            >
-                                Li-Po -&nbsp;
-                                {
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiPo
-                                    ]
-                                }
-                                V
-                            </Radio>
-                        )}
-                        {LowVoltageLimitsByBatteryType[voltage][
-                            BatteryTypes.LiFePo4
-                        ] !== -1 && (
-                            <Radio
-                                value={
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiFePo4
-                                    ]
-                                }
-                            >
-                                LiFePo4 - &nbsp;
-                                {
-                                    LowVoltageLimitsByBatteryType[voltage][
-                                        BatteryTypes.LiFePo4
-                                    ]
-                                }
-                                V
-                            </Radio>
-                        )}
-                    </Radio.Group>
+                    <ParameterInputComponent
+                    value={low_battery_protection}
+                    unit="V"
+                    min={lowVoltageLimits[voltage].min}
+                    max={lowVoltageLimits[voltage].max}
+                    onNewValue={(e) => {
+                        this.setState({
+                            low_battery_protection: e,
+                        });
+                    }}
+                />
                 ),
             },
         ];
