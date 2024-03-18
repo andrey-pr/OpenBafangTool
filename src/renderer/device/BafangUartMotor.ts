@@ -18,7 +18,7 @@ import {
     checkInfo,
     checkPedalParameters,
     checkThrottleParameters,
-} from './UartTypes';
+} from './BafangUartMotorTypes';
 import IConnection from './Connection';
 
 const sleep = (ms: number) =>
