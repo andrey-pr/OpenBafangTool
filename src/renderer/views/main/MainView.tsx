@@ -1,9 +1,12 @@
 import React from 'react';
 import {
-    FileOutlined,
+    InfoCircleOutlined,
     SettingOutlined,
     BookOutlined,
     ArrowLeftOutlined,
+    CarOutlined,
+    DesktopOutlined,
+    RotateRightOutlined
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
@@ -14,6 +17,11 @@ import DocumentationView from '../panels/common/DocumentationView';
 import { DocPages } from '../../../docs/document_resolver';
 import InterfaceType from '../../models/InterfaceType';
 import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView';
+import BafangCanSystemInfoView from '../panels/bafang/full/BafangCanSystemInfoView';
+import BafangCanSystem from '../../device/BafangCanSystem';
+import BafangCanMotorSettingsView from '../panels/bafang/full/BafangCanMotorSettingsView';
+import BafangCanDisplaySettingsView from '../panels/bafang/full/BafangCanDisplaySettingsView';
+import BafangCanSensorSettingsView from '../panels/bafang/full/BafangCanSensorSettingsView';
 
 const { Sider } = Layout;
 
@@ -36,12 +44,12 @@ const menuItems = {
                 label: 'Back',
             },
             {
-                key: 'bafang_motor_settings_simplified',
+                key: 'bafang_uart_motor_settings_simplified',
                 icon: <SettingOutlined />,
                 label: 'Parameters',
             },
             {
-                key: 'bafang_motor_manual',
+                key: 'bafang_uart_motor_manual',
                 icon: <BookOutlined />,
                 label: 'Manual',
                 children: [
@@ -63,17 +71,17 @@ const menuItems = {
                 label: 'Back',
             },
             {
-                key: 'bafang_motor_info',
-                icon: <FileOutlined />,
+                key: 'bafang_uart_motor_info',
+                icon: <InfoCircleOutlined />,
                 label: 'Info',
             },
             {
-                key: 'bafang_motor_settings',
+                key: 'bafang_uart_motor_settings',
                 icon: <SettingOutlined />,
                 label: 'Parameters',
             },
             {
-                key: 'bafang_motor_manual',
+                key: 'bafang_uart_motor_manual',
                 icon: <BookOutlined />,
                 label: 'Manual',
                 children: [
@@ -124,6 +132,64 @@ const menuItems = {
             },
             {
                 key: 'bafang_motor_manual',
+                icon: <BookOutlined />,
+                label: 'Manual',
+                children: [
+                    {
+                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                        label: 'General manual',
+                    },
+                ],
+            },
+        ],
+    },
+    bafang_can_system: {
+        simplified: [
+            {
+                key: 'back',
+                icon: <ArrowLeftOutlined />,
+                label: 'Back',
+            },
+            {
+                key: 'bafang_motor_manual',
+                icon: <BookOutlined />,
+                label: 'Manual',
+                children: [
+                    {
+                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                        label: 'General manual',
+                    },
+                ],
+            },
+        ],
+        full: [
+            {
+                key: 'back',
+                icon: <ArrowLeftOutlined />,
+                label: 'Back',
+            },
+            {
+                key: 'bafang_can_system_info',
+                icon: <InfoCircleOutlined />,
+                label: 'General Info',
+            },
+            {
+                key: 'bafang_can_motor_settings',
+                icon: <CarOutlined />,
+                label: 'Motor settings',
+            },
+            {
+                key: 'bafang_can_display_settings',
+                icon: <DesktopOutlined />,
+                label: 'Display settings',
+            },
+            {
+                key: 'bafang_can_sensor_settings',
+                icon: <RotateRightOutlined />,
+                label: 'Sensor settings',
+            },
+            {
+                key: 'bafang_can_motor_manual',
                 icon: <BookOutlined />,
                 label: 'Manual',
                 children: [
@@ -186,19 +252,39 @@ class MainView extends React.Component<MainProps, MainState> {
                     />
                 </Sider>
                 <Layout style={{ marginLeft: 200, backgroundColor: 'white' }}>
-                    {tab === 'bafang_motor_settings_simplified' && (
+                    {tab === 'bafang_uart_motor_settings_simplified' && (
                         <BafangUartMotorSettingsSimplifiedView
                             connection={connection as BafangUartMotor}
                         />
                     )}
-                    {tab === 'bafang_motor_info' && (
+                    {tab === 'bafang_uart_motor_info' && (
                         <BafangUartMotorInfoView
                             connection={connection as BafangUartMotor}
                         />
                     )}
-                    {tab === 'bafang_motor_settings' && (
+                    {tab === 'bafang_uart_motor_settings' && (
                         <BafangUartMotorSettingsView
                             connection={connection as BafangUartMotor}
+                        />
+                    )}
+                    {tab === 'bafang_can_system_info' && (
+                        <BafangCanSystemInfoView
+                            connection={connection as BafangCanSystem}
+                        />
+                    )}
+                    {tab === 'bafang_can_motor_settings' && (
+                        <BafangCanMotorSettingsView
+                            connection={connection as BafangCanSystem}
+                        />
+                    )}
+                    {tab === 'bafang_can_display_settings' && (
+                        <BafangCanDisplaySettingsView
+                            connection={connection as BafangCanSystem}
+                        />
+                    )}
+                    {tab === 'bafang_can_sensor_settings' && (
+                        <BafangCanSensorSettingsView
+                            connection={connection as BafangCanSystem}
                         />
                     )}
                     {tab.indexOf('manual') === 0 && (

@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import IConnection from '../../device/Connection';
 import BafangUartMotor from '../../device/BafangUartMotor';
+import BafangCanSystem from '../../device/BafangCanSystem';
 import {
     DeviceBrand,
     DeviceInterface,
@@ -40,7 +41,7 @@ type DeviceSelectionState = {
     disclaimerAgreement: boolean | null;
 };
 
-class DeviceSelectionView extends React.Component<
+class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
     DeviceSelectionProps,
     DeviceSelectionState
 > {
@@ -52,8 +53,8 @@ class DeviceSelectionView extends React.Component<
             connection: null,
             interfaceType: null,
             deviceBrand: DeviceBrand.Bafang,
-            deviceInterface: DeviceInterface.UART,
-            deviceType: DeviceType.Motor,
+            deviceInterface: null,
+            deviceType: null,
             devicePort: null,
             localLawsAgreement: false,
             disclaimerAgreement: false,
@@ -169,7 +170,6 @@ class DeviceSelectionView extends React.Component<
                                     message: 'Device interface is required',
                                 },
                             ]}
-                            initialValue={DeviceInterface.UART}
                         >
                             <Select
                                 onChange={(value: DeviceInterface) => {
@@ -184,9 +184,7 @@ class DeviceSelectionView extends React.Component<
                                 <Option value={DeviceInterface.UART}>
                                     UART
                                 </Option>
-                                <Option value={DeviceInterface.CAN} disabled>
-                                    CAN - not yet supported
-                                </Option>
+                                <Option value={DeviceInterface.CAN}>CAN</Option>
                             </Select>
                         </Form.Item>
                     )}
@@ -201,7 +199,6 @@ class DeviceSelectionView extends React.Component<
                                         message: 'Device type is required',
                                     },
                                 ]}
-                                initialValue={DeviceType.Motor}
                             >
                                 <Select
                                     onChange={(value: DeviceType) => {
@@ -246,6 +243,32 @@ class DeviceSelectionView extends React.Component<
                                 >
                                     <Option value="simulator">Simulator</Option>
                                     {portComponents}
+                                </Select>
+                            </Form.Item>
+                        )}
+                    {deviceBrand === DeviceBrand.Bafang &&
+                        deviceInterface === DeviceInterface.CAN && (
+                            <Form.Item
+                                name="usb_device"
+                                label="USB device"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'USB device is required',
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    onChange={(value: string) => {
+                                        this.setState({
+                                            devicePort: value,
+                                            connectionChecked: false,
+                                        });
+                                    }}
+                                    allowClear
+                                    style={{ minWidth: '150px' }}
+                                >
+                                    <Option value="simulator">Simulator</Option>
                                 </Select>
                             </Form.Item>
                         )}
@@ -332,6 +355,15 @@ class DeviceSelectionView extends React.Component<
                                         newConnection = new BafangUartMotor(
                                             devicePort,
                                         );
+                                    } else if (
+                                        deviceBrand === DeviceBrand.Bafang &&
+                                        deviceInterface ===
+                                            DeviceInterface.CAN &&
+                                        devicePort !== null
+                                    ) {
+                                        newConnection = new BafangCanSystem(
+                                            devicePort,
+                                        );
                                     } else {
                                         message.info(
                                             'This kind of device is not supported yet',
@@ -365,9 +397,11 @@ class DeviceSelectionView extends React.Component<
                                 disabled={
                                     deviceBrand === null ||
                                     devicePort === null ||
+                                    deviceInterface === null ||
                                     (deviceBrand === DeviceBrand.Bafang &&
-                                        (deviceInterface === null ||
-                                            deviceType === null)) ||
+                                        deviceInterface ===
+                                            DeviceInterface.UART &&
+                                        deviceType === null) ||
                                     interfaceType === null
                                 }
                             >
