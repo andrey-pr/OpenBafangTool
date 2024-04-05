@@ -208,7 +208,7 @@ export default class BafangCanSystem implements IConnection {
         return JSON.parse(JSON.stringify(this.controllerParameters1)); // method of object clonning, that is stupid but works
     }
 
-    getDisaplyState(): BafangCanControllerCodes {
+    getDisplayState(): BafangCanDisplayState {
         return JSON.parse(JSON.stringify(this.displayState)); // method of object clonning, that is stupid but works
     }
 

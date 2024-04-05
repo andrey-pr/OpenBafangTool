@@ -752,7 +752,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <StringInputComponent
                         value={serial_number}
-                        maxLength={60}
+                        maxLength={40}
                         onNewValue={(e) => {
                             this.setState({
                                 serial_number: e,

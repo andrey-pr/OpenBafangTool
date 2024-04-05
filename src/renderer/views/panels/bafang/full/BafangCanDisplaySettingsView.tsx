@@ -4,14 +4,14 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
 import BafangCanSystem from '../../../../device/BafangCanSystem';
+import { BafangCanDisplayCodes } from '../../../../device/BafangCanSystemTypes';
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = {
+type SettingsState = BafangCanDisplayCodes & {
     lastUpdateTime: number;
-    oldStyle: boolean;
 };
 
 /* eslint-disable camelcase */
@@ -23,8 +23,8 @@ class BafangCanDisplaySettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
+            ...connection.getDisplayCodes(),
             lastUpdateTime: 0,
-            oldStyle: false,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
@@ -35,15 +35,43 @@ class BafangCanDisplaySettingsView extends React.Component<
     }
 
     getOtherItems(): DescriptionsProps['items'] {
+        const {
+            display_serial_number,
+            display_bootload_version,
+            display_customer_number,
+            display_hardware_version,
+            display_manufacturer,
+            display_model_number,
+            display_software_version,
+        } = this.state;
         return [
             {
                 key: 'serial_number',
                 label: 'Serial number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_serial_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_serial_number: e,
+                            });
+                        }}
+                    />
+                ),
+            },
+            {
+                key: 'software_version',
+                label: 'Software version',
+                children: (
+                    <StringInputComponent
+                        maxLength={40}
+                        value={display_software_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_software_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -52,9 +80,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Hardware version',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_hardware_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_hardware_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -63,9 +95,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Model number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_model_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_model_number: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -74,9 +110,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Manufacturer',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_manufacturer}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_manufacturer: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -85,9 +125,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Customer number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_customer_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_customer_number: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -96,9 +140,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Bootloader version',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={display_bootload_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_bootload_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -106,7 +154,9 @@ class BafangCanDisplaySettingsView extends React.Component<
     }
 
     updateData(): void {
+        const { connection } = this.props;
         this.setState({
+            ...connection.getDisplayCodes(),
             lastUpdateTime: Date.now(),
         });
     }
@@ -118,7 +168,6 @@ class BafangCanDisplaySettingsView extends React.Component<
 
     render() {
         const { connection } = this.props;
-        const { oldStyle } = this.state;
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>

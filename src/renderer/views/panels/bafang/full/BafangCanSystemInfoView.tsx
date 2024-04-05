@@ -7,6 +7,7 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
     BafangCanDisplayCodes,
+    BafangCanDisplayState,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../device/BafangCanSystemTypes';
@@ -17,6 +18,7 @@ type InfoProps = {
 
 type InfoState = BafangCanControllerRealtime &
     BafangCanSensorRealtime &
+    BafangCanDisplayState &
     BafangCanControllerCodes &
     BafangCanDisplayCodes &
     BafangCanSensorCodes & { lastUpdateTime: number };
@@ -27,6 +29,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         super(props);
         const { connection } = this.props;
         this.state = {
+            ...connection.getDisplayState(),
             ...connection.getControllerCodes(),
             ...connection.getDisplayCodes(),
             ...connection.getSensorCodes(),
@@ -58,7 +61,8 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getControllerItems(): DescriptionsProps['items'] {
-        const {controller_cadence,
+        const {
+            controller_cadence,
             controller_torque,
             controller_speed,
             controller_current,
@@ -186,37 +190,43 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             display_manufacturer,
             display_model_number,
             display_software_version,
+            display_total_gears,
+            display_ride_mode,
+            display_boost,
+            display_current_gear_level,
+            display_light,
+            display_button,
         } = this.state;
         return [
             {
                 key: 'gear_levels_number',
                 label: 'Gear levels number',
-                children: '',
+                children: display_total_gears,
             },
             {
                 key: 'eco_sport_mode',
                 label: 'Mode',
-                children: '',
+                children: display_ride_mode,
             },
             {
                 key: 'boost',
                 label: 'Boost',
-                children: '',
+                children: display_boost,
             },
             {
                 key: 'current_gear_level',
                 label: 'Current gear',
-                children: '',
+                children: display_current_gear_level,
             },
             {
                 key: 'light',
                 label: 'Light',
-                children: '',
+                children: display_light,
             },
             {
                 key: 'button',
                 label: 'Button',
-                children: '', // pressed or released
+                children: display_button, // pressed or released
             },
             {
                 key: 'total_mileage',
@@ -371,6 +381,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     updateData(): void {
         const { connection } = this.props;
         this.setState({
+            ...connection.getDisplayState(),
             ...connection.getControllerCodes(),
             ...connection.getDisplayCodes(),
             ...connection.getSensorCodes(),
@@ -384,7 +395,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     render() {
         const { connection } = this.props;
-        let sensorData = this.getSensorItems();
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
@@ -408,7 +418,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 <Descriptions
                     bordered
                     title="Sensor"
-                    items={sensorData}
+                    items={this.getSensorItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />

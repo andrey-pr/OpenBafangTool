@@ -4,15 +4,19 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
 import BafangCanSystem from '../../../../device/BafangCanSystem';
+import {
+    BafangCanSensorCodes,
+    BafangCanSensorRealtime,
+} from '../../../../device/BafangCanSystemTypes';
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = {
-    lastUpdateTime: number;
-    oldStyle: boolean;
-};
+type SettingsState = BafangCanSensorRealtime &
+    BafangCanSensorCodes & {
+        lastUpdateTime: number;
+    };
 
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
@@ -23,42 +27,76 @@ class BafangCanSensorSettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
+            ...connection.getSensorCodes(),
+            sensor_torque: 0,
+            sensor_cadence: 0,
             lastUpdateTime: 0,
-            oldStyle: false,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
+        this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.removeAllListeners('write-success');
         connection.emitter.removeAllListeners('write-error');
         connection.emitter.on('data', this.updateData);
+        connection.emitter.on('broadcast-data-sensor', this.updateRealtimeData);
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
+        const { sensor_torque, sensor_cadence } = this.state;
         return [
             {
                 key: 'torque_value',
                 label: 'Torque value',
-                children: '',
+                children: sensor_torque,
             },
             {
                 key: 'cadence',
                 label: 'Cadence',
-                children: '',
+                children: sensor_cadence,
             },
         ];
     }
 
     getOtherItems(): DescriptionsProps['items'] {
+        const {
+            sensor_serial_number,
+            sensor_bootload_version,
+            sensor_customer_number,
+            sensor_hardware_version,
+            sensor_manufacturer,
+            sensor_model_number,
+            sensor_software_version,
+        } = this.state;
         return [
             {
                 key: 'serial_number',
                 label: 'Serial number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_serial_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_serial_number: e,
+                            });
+                        }}
+                        errorOnEmpty
+                    />
+                ),
+            },
+            {
+                key: 'software_version',
+                label: 'Software version',
+                children: (
+                    <StringInputComponent
+                        maxLength={40}
+                        value={sensor_software_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_software_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -67,9 +105,13 @@ class BafangCanSensorSettingsView extends React.Component<
                 label: 'Hardware version',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_hardware_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_hardware_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -78,9 +120,13 @@ class BafangCanSensorSettingsView extends React.Component<
                 label: 'Model number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_model_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_model_number: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -89,9 +135,13 @@ class BafangCanSensorSettingsView extends React.Component<
                 label: 'Manufacturer',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_manufacturer}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_manufacturer: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -100,9 +150,13 @@ class BafangCanSensorSettingsView extends React.Component<
                 label: 'Customer number',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_customer_number}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_customer_number: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -111,9 +165,13 @@ class BafangCanSensorSettingsView extends React.Component<
                 label: 'Bootloader version',
                 children: (
                     <StringInputComponent
-                        maxLength={60}
-                        value={''}
-                        onNewValue={() => {}}
+                        maxLength={40}
+                        value={sensor_bootload_version}
+                        onNewValue={(e) => {
+                            this.setState({
+                                sensor_bootload_version: e,
+                            });
+                        }}
                     />
                 ),
             },
@@ -121,9 +179,15 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     updateData(): void {
+        const { connection } = this.props;
         this.setState({
+            ...connection.getSensorCodes(),
             lastUpdateTime: Date.now(),
         });
+    }
+
+    updateRealtimeData(variables: any): void {
+        this.setState({ ...variables });
     }
 
     saveParameters(): void {
@@ -133,7 +197,6 @@ class BafangCanSensorSettingsView extends React.Component<
 
     render() {
         const { connection } = this.props;
-        const { oldStyle } = this.state;
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
