@@ -10,7 +10,7 @@ import {
     Switch,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
+import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import BafangUartMotor from '../../../../device/BafangUartMotor';
 import {
     BafangUartMotorBasicParameters,
@@ -733,7 +733,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     }}
                 />
                 <FloatButton
-                    icon={<RocketOutlined />}
+                    icon={<DeliveredProcedureOutlined />}
                     type="primary"
                     style={{ right: 24 }}
                     onClick={this.saveParameters}

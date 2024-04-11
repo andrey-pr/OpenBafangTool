@@ -115,11 +115,13 @@ export enum BafangCanRideMode {
     BOOST = 1,
 }
 
+export type BafangCanAssistLevel = 'walk' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
 export type BafangCanDisplayState = {
-    display_total_gears: number;
+    display_assist_levels: number;
     display_ride_mode: BafangCanRideMode;
     display_boost: boolean;
-    display_current_gear_level: number;
+    display_current_assist_level: BafangCanAssistLevel;
     display_light: boolean;
     display_button: boolean;
 };

@@ -190,18 +190,18 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             display_manufacturer,
             display_model_number,
             display_software_version,
-            display_total_gears,
+            display_assist_levels,
             display_ride_mode,
             display_boost,
-            display_current_gear_level,
+            display_current_assist_level,
             display_light,
             display_button,
         } = this.state;
         return [
             {
-                key: 'gear_levels_number',
-                label: 'Gear levels number',
-                children: display_total_gears,
+                key: 'assist_levels_number',
+                label: 'Assist levels number',
+                children: display_assist_levels,
             },
             {
                 key: 'eco_sport_mode',
@@ -214,9 +214,9 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 children: display_boost,
             },
             {
-                key: 'current_gear_level',
-                label: 'Current gear',
-                children: display_current_gear_level,
+                key: 'current_assist_level',
+                label: 'Current assist',
+                children: display_current_assist_level,
             },
             {
                 key: 'light',

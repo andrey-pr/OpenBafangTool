@@ -7,6 +7,7 @@ import {
     BafangCanControllerParameters1,
     BafangCanControllerRealtime,
     BafangCanDisplayCodes,
+    BafangCanDisplayData,
     BafangCanDisplayState,
     BafangCanMotorType,
     BafangCanPedalSensorType,
@@ -29,11 +30,15 @@ export default class BafangCanSystem implements IConnection {
 
     private simulationDataPublisherInterval: NodeJS.Timeout | undefined;
 
+    private simulationRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
+
     private controllerRealtimeData: BafangCanControllerRealtime;
 
     private sensorRealtimeData: BafangCanSensorRealtime;
 
     private controllerParameters1: BafangCanControllerParameters1;
+
+    private displayData: BafangCanDisplayData;
 
     private displayState: BafangCanDisplayState;
 
@@ -107,11 +112,19 @@ export default class BafangCanSystem implements IConnection {
             controller_displayless_mode: false,
             controller_lamps_always_on: false,
         };
+        this.displayData = {
+            display_total_mileage: 0,
+            display_single_mileage: 0,
+            display_max_speed: 0,
+            display_average_speed: 0,
+            display_service_mileage: 0,
+            display_last_shutdown_time: 0,
+        };
         this.displayState = {
-            display_total_gears: 0,
+            display_assist_levels: 0,
             display_ride_mode: BafangCanRideMode.ECO,
             display_boost: false,
-            display_current_gear_level: 0,
+            display_current_assist_level: 0,
             display_light: false,
             display_button: false,
         };
@@ -144,6 +157,8 @@ export default class BafangCanSystem implements IConnection {
         };
         this.loadData = this.loadData.bind(this);
         this.simulationDataPublisher = this.simulationDataPublisher.bind(this);
+        this.simulationRealtimeDataGenerator =
+            this.simulationRealtimeDataGenerator.bind(this);
     }
 
     private simulationDataPublisher(): void {
@@ -151,9 +166,26 @@ export default class BafangCanSystem implements IConnection {
         this.emitter.emit('broadcast-data-controller', {
             ...this.controllerRealtimeData,
         });
+        this.emitter.emit('broadcast-data-display', {
+            ...this.displayState,
+        });
         this.emitter.emit('broadcast-data-sensor', {
             ...this.sensorRealtimeData,
         });
+    }
+
+    private simulationRealtimeDataGenerator(): void {
+        this.displayState = {
+            display_assist_levels: 5,
+            display_ride_mode: BafangCanRideMode.ECO,
+            display_boost: false,
+            display_current_assist_level:
+                this.displayState.display_current_assist_level == 'walk'
+                    ? 5
+                    : 'walk',
+            display_light: !this.displayState.display_light,
+            display_button: !this.displayState.display_button,
+        };
     }
 
     connect(): Promise<boolean> {
@@ -161,6 +193,10 @@ export default class BafangCanSystem implements IConnection {
             this.simulationDataPublisherInterval = setInterval(
                 this.simulationDataPublisher,
                 1500,
+            );
+            this.simulationRealtimeDataGeneratorInterval = setInterval(
+                this.simulationRealtimeDataGenerator,
+                5000,
             );
             console.log('Simulator connected');
             return new Promise<boolean>((resolve) => {
@@ -176,11 +212,52 @@ export default class BafangCanSystem implements IConnection {
         if (this.port === 'simulator') {
             console.log('Simulator disconnected');
             clearInterval(this.simulationDataPublisherInterval);
+            clearInterval(this.simulationRealtimeDataGeneratorInterval);
         }
         if (this.unsubscribe !== undefined) {
             this.unsubscribe();
             this.unsubscribe = undefined;
         }
+    }
+
+    setDisplayTime(
+        hours: number,
+        minutes: number,
+        seconds: number,
+    ): Promise<boolean> {
+        if (
+            hours < 0 ||
+            hours > 23 ||
+            minutes < 0 ||
+            minutes > 59 ||
+            seconds < 0 ||
+            seconds > 59
+        ) {
+            return new Promise<boolean>((resolve) => {
+                resolve(false);
+            });
+        }
+        if (this.port === 'simulator') {
+            console.log(`New display time is ${hours}:${minutes}:${seconds}`);
+            return new Promise<boolean>((resolve) => {
+                resolve(true);
+            });
+        }
+        return new Promise<boolean>((resolve) => {
+            resolve(false);
+        });
+    }
+
+    cleanDisplayServiceMileage(): Promise<boolean> {
+        if (this.port === 'simulator') {
+            console.log('Cleaned display mileage');
+            return new Promise<boolean>((resolve) => {
+                resolve(true);
+            });
+        }
+        return new Promise<boolean>((resolve) => {
+            resolve(false);
+        });
     }
 
     testConnection(): Promise<boolean> {
@@ -208,6 +285,10 @@ export default class BafangCanSystem implements IConnection {
         return JSON.parse(JSON.stringify(this.controllerParameters1)); // method of object clonning, that is stupid but works
     }
 
+    getDisplayData(): BafangCanDisplayData {
+        return JSON.parse(JSON.stringify(this.displayData)); // method of object clonning, that is stupid but works
+    }
+
     getDisplayState(): BafangCanDisplayState {
         return JSON.parse(JSON.stringify(this.displayState)); // method of object clonning, that is stupid but works
     }
@@ -226,6 +307,10 @@ export default class BafangCanSystem implements IConnection {
 
     setDisplayState(data: BafangCanDisplayState): void {
         this.displayState = JSON.parse(JSON.stringify(data));
+    }
+
+    setDisplayData(data: BafangCanDisplayData): void {
+        this.displayData = JSON.parse(JSON.stringify(data));
     }
 
     setControllerCodes(data: BafangCanControllerCodes): void {
@@ -305,11 +390,19 @@ export default class BafangCanSystem implements IConnection {
                 controller_displayless_mode: false,
                 controller_lamps_always_on: false,
             };
+            this.displayData = {
+                display_total_mileage: 10000,
+                display_single_mileage: 1000,
+                display_max_speed: 0,
+                display_average_speed: 0,
+                display_service_mileage: 0,
+                display_last_shutdown_time: 5,
+            };
             this.displayState = {
-                display_total_gears: 1,
+                display_assist_levels: 5,
                 display_ride_mode: BafangCanRideMode.ECO,
                 display_boost: false,
-                display_current_gear_level: 1,
+                display_current_assist_level: 'walk',
                 display_light: false,
                 display_button: false,
             };
@@ -323,13 +416,13 @@ export default class BafangCanSystem implements IConnection {
                 controller_bootload_version: '1',
             };
             this.displayCodes = {
-                display_hardware_version: '1',
-                display_software_version: '1',
-                display_model_number: '1',
-                display_serial_number: '1',
-                display_customer_number: '1',
-                display_manufacturer: '1',
-                display_bootload_version: '1',
+                display_hardware_version: 'DP C221.C 2.0',
+                display_software_version: 'DPC221CE10205.1',
+                display_model_number: 'DP C221.CAN',
+                display_serial_number: 'DPC221.C2.0702F8WC080505',
+                display_customer_number: '0049-0074',
+                display_manufacturer: 'BAFANG',
+                display_bootload_version: 'APM32.DPCAN.V3.0.1',
             };
             this.sensorCodes = {
                 sensor_hardware_version: '1',

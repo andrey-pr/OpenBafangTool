@@ -1,18 +1,38 @@
 import React from 'react';
-import { Typography, Descriptions, FloatButton, message } from 'antd';
+import {
+    Typography,
+    Descriptions,
+    FloatButton,
+    message,
+    Button,
+    TimePicker,
+    Popconfirm,
+} from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
+import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
 import BafangCanSystem from '../../../../device/BafangCanSystem';
-import { BafangCanDisplayCodes } from '../../../../device/BafangCanSystemTypes';
+import {
+    BafangCanDisplayCodes,
+    BafangCanDisplayData,
+    BafangCanDisplayState,
+} from '../../../../device/BafangCanSystemTypes';
+import ParameterInputComponent from '../../../components/ParameterInput';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanDisplayCodes & {
-    lastUpdateTime: number;
-};
+type SettingsState = BafangCanDisplayData &
+    BafangCanDisplayState &
+    BafangCanDisplayCodes & {
+        lastUpdateTime: number;
+        currentTimeToSet: dayjs.Dayjs | null;
+    };
 
 /* eslint-disable camelcase */
 class BafangCanDisplaySettingsView extends React.Component<
@@ -23,15 +43,240 @@ class BafangCanDisplaySettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
+            ...connection.getDisplayData(),
+            ...connection.getDisplayState(),
             ...connection.getDisplayCodes(),
             lastUpdateTime: 0,
+            currentTimeToSet: null,
         };
+        this.getRecordsItems = this.getRecordsItems.bind(this);
+        this.getStateItems = this.getStateItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
+        this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.removeAllListeners('write-success');
         connection.emitter.removeAllListeners('write-error');
         connection.emitter.on('data', this.updateData);
+        connection.emitter.on(
+            'broadcast-data-display',
+            this.updateRealtimeData,
+        );
+    }
+
+    getRecordsItems(): DescriptionsProps['items'] {
+        const {
+            display_total_mileage,
+            display_single_mileage,
+            display_max_speed,
+            display_average_speed,
+            display_service_mileage,
+        } = this.state;
+        return [
+            {
+                key: 'total_mileage',
+                label: 'Total mileage',
+                children: (
+                    <ParameterInputComponent
+                        value={display_total_mileage}
+                        unit="Km"
+                        min={0}
+                        max={1000000}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_total_mileage: e,
+                            });
+                        }}
+                    />
+                ),
+            },
+            {
+                key: 'single_mileage',
+                label: 'Single trip mileage',
+                children: (
+                    <ParameterInputComponent
+                        value={display_single_mileage}
+                        unit="Km"
+                        min={0}
+                        max={display_total_mileage}
+                        decimalPlaces={1}
+                        onNewValue={(e) => {
+                            this.setState({
+                                display_single_mileage: e,
+                            });
+                        }}
+                    />
+                ),
+            },
+            {
+                key: 'max_speed',
+                label: 'Speed record',
+                children: (
+                    <>
+                        {display_max_speed} {'Km/H'}
+                    </>
+                ),
+            },
+            {
+                key: 'average_speed',
+                label: 'Average speed',
+                children: (
+                    <>
+                        {display_average_speed} {'Km/H'}
+                    </>
+                ),
+            },
+            {
+                key: 'display_service_mileage',
+                label: 'Mileage since last service',
+                children: (
+                    <>
+                        {display_service_mileage}
+                        {' Km'}
+                        <br />
+                        <br />
+                        <Popconfirm
+                            title="Erase service mileage"
+                            description={`Are you sure to clean mileage since last service record?`}
+                            onConfirm={() => {
+                                message.open({
+                                    key: 'cleaning_service_mileage',
+                                    type: 'loading',
+                                    content: 'Cleaning mileage...',
+                                });
+                                this.props.connection
+                                    .cleanDisplayServiceMileage()
+                                    .then((success) => {
+                                        if (success) {
+                                            message.open({
+                                                key: 'cleaning_service_mileage',
+                                                type: 'success',
+                                                content: 'Cleaned sucessfully!',
+                                                duration: 2,
+                                            });
+                                        } else {
+                                            message.open({
+                                                key: 'cleaning_service_mileage',
+                                                type: 'error',
+                                                content:
+                                                    'Error during cleaning!',
+                                                duration: 2,
+                                            });
+                                        }
+                                    });
+                            }}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                            <Button type="primary">Erase record</Button>
+                        </Popconfirm>
+                    </>
+                ),
+            },
+            {
+                key: 'display_current_time',
+                label: 'Set current time',
+                children: (
+                    <>
+                        <TimePicker
+                            onChange={(time: dayjs.Dayjs | null) =>
+                                this.setState({ currentTimeToSet: time })
+                            }
+                        />
+                        <br />
+                        <br />
+                        <Popconfirm
+                            title="Set new time on display"
+                            description={`Are you sure to set new time on display clock?`}
+                            onConfirm={() => {
+                                if (this.state.currentTimeToSet == null) {
+                                    message.error(
+                                        'Time in input form is not chosen',
+                                    );
+                                    return;
+                                }
+                                message.open({
+                                    key: 'setting_time',
+                                    type: 'loading',
+                                    content: 'Setting time...',
+                                });
+                                this.props.connection
+                                    .setDisplayTime(
+                                        this.state.currentTimeToSet.hour(),
+                                        this.state.currentTimeToSet.minute(),
+                                        this.state.currentTimeToSet.second(),
+                                    )
+                                    .then((success) => {
+                                        if (success) {
+                                            message.open({
+                                                key: 'setting_time',
+                                                type: 'success',
+                                                content: 'Set sucessfully!',
+                                                duration: 2,
+                                            });
+                                        } else {
+                                            message.open({
+                                                key: 'setting_time',
+                                                type: 'error',
+                                                content:
+                                                    'Error during setting!',
+                                                duration: 2,
+                                            });
+                                        }
+                                    });
+                            }}
+                            okText="Yes"
+                            cancelText="No"
+                        >
+                            <Button type="primary">Set time on display</Button>
+                        </Popconfirm>
+                    </>
+                ),
+            },
+        ];
+    }
+
+    getStateItems(): DescriptionsProps['items'] {
+        const {
+            display_assist_levels,
+            display_ride_mode,
+            display_boost,
+            display_current_assist_level,
+            display_light,
+            display_button,
+        } = this.state;
+        return [
+            {
+                key: 'total_assist_levels',
+                label: 'Total assist level number',
+                children: display_assist_levels,
+            },
+            {
+                key: 'ride_mode',
+                label: 'Ride mode',
+                children: display_ride_mode,
+            },
+            {
+                key: 'boost',
+                label: 'Boost',
+                children: display_boost ? 'true' : 'false',
+            },
+            {
+                key: 'current_assist_level',
+                label: 'Current assist level',
+                children: display_current_assist_level,
+            },
+            {
+                key: 'light',
+                label: 'Light',
+                children: display_light ? 'true' : 'false',
+            },
+            {
+                key: 'button_pressed',
+                label: 'Button pressed',
+                children: display_button ? 'true' : 'false',
+            },
+        ];
     }
 
     getOtherItems(): DescriptionsProps['items'] {
@@ -156,9 +401,15 @@ class BafangCanDisplaySettingsView extends React.Component<
     updateData(): void {
         const { connection } = this.props;
         this.setState({
+            ...connection.getDisplayData(),
+            ...connection.getDisplayState(),
             ...connection.getDisplayCodes(),
             lastUpdateTime: Date.now(),
         });
+    }
+
+    updateRealtimeData(variables: any): void {
+        this.setState({ ...variables });
     }
 
     saveParameters(): void {
@@ -173,6 +424,20 @@ class BafangCanDisplaySettingsView extends React.Component<
                 <Typography.Title level={2} style={{ margin: 0 }}>
                     Display settings
                 </Typography.Title>
+                <br />
+                <Descriptions
+                    bordered
+                    title="Records"
+                    items={this.getRecordsItems()}
+                    column={1}
+                />
+                <br />
+                <Descriptions
+                    bordered
+                    title="State"
+                    items={this.getStateItems()}
+                    column={1}
+                />
                 <br />
                 <Descriptions
                     bordered
@@ -211,12 +476,19 @@ class BafangCanDisplaySettingsView extends React.Component<
                         }, 3000);
                     }}
                 />
+                <Popconfirm
+                    title="Parameter writing"
+                    description={`Are you sure that you want to write all parameters on device?`}
+                    onConfirm={this.saveParameters}
+                    okText="Yes"
+                    cancelText="No"
+                >
                 <FloatButton
-                    icon={<RocketOutlined />}
+                    icon={<DeliveredProcedureOutlined />}
                     type="primary"
                     style={{ right: 24 }}
-                    onClick={this.saveParameters}
                 />
+                </Popconfirm>
             </div>
         );
     }
