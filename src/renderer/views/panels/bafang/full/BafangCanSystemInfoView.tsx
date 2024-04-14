@@ -4,6 +4,7 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import BafangCanSystem from '../../../../device/BafangCanSystem';
 import {
+    BafangBesstCodes,
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
     BafangCanDisplayCodes,
@@ -21,7 +22,8 @@ type InfoState = BafangCanControllerRealtime &
     BafangCanDisplayState &
     BafangCanControllerCodes &
     BafangCanDisplayCodes &
-    BafangCanSensorCodes & { lastUpdateTime: number };
+    BafangCanSensorCodes &
+    BafangBesstCodes & { lastUpdateTime: number };
 
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     //TODO redesign as a dashboard and remove version fields
@@ -33,6 +35,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             ...connection.getControllerCodes(),
             ...connection.getDisplayCodes(),
             ...connection.getSensorCodes(),
+            ...connection.getBesstCodes(),
             controller_cadence: 0,
             controller_torque: 0,
             controller_speed: 0,
@@ -359,21 +362,22 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     getBesstItems(): DescriptionsProps['items'] {
         const { connection } = this.props;
+        const {besst_hardware_version, besst_software_version, besst_serial_number} = this.state;
         return [
             {
                 key: 'software_version',
                 label: 'Software version',
-                children: '',
+                children: besst_software_version, //TODO add editing
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
-                children: '',
+                children: besst_hardware_version, //TODO add editing
             },
             {
                 key: 'serial_number',
                 label: 'Serial number',
-                children: '',
+                children: besst_serial_number, //TODO add editing
             },
         ];
     }
@@ -385,6 +389,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             ...connection.getControllerCodes(),
             ...connection.getDisplayCodes(),
             ...connection.getSensorCodes(),
+            ...connection.getBesstCodes(),
             lastUpdateTime: Date.now(),
         });
     }

@@ -104,7 +104,7 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
   - [ ] Beta
   - [ ] Stable
 - [ ] Add support of Bafang systems with CAN
-  - [ ] Find hardware - in progress
+  - [*] Find hardware
   - [ ] Alpha
   - [ ] Beta
   - [ ] Stable

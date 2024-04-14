@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 import { DeviceName } from '../models/DeviceType';
 import IConnection from './Connection';
 import {
+    BafangBesstCodes,
     BafangCanControllerCodes,
     BafangCanControllerParameters1,
     BafangCanControllerRealtime,
@@ -16,17 +17,21 @@ import {
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
 } from './BafangCanSystemTypes';
+import HID from 'node-hid';
+
+const sleep = (ms: number) =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 
 export default class BafangCanSystem implements IConnection {
-    private port: string;
+    private devicePath: string;
 
     readonly deviceName: DeviceName = DeviceName.BafangCanSystem;
 
+    private device: HID.HID | null = null;
+
     public emitter: EventEmitter;
-
-    private unsubscribe: (() => void) | undefined = undefined;
-
-    private portBuffer: Uint8Array = new Uint8Array();
 
     private simulationDataPublisherInterval: NodeJS.Timeout | undefined;
 
@@ -48,8 +53,10 @@ export default class BafangCanSystem implements IConnection {
 
     private sensorCodes: BafangCanSensorCodes;
 
-    constructor(port: string) {
-        this.port = port;
+    private besstCodes: BafangBesstCodes;
+
+    constructor(devicePath: string) {
+        this.devicePath = devicePath;
         this.emitter = new EventEmitter();
         this.controllerRealtimeData = {
             controller_cadence: 0,
@@ -155,6 +162,11 @@ export default class BafangCanSystem implements IConnection {
             sensor_manufacturer: '',
             sensor_bootload_version: '',
         };
+        this.besstCodes = {
+            besst_hardware_version: '',
+            besst_software_version: '',
+            besst_serial_number: '',
+        };
         this.loadData = this.loadData.bind(this);
         this.simulationDataPublisher = this.simulationDataPublisher.bind(this);
         this.simulationRealtimeDataGenerator =
@@ -174,6 +186,10 @@ export default class BafangCanSystem implements IConnection {
         });
     }
 
+    public static filterHidDevices(devices: HID.Device[]): HID.Device[] {
+        return devices.filter((device) => device.product === 'BaFang Besst');
+    }
+
     private simulationRealtimeDataGenerator(): void {
         this.displayState = {
             display_assist_levels: 5,
@@ -189,7 +205,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     connect(): Promise<boolean> {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             this.simulationDataPublisherInterval = setInterval(
                 this.simulationDataPublisher,
                 1500,
@@ -203,21 +219,20 @@ export default class BafangCanSystem implements IConnection {
                 resolve(true);
             });
         }
+        this.device = new HID.HID(this.devicePath);
         return new Promise<boolean>((resolve) => {
-            resolve(false);
+            resolve(true);
         });
     }
 
     disconnect(): void {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             console.log('Simulator disconnected');
             clearInterval(this.simulationDataPublisherInterval);
             clearInterval(this.simulationRealtimeDataGeneratorInterval);
+            return;
         }
-        if (this.unsubscribe !== undefined) {
-            this.unsubscribe();
-            this.unsubscribe = undefined;
-        }
+        this.device?.close();
     }
 
     setDisplayTime(
@@ -237,7 +252,7 @@ export default class BafangCanSystem implements IConnection {
                 resolve(false);
             });
         }
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             console.log(`New display time is ${hours}:${minutes}:${seconds}`);
             return new Promise<boolean>((resolve) => {
                 resolve(true);
@@ -249,7 +264,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     cleanDisplayServiceMileage(): Promise<boolean> {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             console.log('Cleaned display mileage');
             return new Promise<boolean>((resolve) => {
                 resolve(true);
@@ -261,7 +276,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     testConnection(): Promise<boolean> {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             return new Promise<boolean>((resolve) => {
                 resolve(true);
             });
@@ -301,6 +316,10 @@ export default class BafangCanSystem implements IConnection {
         return JSON.parse(JSON.stringify(this.sensorCodes)); // method of object clonning, that is stupid but works
     }
 
+    getBesstCodes(): BafangBesstCodes {
+        return JSON.parse(JSON.stringify(this.besstCodes)); // method of object clonning, that is stupid but works
+    }
+
     setControllerParameters1(data: BafangCanControllerParameters1): void {
         this.controllerParameters1 = JSON.parse(JSON.stringify(data));
     }
@@ -325,8 +344,12 @@ export default class BafangCanSystem implements IConnection {
         this.sensorCodes = JSON.parse(JSON.stringify(data));
     }
 
+    setBesstCodes(data: BafangBesstCodes): void {
+        this.besstCodes = JSON.parse(JSON.stringify(data));
+    }
+
     loadData(): void {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             //TODO fill DTOs with realistic data
             this.controllerRealtimeData = {
                 controller_cadence: 1,
@@ -407,12 +430,12 @@ export default class BafangCanSystem implements IConnection {
                 display_button: false,
             };
             this.controllerCodes = {
-                controller_hardware_version: '1',
-                controller_software_version: '1',
-                controller_model_number: '1',
-                controller_serial_number: '1',
-                controller_customer_number: '1',
-                controller_manufacturer: '1',
+                controller_hardware_version: 'CR X10V.350.FC 2.1',
+                controller_software_version: 'CRX10VC3615E101004.0',
+                controller_model_number: 'CR X10V.350.FC',
+                controller_serial_number: 'CRX10V.350.FC2.1A42F5TB045999',
+                controller_customer_number: '',
+                controller_manufacturer: 'BAFANG',
                 controller_bootload_version: '1',
             };
             this.displayCodes = {
@@ -425,21 +448,27 @@ export default class BafangCanSystem implements IConnection {
                 display_bootload_version: 'APM32.DPCAN.V3.0.1',
             };
             this.sensorCodes = {
-                sensor_hardware_version: '1',
-                sensor_software_version: '1',
-                sensor_model_number: '1',
-                sensor_serial_number: '1',
+                sensor_hardware_version: 'SR PA212.32.ST.C 1.0',
+                sensor_software_version: 'SRPA212CF10101.0',
+                sensor_model_number: 'SR PA212.32.ST.C',
+                sensor_serial_number: '0000000000',
                 sensor_customer_number: '1',
                 sensor_manufacturer: '1',
                 sensor_bootload_version: '1',
             };
+            this.besstCodes = {
+                besst_hardware_version: 'BESST.UC 3.0.3',
+                besst_software_version: 'BSF33.05',
+                besst_serial_number: '',
+            };
             setTimeout(() => this.emitter.emit('data'), 1500);
             console.log('Simulator: blank data loaded');
+            return;
         }
     }
 
     saveData(): boolean {
-        if (this.port === 'simulator') {
+        if (this.devicePath === 'simulator') {
             return true;
         }
         return false;

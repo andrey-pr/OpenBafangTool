@@ -18,6 +18,9 @@ import {
     DeviceType,
 } from '../../models/DeviceType';
 import InterfaceType from '../../models/InterfaceType';
+import HID from 'node-hid';
+import filterPorts from '../../../device/serial-patcher';
+import { SerialPort } from 'serialport';
 
 const { Option } = Select;
 
@@ -30,6 +33,7 @@ type DeviceSelectionProps = {
 
 type DeviceSelectionState = {
     portList: string[];
+    hidDeviceList: HID.Device[];
     connectionChecked: boolean;
     connection: IConnection | null;
     interfaceType: InterfaceType | null;
@@ -41,7 +45,8 @@ type DeviceSelectionState = {
     disclaimerAgreement: boolean | null;
 };
 
-class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
+class DeviceSelectionView extends React.Component<
+    //TODO fix dropdown logic
     DeviceSelectionProps,
     DeviceSelectionState
 > {
@@ -49,6 +54,7 @@ class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
         super(props);
         this.state = {
             portList: [],
+            hidDeviceList: [],
             connectionChecked: false,
             connection: null,
             interfaceType: null,
@@ -61,11 +67,16 @@ class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
         };
 
         setInterval(() => {
-            window.electron.ipcRenderer.sendMessage('list-serial-ports', []);
-
-            window.electron.ipcRenderer.once('list-serial-ports', (arg) => {
-                this.setState({ portList: arg as string[] });
+            SerialPort.list().then((ports) => {
+                this.setState({
+                    portList: filterPorts(
+                        ports.map((port) => port.path),
+                        true,
+                    ),
+                });
             });
+
+            this.setState({ hidDeviceList: HID.devices() });
         }, 1000);
     }
 
@@ -73,6 +84,7 @@ class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
         const { deviceSelectionHook } = this.props;
         const {
             portList,
+            hidDeviceList,
             connectionChecked,
             connection,
             interfaceType,
@@ -269,6 +281,18 @@ class DeviceSelectionView extends React.Component< //TODO fix dropdown logic
                                     style={{ minWidth: '150px' }}
                                 >
                                     <Option value="simulator">Simulator</Option>
+                                    {BafangCanSystem.filterHidDevices(
+                                        hidDeviceList,
+                                    ).map((item) => {
+                                        return (
+                                            <Option
+                                                value={item.path}
+                                                key={item.path}
+                                            >
+                                                {item.product} ({item.path})
+                                            </Option>
+                                        );
+                                    })}
                                 </Select>
                             </Form.Item>
                         )}

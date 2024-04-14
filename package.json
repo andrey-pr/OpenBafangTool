@@ -91,6 +91,7 @@
     "electron-updater": "^6.1.4",
     "is-callable": "^1.2.7",
     "markdown-loader": "^8.0.0",
+    "node-hid": "^3.0.0",
     "raw-loader": "^4.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -171,6 +172,7 @@
     "appId": "org.OpenBafangTool",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
+    "npmRebuild": false,
     "files": [
       "dist",
       "node_modules",
@@ -213,8 +215,7 @@
     "linux": {
       "target": [
         "AppImage"
-      ],
-      "category": "Development"
+      ]
     },
     "directories": {
       "app": "release/app",

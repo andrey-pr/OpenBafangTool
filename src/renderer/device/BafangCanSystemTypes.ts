@@ -140,3 +140,9 @@ export type BafangCanSensorCodes = {
     sensor_manufacturer: string;
     sensor_bootload_version: string;
 };
+
+export type BafangBesstCodes = {
+    besst_hardware_version: string;
+    besst_software_version: string;
+    besst_serial_number: string;
+};

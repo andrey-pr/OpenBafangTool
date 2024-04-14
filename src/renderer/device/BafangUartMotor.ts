@@ -20,6 +20,7 @@ import {
     checkThrottleParameters,
 } from './BafangUartMotorTypes';
 import IConnection from './Connection';
+import { closePort, openPort, writeToPort } from '../../device/port';
 
 const sleep = (ms: number) =>
     new Promise((resolve) => {
@@ -40,8 +41,6 @@ export default class BafangUartMotor implements IConnection {
     readonly deviceName: DeviceName = DeviceName.BafangUartMotor;
 
     public emitter: EventEmitter;
-
-    private unsubscribe: (() => void) | undefined = undefined;
 
     private portBuffer: Uint8Array = new Uint8Array();
 
@@ -120,6 +119,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     private processBuffer(): void {
+        console.log(this.portBuffer);
         if (this.portBuffer.length <= 2) {
             return;
         }
@@ -252,24 +252,26 @@ export default class BafangUartMotor implements IConnection {
                 resolve(true);
             });
         }
-        window.electron.ipcRenderer.sendMessage('open-serial-port', {
-            path: this.port,
-            baud: 1200,
-        });
         let ready: boolean = false;
         let success: boolean = false;
-        window.electron.ipcRenderer.once('open-serial-port', (arg) => {
-            success = arg as boolean;
-            ready = true;
-        });
-        this.unsubscribe = window.electron.ipcRenderer.on(
-            'read-from-serial-port',
-            (arg) => {
-                let data = arg as { path: string; data: Uint8Array };
-                if (data.path === this.port) {
+        openPort(
+            this.port,
+            1200,
+            () => {
+                success = true;
+                ready = true;
+            },
+            (err: Error | null) => {
+                if(!err) return;
+                console.log('Serial port error ', err);
+                success = false;
+                ready = true;
+            },
+            (responsePath: string, data: Uint8Array) => {
+                if (responsePath === this.port) {
                     this.portBuffer = new Uint8Array([
                         ...Array.from(this.portBuffer),
-                        ...Array.from(data.data),
+                        ...Array.from(data),
                     ]);
                     this.processBuffer();
                 }
@@ -289,14 +291,9 @@ export default class BafangUartMotor implements IConnection {
     disconnect(): void {
         if (this.port === 'simulator') {
             console.log('Simulator disconnected');
+            return;
         }
-        window.electron.ipcRenderer.sendMessage('close-serial-port', [
-            this.port,
-        ]);
-        if (this.unsubscribe !== undefined) {
-            this.unsubscribe();
-            this.unsubscribe = undefined;
-        }
+        closePort(this.port);
     }
 
     testConnection(): Promise<boolean> {
@@ -368,6 +365,7 @@ export default class BafangUartMotor implements IConnection {
             };
             setTimeout(() => this.emitter.emit('data'), 300);
             console.log('Simulator: blank data loaded');
+            return;
         }
         const request = [
             [0x11, 0x51, 0x04, 0xb0, 0x05],
@@ -382,10 +380,7 @@ export default class BafangUartMotor implements IConnection {
         const port = this.port;
         function sendRequest(i: number): void {
             log.info('Sent read package: ', request[i]);
-            window.electron.ipcRenderer.sendMessage('write-to-serial-port', {
-                path: port,
-                message: request[i],
-            });
+            writeToPort(port, Buffer.from(request[i])).then();
             if (i !== request.length - 1) {
                 setTimeout(sendRequest, 300, i + 1);
             }
@@ -487,10 +482,7 @@ export default class BafangUartMotor implements IConnection {
         const port = this.port;
         function sendRequest(i: number): void {
             log.info('Sent write package: ', request[i]);
-            window.electron.ipcRenderer.sendMessage('write-to-serial-port', {
-                path: port,
-                message: request[i],
-            });
+            writeToPort(port, Buffer.from(request[i])).then();
             if (i !== request.length - 1) {
                 setTimeout(sendRequest, 300, i + 1);
             }
