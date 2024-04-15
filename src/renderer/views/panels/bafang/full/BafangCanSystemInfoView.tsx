@@ -56,6 +56,18 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         this.updateData = this.updateData.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.on('data', this.updateData);
+        connection.emitter.on('controller-data', (data: BafangCanControllerCodes) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('display-data', (data: BafangCanDisplayCodes) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('sensor-data', (data: BafangCanSensorCodes) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('besst-data', (data: BafangBesstCodes) =>
+            this.setState({ ...data }),
+        );
         connection.emitter.on(
             'broadcast-data-controller',
             this.updateRealtimeData,
@@ -362,7 +374,11 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     getBesstItems(): DescriptionsProps['items'] {
         const { connection } = this.props;
-        const {besst_hardware_version, besst_software_version, besst_serial_number} = this.state;
+        const {
+            besst_hardware_version,
+            besst_software_version,
+            besst_serial_number,
+        } = this.state;
         return [
             {
                 key: 'software_version',
@@ -386,10 +402,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         this.setState({
             ...connection.getDisplayState(),
-            ...connection.getControllerCodes(),
-            ...connection.getDisplayCodes(),
-            ...connection.getSensorCodes(),
-            ...connection.getBesstCodes(),
             lastUpdateTime: Date.now(),
         });
     }
