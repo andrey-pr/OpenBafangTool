@@ -8,10 +8,15 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
     BafangCanDisplayCodes,
+    BafangCanDisplayData,
     BafangCanDisplayState,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../device/BafangCanSystemTypes';
+import NumberValueComponent from '../../../components/NumberValueComponent';
+import StringValueComponent from '../../../components/StringValueComponent';
+import BooleanValueComponent from '../../../components/BooleanValueComponent';
+import { NotLoadedYet } from '../../../../types/no_data';
 
 type InfoProps = {
     connection: BafangCanSystem;
@@ -20,10 +25,11 @@ type InfoProps = {
 type InfoState = BafangCanControllerRealtime &
     BafangCanSensorRealtime &
     BafangCanDisplayState &
+    BafangCanDisplayData &
     BafangCanControllerCodes &
     BafangCanDisplayCodes &
     BafangCanSensorCodes &
-    BafangBesstCodes & { lastUpdateTime: number };
+    BafangBesstCodes;
 
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     //TODO redesign as a dashboard and remove version fields
@@ -31,35 +37,40 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.getDisplayState(),
             ...connection.getControllerCodes(),
+            ...connection.getDisplayState(),
+            ...connection.getDisplayData(),
             ...connection.getDisplayCodes(),
             ...connection.getSensorCodes(),
             ...connection.getBesstCodes(),
-            controller_cadence: 0,
-            controller_torque: 0,
-            controller_speed: 0,
-            controller_current: 0,
-            controller_voltage: 0,
-            controller_temperature: 0,
-            controller_motor_temperature: 0,
-            controller_walk_assistance: false,
-            controller_calories: 0,
-            controller_remaining_capacity: 0,
-            controller_single_trip: 0,
-            controller_remaining_distance: 0,
-            sensor_torque: 0,
-            sensor_cadence: 0,
-            lastUpdateTime: 0,
+            controller_cadence: NotLoadedYet,
+            controller_torque: NotLoadedYet,
+            controller_speed: NotLoadedYet,
+            controller_current: NotLoadedYet,
+            controller_voltage: NotLoadedYet,
+            controller_temperature: NotLoadedYet,
+            controller_motor_temperature: NotLoadedYet,
+            controller_walk_assistance: NotLoadedYet,
+            controller_calories: NotLoadedYet,
+            controller_remaining_capacity: NotLoadedYet,
+            controller_single_trip: NotLoadedYet,
+            controller_remaining_distance: NotLoadedYet,
+            sensor_torque: NotLoadedYet,
+            sensor_cadence: NotLoadedYet,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        this.updateData = this.updateData.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.on('data', this.updateData);
-        connection.emitter.on('controller-data', (data: BafangCanControllerCodes) =>
+        connection.emitter.on(
+            'controller-data',
+            (data: BafangCanControllerCodes) => this.setState({ ...data }),
+        );
+        connection.emitter.on('display-general-data', (data: BafangCanDisplayData) =>
             this.setState({ ...data }),
         );
-        connection.emitter.on('display-data', (data: BafangCanDisplayCodes) =>
+        connection.emitter.on('display-state-data', (data: BafangCanDisplayState) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('display-codes-data', (data: BafangCanDisplayCodes) =>
             this.setState({ ...data }),
         );
         connection.emitter.on('sensor-data', (data: BafangCanSensorCodes) =>
@@ -97,101 +108,168 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             controller_single_trip,
             controller_remaining_distance,
         } = this.state;
+        console.log(controller_speed);
         return [
             {
                 key: 'capacity_left',
                 label: 'Remaining capacity',
-                children: controller_remaining_capacity,
+                children: (
+                    <NumberValueComponent
+                        value={controller_remaining_capacity}
+                        unit="mAh"
+                    />
+                ),
             },
             {
                 key: 'remaining_trip',
                 label: 'Remaining trip distance',
-                children: controller_remaining_distance,
+                children: (
+                    <NumberValueComponent
+                        value={controller_remaining_distance}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'single_trip',
                 label: 'Last trip distance',
-                children: controller_single_trip,
+                children: (
+                    <NumberValueComponent
+                        value={controller_single_trip}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'cadence',
                 label: 'Cadence',
-                children: controller_cadence,
+                children: (
+                    <NumberValueComponent
+                        value={controller_cadence}
+                        unit="RPM"
+                    />
+                ),
             },
             {
                 key: 'torque_value',
                 label: 'Torque value',
-                children: controller_torque,
+                children: (
+                    <NumberValueComponent value={controller_torque} unit="mV" />
+                ),
             },
             {
                 key: 'voltage',
                 label: 'Voltage',
-                children: controller_voltage,
+                children: (
+                    <NumberValueComponent value={controller_voltage} unit="V" />
+                ),
             },
             {
                 key: 'controller_temperature',
                 label: 'Controller temperature',
-                children: controller_temperature,
+                children: (
+                    <NumberValueComponent
+                        value={controller_temperature}
+                        unit="C°"
+                    />
+                ),
             },
             {
                 key: 'motor_temperature',
                 label: 'Motor temperature',
-                children: controller_motor_temperature,
+                children: (
+                    <NumberValueComponent
+                        value={controller_motor_temperature}
+                        unit="C°"
+                    />
+                ),
             },
             {
                 key: 'walk_assist',
                 label: 'Walk assist status',
-                children: controller_walk_assistance,
+                children: (
+                    <BooleanValueComponent
+                        value={controller_walk_assistance}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'calories',
                 label: 'Calories',
-                children: controller_calories,
+                children: (
+                    <NumberValueComponent
+                        value={controller_calories}
+                        unit="Cal."
+                    />
+                ),
             },
             {
                 key: 'current',
                 label: 'Current',
-                children: controller_current,
+                children: (
+                    <NumberValueComponent value={controller_current} unit="A" />
+                ),
             },
             {
                 key: 'speed',
                 label: 'Speed',
-                children: controller_speed,
+                children: (
+                    <NumberValueComponent
+                        value={controller_speed}
+                        unit="Km/H"
+                    />
+                ),
             },
             {
                 key: 'manufacturer',
                 label: 'Manufacturer',
-                children: controller_manufacturer,
+                children: (
+                    <StringValueComponent value={controller_manufacturer} />
+                ),
             },
             {
                 key: 'software_version',
                 label: 'Software version',
-                children: controller_software_version,
+                children: (
+                    <StringValueComponent value={controller_software_version} />
+                ),
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
-                children: controller_hardware_version,
+                children: (
+                    <StringValueComponent value={controller_hardware_version} />
+                ),
             },
             {
                 key: 'bootloader_version',
                 label: 'Bootloader version',
-                children: controller_bootload_version,
+                children: (
+                    <StringValueComponent value={controller_bootload_version} />
+                ),
             },
             {
                 key: 'model_number',
                 label: 'Model number',
-                children: controller_model_number,
+                children: (
+                    <StringValueComponent value={controller_model_number} />
+                ),
             },
             {
                 key: 'serial_number',
                 label: 'Serial number',
-                children: controller_serial_number,
+                children: (
+                    <StringValueComponent value={controller_serial_number} />
+                ),
             },
             {
                 key: 'customer_number',
                 label: 'Customer number',
-                children: controller_customer_number,
+                children: (
+                    <StringValueComponent value={controller_customer_number} />
+                ),
             },
         ];
     }
@@ -211,102 +289,164 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             display_current_assist_level,
             display_light,
             display_button,
+            display_total_mileage,
+            display_single_mileage,
+            display_max_speed,
+            display_average_speed,
+            display_service_mileage,
         } = this.state;
+        console.log(display_total_mileage);
         return [
             {
                 key: 'assist_levels_number',
                 label: 'Assist levels number',
-                children: display_assist_levels,
+                children: (
+                    <NumberValueComponent value={display_assist_levels} />
+                ),
             },
             {
                 key: 'eco_sport_mode',
                 label: 'Mode',
-                children: display_ride_mode,
+                children: (
+                    <BooleanValueComponent
+                        value={display_ride_mode === 1}
+                        textTrue="SPORT"
+                        textFalse="ECO"
+                    />
+                ),
             },
             {
                 key: 'boost',
                 label: 'Boost',
-                children: display_boost,
+                children: (
+                    <BooleanValueComponent
+                        value={display_boost}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'current_assist_level',
                 label: 'Current assist',
-                children: display_current_assist_level,
+                children: <StringValueComponent value={`${display_current_assist_level}`}/>
             },
             {
                 key: 'light',
                 label: 'Light',
-                children: display_light,
+                children: (
+                    <BooleanValueComponent
+                        value={display_light}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'button',
                 label: 'Button',
-                children: display_button, // pressed or released
+                children: (
+                    <BooleanValueComponent
+                        value={display_button}
+                        textTrue="Pressed"
+                        textFalse="Not pressed"
+                    />
+                ), // pressed or released
             },
             {
                 key: 'total_mileage',
                 label: 'Total mileage',
-                children: '',
+                children: (
+                    <NumberValueComponent
+                        value={display_total_mileage}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'single_mileage',
                 label: 'Single mileage',
-                children: '',
+                children: (
+                    <NumberValueComponent
+                        value={display_single_mileage}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'max_registered_speed',
                 label: 'Max registered speed',
-                children: '',
+                children: (
+                    <NumberValueComponent
+                        value={display_max_speed}
+                        unit="Km/H"
+                    />
+                ),
             },
             {
                 key: 'average_speed',
                 label: 'Average speed',
-                children: '',
+                children: (
+                    <NumberValueComponent
+                        value={display_average_speed}
+                        unit="Km/H"
+                    />
+                ),
             },
             {
                 key: 'service_mileage',
                 label: 'Mileage since last service',
-                children: '',
-            },
-            {
-                key: 'last_shutdown_time',
-                label: 'Last shutdown time',
-                children: '',
+                children: (
+                    <NumberValueComponent
+                        value={display_service_mileage}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'software_version',
                 label: 'Software version',
-                children: display_software_version,
+                children: (
+                    <StringValueComponent value={display_software_version} />
+                ),
             },
             {
                 key: 'manufacturer',
                 label: 'Manufacturer',
-                children: display_manufacturer,
+                children: <StringValueComponent value={display_manufacturer} />,
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
-                children: display_hardware_version,
+                children: (
+                    <StringValueComponent value={display_hardware_version} />
+                ),
             },
             {
                 key: 'model_number',
                 label: 'Model number',
-                children: display_model_number,
+                children: <StringValueComponent value={display_model_number} />,
             },
             {
                 key: 'bootloader_version',
                 label: 'Bootloader bersion',
-                children: display_bootload_version,
+                children: (
+                    <StringValueComponent value={display_bootload_version} />
+                ),
             },
             {
                 key: 'serial_number',
                 label: 'Serial number',
-                children: display_serial_number,
+                children: (
+                    <StringValueComponent value={display_serial_number} />
+                ),
             },
             {
                 key: 'customer_number',
                 label: 'Customer number',
-                children: display_customer_number,
+                children: (
+                    <StringValueComponent value={display_customer_number} />
+                ),
             },
         ];
     }
@@ -327,53 +467,64 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             {
                 key: 'torque_value',
                 label: 'Torque value',
-                children: sensor_torque,
+                children: (
+                    <NumberValueComponent value={sensor_torque} unit="mV" />
+                ),
             },
             {
                 key: 'cadence',
                 label: 'Cadence',
-                children: sensor_cadence,
+                children: (
+                    <NumberValueComponent value={sensor_cadence} unit="RPM" />
+                ),
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
-                children: sensor_hardware_version,
+                children: (
+                    <StringValueComponent value={sensor_hardware_version} />
+                ),
             },
             {
                 key: 'model_number',
                 label: 'Model number',
-                children: sensor_model_number,
+                children: <StringValueComponent value={sensor_model_number} />,
             },
             {
                 key: 'bootloader_version',
                 label: 'Bootloader bersion',
-                children: sensor_bootload_version,
+                children: (
+                    <StringValueComponent value={sensor_bootload_version} />
+                ),
             },
             {
                 key: 'serial_number',
                 label: 'Serial number',
-                children: sensor_serial_number,
+                children: <StringValueComponent value={sensor_serial_number} />,
             },
             {
                 key: 'customer_number',
                 label: 'Customer number',
-                children: sensor_customer_number,
+                children: (
+                    <StringValueComponent value={sensor_customer_number} />
+                ),
             },
             {
                 key: 'manufacturer',
                 label: 'Manufacturer',
-                children: sensor_manufacturer,
+                children: <StringValueComponent value={sensor_manufacturer} />,
             },
             {
                 key: 'software_version',
                 label: 'Software version',
-                children: sensor_software_version,
+                children: (
+                    <StringValueComponent value={sensor_software_version} />
+                ),
             },
         ];
     }
 
     getBesstItems(): DescriptionsProps['items'] {
-        const { connection } = this.props;
         const {
             besst_hardware_version,
             besst_software_version,
@@ -383,27 +534,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             {
                 key: 'software_version',
                 label: 'Software version',
-                children: besst_software_version, //TODO add editing
+                children: (
+                    <StringValueComponent value={besst_software_version} />
+                ), //TODO add editing
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
-                children: besst_hardware_version, //TODO add editing
+                children: (
+                    <StringValueComponent value={besst_hardware_version} />
+                ), //TODO add editing
             },
             {
                 key: 'serial_number',
                 label: 'Serial number',
-                children: besst_serial_number, //TODO add editing
+                children: <StringValueComponent value={besst_serial_number} />, //TODO add editing
             },
         ];
-    }
-
-    updateData(): void {
-        const { connection } = this.props;
-        this.setState({
-            ...connection.getDisplayState(),
-            lastUpdateTime: Date.now(),
-        });
     }
 
     updateRealtimeData(variables: any): void {
@@ -458,22 +605,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                             content: 'Loading...',
                         });
                         setTimeout(() => {
-                            const { lastUpdateTime } = this.state;
-                            if (Date.now() - lastUpdateTime < 3000) {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'success',
-                                    content: 'Read sucessfully!',
-                                    duration: 2,
-                                });
-                            } else {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'error',
-                                    content: 'Error during reading!',
-                                    duration: 2,
-                                });
-                            }
+                            //TODO
+                            // const { lastUpdateTime } = this.state;
+                            // if (Date.now() - lastUpdateTime < 3000) {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'success',
+                            //         content: 'Read sucessfully!',
+                            //         duration: 2,
+                            //     });
+                            // } else {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'error',
+                            //         content: 'Error during reading!',
+                            //         duration: 2,
+                            //     });
+                            // }
                         }, 3000);
                     }}
                 />

@@ -8,15 +8,15 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
 } from '../../../../device/BafangCanSystemTypes';
+import { NotLoadedYet } from '../../../../types/no_data';
+import NumberValueComponent from '../../../components/NumberValueComponent';
+import BooleanValueComponent from '../../../components/BooleanValueComponent';
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanControllerRealtime &
-    BafangCanControllerCodes & {
-        lastUpdateTime: number;
-    };
+type SettingsState = BafangCanControllerRealtime & BafangCanControllerCodes;
 
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
@@ -29,27 +29,26 @@ class BafangCanMotorSettingsView extends React.Component<
         const { connection } = this.props;
         this.state = {
             ...connection.getControllerCodes(),
-            controller_cadence: 0,
-            controller_torque: 0,
-            controller_speed: 0,
-            controller_current: 0,
-            controller_voltage: 0,
-            controller_temperature: 0,
-            controller_motor_temperature: 0,
-            controller_walk_assistance: false,
-            controller_calories: 0,
-            controller_remaining_capacity: 0,
-            controller_single_trip: 0,
-            controller_remaining_distance: 0,
-            lastUpdateTime: 0,
+            controller_cadence: NotLoadedYet,
+            controller_torque: NotLoadedYet,
+            controller_speed: NotLoadedYet,
+            controller_current: NotLoadedYet,
+            controller_voltage: NotLoadedYet,
+            controller_temperature: NotLoadedYet,
+            controller_motor_temperature: NotLoadedYet,
+            controller_walk_assistance: NotLoadedYet,
+            controller_calories: NotLoadedYet,
+            controller_remaining_capacity: NotLoadedYet,
+            controller_single_trip: NotLoadedYet,
+            controller_remaining_distance: NotLoadedYet,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateData = this.updateData.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.removeAllListeners('write-success');
-        connection.emitter.removeAllListeners('write-error');
-        connection.emitter.on('data', this.updateData);
+        connection.emitter.on(
+            'controller-data',
+            (data: BafangCanControllerCodes) => this.setState({ ...data }),
+        );
         connection.emitter.on(
             'broadcast-data-controller',
             this.updateRealtimeData,
@@ -75,62 +74,114 @@ class BafangCanMotorSettingsView extends React.Component<
             {
                 key: 'capacity_left',
                 label: 'Remaining capacity',
-                children: controller_remaining_capacity,
+                children: (
+                    <NumberValueComponent
+                        value={controller_remaining_capacity}
+                        unit="mAh"
+                    />
+                ),
             },
             {
                 key: 'remaining_trip',
                 label: 'Remaining trip distance',
-                children: controller_remaining_distance,
+                children: (
+                    <NumberValueComponent
+                        value={controller_remaining_distance}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'single_trip',
                 label: 'Last trip distance',
-                children: controller_single_trip,
+                children: (
+                    <NumberValueComponent
+                        value={controller_single_trip}
+                        unit="Km"
+                    />
+                ),
             },
             {
                 key: 'cadence',
                 label: 'Cadence',
-                children: controller_cadence,
+                children: (
+                    <NumberValueComponent
+                        value={controller_cadence}
+                        unit="RPM"
+                    />
+                ),
             },
             {
                 key: 'torque_value',
                 label: 'Torque value',
-                children: controller_torque,
+                children: (
+                    <NumberValueComponent value={controller_torque} unit="mV" />
+                ),
             },
             {
                 key: 'voltage',
                 label: 'Voltage',
-                children: controller_voltage,
+                children: (
+                    <NumberValueComponent value={controller_voltage} unit="V" />
+                ),
             },
             {
                 key: 'controller_temperature',
                 label: 'Controller temperature',
-                children: controller_temperature,
+                children: (
+                    <NumberValueComponent
+                        value={controller_temperature}
+                        unit="C°"
+                    />
+                ),
             },
             {
                 key: 'motor_temperature',
                 label: 'Motor temperature',
-                children: controller_motor_temperature,
+                children: (
+                    <NumberValueComponent
+                        value={controller_motor_temperature}
+                        unit="C°"
+                    />
+                ),
             },
             {
                 key: 'walk_assist',
                 label: 'Walk assist status',
-                children: controller_walk_assistance,
+                children: (
+                    <BooleanValueComponent
+                        value={controller_walk_assistance}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'calories',
                 label: 'Calories',
-                children: controller_calories,
+                children: (
+                    <NumberValueComponent
+                        value={controller_calories}
+                        unit="Cal."
+                    />
+                ),
             },
             {
                 key: 'current',
                 label: 'Current',
-                children: controller_current,
+                children: (
+                    <NumberValueComponent value={controller_current} unit="A" />
+                ),
             },
             {
                 key: 'speed',
                 label: 'Speed',
-                children: controller_speed,
+                children: (
+                    <NumberValueComponent
+                        value={controller_speed}
+                        unit="Km/H"
+                    />
+                ),
             },
         ];
     }
@@ -254,14 +305,6 @@ class BafangCanMotorSettingsView extends React.Component<
         ];
     }
 
-    updateData(): void {
-        const { connection } = this.props;
-        this.setState({
-            ...connection.getControllerCodes(),
-            lastUpdateTime: Date.now(),
-        });
-    }
-
     updateRealtimeData(variables: any): void {
         this.setState({ ...variables });
     }
@@ -304,22 +347,21 @@ class BafangCanMotorSettingsView extends React.Component<
                             content: 'Loading...',
                         });
                         setTimeout(() => {
-                            const { lastUpdateTime } = this.state;
-                            if (Date.now() - lastUpdateTime < 3000) {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'success',
-                                    content: 'Read sucessfully!',
-                                    duration: 2,
-                                });
-                            } else {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'error',
-                                    content: 'Error during reading!',
-                                    duration: 2,
-                                });
-                            }
+                            // if (Date.now() - lastUpdateTime < 3000) {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'success',
+                            //         content: 'Read sucessfully!',
+                            //         duration: 2,
+                            //     });
+                            // } else {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'error',
+                            //         content: 'Error during reading!',
+                            //         duration: 2,
+                            //     });
+                            // }
                         }, 3000);
                     }}
                 />

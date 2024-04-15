@@ -1,15 +1,16 @@
 import { Input, Tooltip } from 'antd';
 import React from 'react';
+import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type StringInputProps = {
-    value: string;
+    value: string | NoData;
     maxLength: number;
     onNewValue: (value: string) => void;
     errorOnEmpty?: boolean;
 };
 
 type StringInputState = {
-    value: string;
+    value: string | NoData;
     error: boolean;
 };
 
@@ -42,29 +43,47 @@ class StringInputComponent extends React.Component<
     render() {
         const { value, error } = this.state;
         const { onNewValue, maxLength, errorOnEmpty } = this.props;
-        return (
-            <Tooltip
-                title="This field should not be empty"
-                trigger="click"
-                open={error}
-            >
+        if (value === NotLoadedYet) {
+            return (
                 <Input
-                    value={value}
+                    value="Isn't readed yet"
                     style={{ minWidth: '150px' }}
-                    maxLength={maxLength}
-                    onChange={(e) => {
-                        const tmp = (errorOnEmpty &&
-                            e.target.value === '') as boolean;
-                        this.setState({
-                            value: e.target.value,
-                            error: tmp,
-                        });
-                        onNewValue(e.target.value);
-                    }}
-                    status={error ? 'error' : ''}
+                    disabled
                 />
-            </Tooltip>
-        );
+            );
+        } else if (value === NotAvailable) {
+            return (
+                <Input
+                    value="Not available on this hardware"
+                    style={{ minWidth: '150px' }}
+                    disabled
+                />
+            );
+        } else {
+            return (
+                <Tooltip
+                    title="This field should not be empty"
+                    trigger="click"
+                    open={error}
+                >
+                    <Input
+                        value={value as string}
+                        style={{ minWidth: '150px' }}
+                        maxLength={maxLength}
+                        onChange={(e) => {
+                            const tmp = (errorOnEmpty &&
+                                e.target.value === '') as boolean;
+                            this.setState({
+                                value: e.target.value,
+                                error: tmp,
+                            });
+                            onNewValue(e.target.value);
+                        }}
+                        status={error ? 'error' : ''}
+                    />
+                </Tooltip>
+            );
+        }
     }
 }
 

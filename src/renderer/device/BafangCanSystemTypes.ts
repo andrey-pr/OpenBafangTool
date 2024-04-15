@@ -1,18 +1,20 @@
 //TODO make all values nullable
 
+import { NoData } from "../types/no_data";
+
 export type BafangCanControllerRealtime = {
-    controller_cadence: number;
-    controller_torque: number;
-    controller_speed: number;
-    controller_current: number;
-    controller_voltage: number;
-    controller_temperature: number;
-    controller_motor_temperature: number;
-    controller_walk_assistance: boolean;
-    controller_calories: number;
-    controller_remaining_capacity: number;
-    controller_single_trip: number;
-    controller_remaining_distance: number;
+    controller_cadence: number | NoData;
+    controller_torque: number | NoData;
+    controller_speed: number | NoData;
+    controller_current: number | NoData;
+    controller_voltage: number | NoData;
+    controller_temperature: number | NoData;
+    controller_motor_temperature: number | NoData;
+    controller_walk_assistance: boolean | NoData;
+    controller_calories: number | NoData;
+    controller_remaining_capacity: number | NoData;
+    controller_single_trip: number | NoData;
+    controller_remaining_distance: number | NoData;
 };
 
 export type BafangCanAssistProfile = {
@@ -21,6 +23,8 @@ export type BafangCanAssistProfile = {
 };
 
 export type BafangCanSystemVoltage = 36 | 43 | 48;
+
+
 
 export enum BafangCanPedalSensorType {
     TorqueSensor = 0,
@@ -82,32 +86,32 @@ export type BafangCanControllerParameters1 = {
 };
 
 export type BafangCanControllerCodes = {
-    controller_hardware_version: string;
-    controller_software_version: string;
-    controller_model_number: string;
-    controller_serial_number: string;
-    controller_customer_number: string;
-    controller_manufacturer: string;
-    controller_bootload_version: string;
+    controller_hardware_version: string | NoData;
+    controller_software_version: string | NoData;
+    controller_model_number: string | NoData;
+    controller_serial_number: string | NoData;
+    controller_customer_number: string | NoData;
+    controller_manufacturer: string | NoData;
+    controller_bootload_version: string | NoData;
 };
 
 export type BafangCanDisplayCodes = {
-    display_hardware_version: string;
-    display_software_version: string;
-    display_model_number: string;
-    display_serial_number: string;
-    display_customer_number: string;
-    display_manufacturer: string;
-    display_bootload_version: string;
+    display_hardware_version: string | NoData;
+    display_software_version: string | NoData;
+    display_model_number: string | NoData;
+    display_serial_number: string | NoData;
+    display_customer_number: string | NoData;
+    display_manufacturer: string | NoData;
+    display_bootload_version: string | NoData;
 };
 
 export type BafangCanDisplayData = {
-    display_total_mileage: number;
-    display_single_mileage: number;
-    display_max_speed: number;
-    display_average_speed: number;
-    display_service_mileage: number;
-    display_last_shutdown_time: number;
+    display_total_mileage: number | NoData;
+    display_single_mileage: number | NoData;
+    display_max_speed: number | NoData;
+    display_average_speed: number | NoData;
+    display_service_mileage: number | NoData;
+    display_last_shutdown_time: number | NoData;
 };
 
 export enum BafangCanRideMode {
@@ -118,31 +122,31 @@ export enum BafangCanRideMode {
 export type BafangCanAssistLevel = 'walk' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type BafangCanDisplayState = {
-    display_assist_levels: number;
-    display_ride_mode: BafangCanRideMode;
-    display_boost: boolean;
-    display_current_assist_level: BafangCanAssistLevel;
-    display_light: boolean;
-    display_button: boolean;
+    display_assist_levels: number | NoData;
+    display_ride_mode: BafangCanRideMode | NoData;
+    display_boost: boolean | NoData;
+    display_current_assist_level: BafangCanAssistLevel | NoData;
+    display_light: boolean | NoData;
+    display_button: boolean | NoData;
 };
 
 export type BafangCanSensorRealtime = {
-    sensor_torque: number;
-    sensor_cadence: number;
+    sensor_torque: number | NoData;
+    sensor_cadence: number | NoData;
 };
 
 export type BafangCanSensorCodes = {
-    sensor_hardware_version: string;
-    sensor_software_version: string;
-    sensor_model_number: string;
-    sensor_serial_number: string;
-    sensor_customer_number: string;
-    sensor_manufacturer: string;
-    sensor_bootload_version: string;
+    sensor_hardware_version: string | NoData;
+    sensor_software_version: string | NoData;
+    sensor_model_number: string | NoData;
+    sensor_serial_number: string | NoData;
+    sensor_customer_number: string | NoData;
+    sensor_manufacturer: string | NoData;
+    sensor_bootload_version: string | NoData;
 };
 
 export type BafangBesstCodes = {
-    besst_hardware_version: string;
-    besst_software_version: string;
-    besst_serial_number: string;
+    besst_hardware_version: string | NoData;
+    besst_software_version: string | NoData;
+    besst_serial_number: string | NoData;
 };

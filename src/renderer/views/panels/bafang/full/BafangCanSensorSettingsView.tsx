@@ -8,15 +8,14 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../device/BafangCanSystemTypes';
+import NumberValueComponent from '../../../components/NumberValueComponent';
+import { NotLoadedYet } from '../../../../types/no_data';
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanSensorRealtime &
-    BafangCanSensorCodes & {
-        lastUpdateTime: number;
-    };
+type SettingsState = BafangCanSensorRealtime & BafangCanSensorCodes;
 
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
@@ -28,17 +27,15 @@ class BafangCanSensorSettingsView extends React.Component<
         const { connection } = this.props;
         this.state = {
             ...connection.getSensorCodes(),
-            sensor_torque: 0,
-            sensor_cadence: 0,
-            lastUpdateTime: 0,
+            sensor_torque: NotLoadedYet,
+            sensor_cadence: NotLoadedYet,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateData = this.updateData.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.removeAllListeners('write-success');
-        connection.emitter.removeAllListeners('write-error');
-        connection.emitter.on('data', this.updateData);
+        connection.emitter.on('sensor-data', (data: BafangCanSensorCodes) =>
+            this.setState({ ...data }),
+        );
         connection.emitter.on('broadcast-data-sensor', this.updateRealtimeData);
     }
 
@@ -48,12 +45,16 @@ class BafangCanSensorSettingsView extends React.Component<
             {
                 key: 'torque_value',
                 label: 'Torque value',
-                children: sensor_torque,
+                children: (
+                    <NumberValueComponent value={sensor_torque} unit="mV" />
+                ),
             },
             {
                 key: 'cadence',
                 label: 'Cadence',
-                children: sensor_cadence,
+                children: (
+                    <NumberValueComponent value={sensor_cadence} unit="RPM" />
+                ),
             },
         ];
     }
@@ -178,14 +179,6 @@ class BafangCanSensorSettingsView extends React.Component<
         ];
     }
 
-    updateData(): void {
-        const { connection } = this.props;
-        this.setState({
-            ...connection.getSensorCodes(),
-            lastUpdateTime: Date.now(),
-        });
-    }
-
     updateRealtimeData(variables: any): void {
         this.setState({ ...variables });
     }
@@ -228,22 +221,21 @@ class BafangCanSensorSettingsView extends React.Component<
                             content: 'Loading...',
                         });
                         setTimeout(() => {
-                            const { lastUpdateTime } = this.state;
-                            if (Date.now() - lastUpdateTime < 3000) {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'success',
-                                    content: 'Read sucessfully!',
-                                    duration: 2,
-                                });
-                            } else {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'error',
-                                    content: 'Error during reading!',
-                                    duration: 2,
-                                });
-                            }
+                            // if (Date.now() - lastUpdateTime < 3000) {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'success',
+                            //         content: 'Read sucessfully!',
+                            //         duration: 2,
+                            //     });
+                            // } else {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'error',
+                            //         content: 'Error during reading!',
+                            //         duration: 2,
+                            //     });
+                            // }
                         }, 3000);
                     }}
                 />

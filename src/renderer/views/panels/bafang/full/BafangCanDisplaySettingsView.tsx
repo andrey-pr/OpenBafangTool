@@ -20,6 +20,9 @@ import {
 import ParameterInputComponent from '../../../components/ParameterInput';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import NumberValueComponent from '../../../components/NumberValueComponent';
+import BooleanValueComponent from '../../../components/BooleanValueComponent';
+import StringValueComponent from '../../../components/StringValueComponent';
 
 dayjs.extend(customParseFormat);
 
@@ -30,7 +33,6 @@ type SettingsProps = {
 type SettingsState = BafangCanDisplayData &
     BafangCanDisplayState &
     BafangCanDisplayCodes & {
-        lastUpdateTime: number;
         currentTimeToSet: dayjs.Dayjs | null;
     };
 
@@ -46,18 +48,22 @@ class BafangCanDisplaySettingsView extends React.Component<
             ...connection.getDisplayData(),
             ...connection.getDisplayState(),
             ...connection.getDisplayCodes(),
-            lastUpdateTime: 0,
             currentTimeToSet: null,
         };
         this.getRecordsItems = this.getRecordsItems.bind(this);
         this.getStateItems = this.getStateItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateData = this.updateData.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.removeAllListeners('write-success');
-        connection.emitter.removeAllListeners('write-error');
-        connection.emitter.on('data', this.updateData);
+        connection.emitter.on('display-general-data', (data: BafangCanDisplayData) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('display-state-data', (data: BafangCanDisplayState) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('display-codes-data', (data: BafangCanDisplayCodes) =>
+            this.setState({ ...data }),
+        );
         connection.emitter.on(
             'broadcast-data-display',
             this.updateRealtimeData,
@@ -98,7 +104,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                         value={display_single_mileage}
                         unit="Km"
                         min={0}
-                        max={display_total_mileage}
+                        max={display_total_mileage as number}
                         decimalPlaces={1}
                         onNewValue={(e) => {
                             this.setState({
@@ -112,18 +118,20 @@ class BafangCanDisplaySettingsView extends React.Component<
                 key: 'max_speed',
                 label: 'Speed record',
                 children: (
-                    <>
-                        {display_max_speed} {'Km/H'}
-                    </>
+                    <NumberValueComponent
+                        value={display_max_speed}
+                        unit="Km/H"
+                    />
                 ),
             },
             {
                 key: 'average_speed',
                 label: 'Average speed',
                 children: (
-                    <>
-                        {display_average_speed} {'Km/H'}
-                    </>
+                    <NumberValueComponent
+                        value={display_average_speed}
+                        unit="Km/H"
+                    />
                 ),
             },
             {
@@ -131,8 +139,10 @@ class BafangCanDisplaySettingsView extends React.Component<
                 label: 'Mileage since last service',
                 children: (
                     <>
-                        {display_service_mileage}
-                        {' Km'}
+                        <NumberValueComponent
+                            value={display_service_mileage}
+                            unit="Km"
+                        />
                         <br />
                         <br />
                         <Popconfirm
@@ -189,7 +199,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                             title="Set new time on display"
                             description={`Are you sure to set new time on display clock?`}
                             onConfirm={() => {
-                                if (this.state.currentTimeToSet == null) {
+                                if (this.state.currentTimeToSet === null) {
                                     message.error(
                                         'Time in input form is not chosen',
                                     );
@@ -249,32 +259,52 @@ class BafangCanDisplaySettingsView extends React.Component<
             {
                 key: 'total_assist_levels',
                 label: 'Total assist level number',
-                children: display_assist_levels,
+                children: (
+                    <NumberValueComponent value={display_assist_levels} />
+                ),
             },
             {
                 key: 'ride_mode',
                 label: 'Ride mode',
-                children: display_ride_mode,
+                children: <NumberValueComponent value={display_ride_mode} />,
             },
             {
                 key: 'boost',
                 label: 'Boost',
-                children: display_boost ? 'true' : 'false',
+                children: (
+                    <BooleanValueComponent
+                        value={display_boost}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'current_assist_level',
                 label: 'Current assist level',
-                children: display_current_assist_level,
+                children: <StringValueComponent value={`${display_current_assist_level}`}/>,
             },
             {
                 key: 'light',
                 label: 'Light',
-                children: display_light ? 'true' : 'false',
+                children: (
+                    <BooleanValueComponent
+                        value={display_light}
+                        textTrue="On"
+                        textFalse="Off"
+                    />
+                ),
             },
             {
                 key: 'button_pressed',
                 label: 'Button pressed',
-                children: display_button ? 'true' : 'false',
+                children: (
+                    <BooleanValueComponent
+                        value={display_button}
+                        textTrue="Pressed"
+                        textFalse="Not pressed"
+                    />
+                ),
             },
         ];
     }
@@ -398,16 +428,6 @@ class BafangCanDisplaySettingsView extends React.Component<
         ];
     }
 
-    updateData(): void {
-        const { connection } = this.props;
-        this.setState({
-            ...connection.getDisplayData(),
-            ...connection.getDisplayState(),
-            ...connection.getDisplayCodes(),
-            lastUpdateTime: Date.now(),
-        });
-    }
-
     updateRealtimeData(variables: any): void {
         this.setState({ ...variables });
     }
@@ -457,22 +477,21 @@ class BafangCanDisplaySettingsView extends React.Component<
                             content: 'Loading...',
                         });
                         setTimeout(() => {
-                            const { lastUpdateTime } = this.state;
-                            if (Date.now() - lastUpdateTime < 3000) {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'success',
-                                    content: 'Read sucessfully!',
-                                    duration: 2,
-                                });
-                            } else {
-                                message.open({
-                                    key: 'loading',
-                                    type: 'error',
-                                    content: 'Error during reading!',
-                                    duration: 2,
-                                });
-                            }
+                            // if (Date.now() - lastUpdateTime < 3000) {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'success',
+                            //         content: 'Read sucessfully!',
+                            //         duration: 2,
+                            //     });
+                            // } else {
+                            //     message.open({
+                            //         key: 'loading',
+                            //         type: 'error',
+                            //         content: 'Error during reading!',
+                            //         duration: 2,
+                            //     });
+                            // }
                         }, 3000);
                     }}
                 />
@@ -483,11 +502,11 @@ class BafangCanDisplaySettingsView extends React.Component<
                     okText="Yes"
                     cancelText="No"
                 >
-                <FloatButton
-                    icon={<DeliveredProcedureOutlined />}
-                    type="primary"
-                    style={{ right: 24 }}
-                />
+                    <FloatButton
+                        icon={<DeliveredProcedureOutlined />}
+                        type="primary"
+                        style={{ right: 24 }}
+                    />
                 </Popconfirm>
             </div>
         );
