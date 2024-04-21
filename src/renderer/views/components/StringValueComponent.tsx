@@ -2,7 +2,7 @@ import React from 'react';
 import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type StringValueProps = {
-    value: string | NoData;
+    value: string | number | NoData;
 };
 
 class StringValueComponent extends React.Component<StringValueProps> {

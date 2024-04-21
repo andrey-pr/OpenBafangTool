@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type BooleanValueProps = {
-    value: boolean | NoData;
+    value: boolean | number | NoData;
     textTrue?: string;
     textFalse?: string;
 };
@@ -20,6 +20,10 @@ class BooleanValueComponent extends React.Component<BooleanValueProps> {
 
     render() {
         const { value, textTrue, textFalse } = this.props;
+        let castedValue = value;
+        if (typeof value == 'number') {
+            castedValue = value !== 0 ? true : false; //unfortunatelly, direct cast from number to boolean in typescript works not ideally
+        }
         if (value === NotLoadedYet) {
             return <>Isn't readed yet</>;
         } else if (value === NotAvailable) {
@@ -28,13 +32,9 @@ class BooleanValueComponent extends React.Component<BooleanValueProps> {
             return (
                 <>
                     {value ? (
-                        <Typography.Text strong>
-                            {textTrue}
-                        </Typography.Text>
+                        <Typography.Text strong>{textTrue}</Typography.Text>
                     ) : (
-                        <Typography.Text strong>
-                            {textFalse}
-                        </Typography.Text>
+                        <Typography.Text strong>{textFalse}</Typography.Text>
                     )}
                 </>
             );

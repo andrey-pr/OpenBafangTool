@@ -108,7 +108,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             controller_single_trip,
             controller_remaining_distance,
         } = this.state;
-        console.log(controller_speed);
         return [
             {
                 key: 'capacity_left',
@@ -295,7 +294,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             display_average_speed,
             display_service_mileage,
         } = this.state;
-        console.log(display_total_mileage);
         return [
             {
                 key: 'assist_levels_number',
@@ -309,7 +307,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 label: 'Mode',
                 children: (
                     <BooleanValueComponent
-                        value={display_ride_mode === 1}
+                        value={display_ride_mode}
                         textTrue="SPORT"
                         textFalse="ECO"
                     />
@@ -329,7 +327,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             {
                 key: 'current_assist_level',
                 label: 'Current assist',
-                children: <StringValueComponent value={`${display_current_assist_level}`}/>
+                children: <StringValueComponent value={display_current_assist_level}/>
             },
             {
                 key: 'light',
