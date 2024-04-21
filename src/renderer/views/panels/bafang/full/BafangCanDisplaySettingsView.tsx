@@ -55,14 +55,17 @@ class BafangCanDisplaySettingsView extends React.Component<
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.on('display-general-data', (data: BafangCanDisplayData) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'display-general-data',
+            (data: BafangCanDisplayData) => this.setState({ ...data }),
         );
-        connection.emitter.on('display-state-data', (data: BafangCanDisplayState) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'display-state-data',
+            (data: BafangCanDisplayState) => this.setState({ ...data }),
         );
-        connection.emitter.on('display-codes-data', (data: BafangCanDisplayCodes) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'display-codes-data',
+            (data: BafangCanDisplayCodes) => this.setState({ ...data }),
         );
         connection.emitter.on(
             'broadcast-data-display',
@@ -262,11 +265,13 @@ class BafangCanDisplaySettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={display_assist_levels} />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'ride_mode',
                 label: 'Ride mode',
                 children: <NumberValueComponent value={display_ride_mode} />,
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'boost',
@@ -278,11 +283,17 @@ class BafangCanDisplaySettingsView extends React.Component<
                         textFalse="Off"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'current_assist_level',
                 label: 'Current assist level',
-                children: <StringValueComponent value={`${display_current_assist_level}`}/>,
+                children: (
+                    <StringValueComponent
+                        value={`${display_current_assist_level}`}
+                    />
+                ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'light',
@@ -294,6 +305,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                         textFalse="Off"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'button_pressed',
@@ -305,6 +317,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                         textFalse="Not pressed"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
         ];
     }

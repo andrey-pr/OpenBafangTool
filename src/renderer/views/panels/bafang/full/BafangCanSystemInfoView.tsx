@@ -301,6 +301,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 children: (
                     <NumberValueComponent value={display_assist_levels} />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'eco_sport_mode',
@@ -312,6 +313,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         textFalse="ECO"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'boost',
@@ -323,11 +325,13 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         textFalse="Off"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'current_assist_level',
                 label: 'Current assist',
-                children: <StringValueComponent value={display_current_assist_level}/>
+                children: <StringValueComponent value={display_current_assist_level}/>,
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'light',
@@ -350,6 +354,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         textFalse="Not pressed"
                     />
                 ), // pressed or released
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'total_mileage',

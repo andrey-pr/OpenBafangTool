@@ -80,6 +80,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="mAh"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'remaining_trip',
@@ -90,6 +91,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="Km"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'single_trip',
@@ -100,6 +102,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="Km"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'cadence',
@@ -110,6 +113,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="RPM"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'torque_value',
@@ -117,6 +121,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={controller_torque} unit="mV" />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'voltage',
@@ -124,6 +129,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={controller_voltage} unit="V" />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'controller_temperature',
@@ -134,6 +140,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="C°"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'motor_temperature',
@@ -144,6 +151,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="C°"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'walk_assist',
@@ -155,6 +163,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         textFalse="Off"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'calories',
@@ -165,6 +174,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="Cal."
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'current',
@@ -172,6 +182,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={controller_current} unit="A" />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'speed',
@@ -182,6 +193,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="Km/H"
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
         ];
     }

@@ -48,6 +48,7 @@ class BafangCanSensorSettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={sensor_torque} unit="mV" />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'cadence',
@@ -55,6 +56,7 @@ class BafangCanSensorSettingsView extends React.Component<
                 children: (
                     <NumberValueComponent value={sensor_cadence} unit="RPM" />
                 ),
+                contentStyle: { width: '50%' },
             },
         ];
     }
