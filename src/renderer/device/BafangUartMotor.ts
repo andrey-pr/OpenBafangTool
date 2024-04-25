@@ -18,7 +18,7 @@ import {
     checkInfo,
     checkPedalParameters,
     checkThrottleParameters,
-} from './BafangUartMotorTypes';
+} from '../types/BafangUartMotorTypes';
 import IConnection from './Connection';
 import { closePort, openPort, writeToPort } from '../../device/port';
 

@@ -16,7 +16,7 @@ import {
     BafangCanDisplayCodes,
     BafangCanDisplayData,
     BafangCanDisplayState,
-} from '../../../../device/BafangCanSystemTypes';
+} from '../../../../types/BafangCanSystemTypes';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -45,23 +45,18 @@ class BafangCanDisplaySettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.getDisplayData(),
-            ...connection.getDisplayState(),
-            ...connection.getDisplayCodes(),
+            ...connection.displayData,
+            ...connection.displayState,
+            ...connection.displayCodes,
             currentTimeToSet: null,
         };
         this.getRecordsItems = this.getRecordsItems.bind(this);
         this.getStateItems = this.getStateItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.on(
             'display-general-data',
             (data: BafangCanDisplayData) => this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'display-state-data',
-            (data: BafangCanDisplayState) => this.setState({ ...data }),
         );
         connection.emitter.on(
             'display-codes-data',
@@ -69,7 +64,7 @@ class BafangCanDisplaySettingsView extends React.Component<
         );
         connection.emitter.on(
             'broadcast-data-display',
-            this.updateRealtimeData,
+            (data) => this.setState({ ...data }),
         );
     }
 
@@ -270,7 +265,13 @@ class BafangCanDisplaySettingsView extends React.Component<
             {
                 key: 'ride_mode',
                 label: 'Ride mode',
-                children: <NumberValueComponent value={display_ride_mode} />,
+                children: (
+                    <BooleanValueComponent
+                        value={display_ride_mode}
+                        textTrue="SPORT"
+                        textFalse="ECO"
+                    />
+                ),
                 contentStyle: { width: '50%' },
             },
             {
@@ -439,10 +440,6 @@ class BafangCanDisplaySettingsView extends React.Component<
                 ),
             },
         ];
-    }
-
-    updateRealtimeData(variables: any): void {
-        this.setState({ ...variables });
     }
 
     saveParameters(): void {

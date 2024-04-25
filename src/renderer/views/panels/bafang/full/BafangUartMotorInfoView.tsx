@@ -3,7 +3,7 @@ import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import BafangUartMotor from '../../../../device/BafangUartMotor';
-import { BafangUartMotorInfo } from '../../../../device/BafangUartMotorTypes';
+import { BafangUartMotorInfo } from '../../../../types/BafangUartMotorTypes';
 
 type InfoProps = {
     connection: BafangUartMotor;

@@ -8,6 +8,7 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerParameters1,
     BafangCanControllerRealtime,
+    BafangCanControllerSpeedParameters,
     BafangCanDisplayCodes,
     BafangCanDisplayData,
     BafangCanDisplayState,
@@ -17,126 +18,19 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
-} from './BafangCanSystemTypes';
+    BafangCanWheelDiameterTable,
+} from '../types/BafangCanSystemTypes';
 import HID from 'node-hid';
-import { NotAvailable, NotLoadedYet } from '../types/no_data';
+import { NotLoadedYet } from '../types/no_data';
+import { CanOperation, DeviceNetworkId, BesstRequestType, CanCommandsList } from '../constants/BafangCanConstants';
+import { decodeCurrentAssistLevel, hexMsgDecoder } from '../utils/BafangCanUtils';
 
-enum PacketType {
-    CAN_REQUEST = 0x15,
-    CAN_RESPONSE = 0x12,
-    BESST_HW = 0x30,
-    BESST_SN = 0x31,
-    BESST_SW = 0x32,
-    BESST_RESET = 0x39,
-}
 
-enum CanOperation {
-    WRITE_CMD = 0x00,
-    READ_CMD = 0x01,
-    NORMAL_ACK = 0x02,
-    ERROR_ACK = 0x03,
-    LONG_START_CMD = 0x04,
-    LONG_TRANG_CMD = 0x05,
-    LONG_END_CMD = 0x06,
-    LONG_WARNING_CMD = 0x07,
-}
-
-enum DeviceNetworkId {
-    TORQUE_SENSOR = 0x01,
-    DRIVE_UNIT = 0x02,
-    DISPLAY = 0x03,
-    BESST = 0x05,
-    BROADCAST = 0x1f,
-}
-
-type CanCommand = {
-    canCommandCode: number;
-    canCommandSubCode: number;
-    applicableDevices: DeviceNetworkId[];
-};
-
-const CanCommandsList: {
-    [key: string]: CanCommand;
-} = {
-    HardwareVersion: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x00,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    SoftwareVersion: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x01,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    ModelNumber: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x02,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    SerialNumber: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x03,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    CustomerNumber: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x04,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    Manufacturer: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x05,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    BootloaderVersion: {
-        canCommandCode: 0x60,
-        canCommandSubCode: 0x08,
-        applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
-            DeviceNetworkId.DISPLAY,
-        ],
-    },
-    DisplayDataBlock1: {
-        canCommandCode: 0x63,
-        canCommandSubCode: 0x01,
-        applicableDevices: [DeviceNetworkId.DISPLAY],
-    },
-    DisplayDataBlock2: {
-        canCommandCode: 0x63,
-        canCommandSubCode: 0x02,
-        applicableDevices: [DeviceNetworkId.DISPLAY],
-    },
-};
 
 type BesstRequestPacket = {
     data: number[];
     interval: number;
-    type: PacketType;
+    type: BesstRequestType;
 };
 
 type BesstCanResponsePacket = {
@@ -172,25 +66,27 @@ export default class BafangCanSystem implements IConnection {
 
     private sensorRealtimeData: BafangCanSensorRealtime;
 
-    private controllerParameters1: BafangCanControllerParameters1;
+    private _controllerParameters1: BafangCanControllerParameters1;
 
-    private displayData: BafangCanDisplayData;
+    private _controllerSpeedParameters: BafangCanControllerSpeedParameters;
 
-    private displayState: BafangCanDisplayState;
+    private _displayData: BafangCanDisplayData;
 
-    private controllerCodes: BafangCanControllerCodes;
+    private _displayState: BafangCanDisplayState;
 
-    private displayCodes: BafangCanDisplayCodes;
+    private _controllerCodes: BafangCanControllerCodes;
 
-    private sensorCodes: BafangCanSensorCodes;
+    private _displayCodes: BafangCanDisplayCodes;
 
-    private besstCodes: BafangBesstCodes;
+    private _sensorCodes: BafangCanSensorCodes;
+
+    private _besstCodes: BafangBesstCodes;
 
     private packetQueue: BesstRequestPacket[] = [];
 
-    private lastWrittenPacket: BesstRequestPacket | undefined;
-
-    private lastMultipacketCanCommand: BesstCanResponsePacket | null = null;
+    private lastMultipacketCanCommand: {
+        [key: number]: BesstCanResponsePacket;
+    } = [];
 
     private packetQueueBlockTime: number = 0;
 
@@ -215,7 +111,7 @@ export default class BafangCanSystem implements IConnection {
             sensor_torque: NotLoadedYet,
             sensor_cadence: NotLoadedYet,
         };
-        this.controllerParameters1 = {
+        this._controllerParameters1 = {
             controller_system_voltage: 36,
             controller_current_limit: 0,
             controller_overvoltage: 0,
@@ -258,7 +154,12 @@ export default class BafangCanSystem implements IConnection {
             controller_displayless_mode: false,
             controller_lamps_always_on: false,
         };
-        this.displayData = {
+        this._controllerSpeedParameters = {
+            controller_wheel_diameter: NotLoadedYet,
+            controller_speed_limit: NotLoadedYet,
+            controller_circumference: NotLoadedYet,
+        };
+        this._displayData = {
             display_total_mileage: NotLoadedYet,
             display_single_mileage: NotLoadedYet,
             display_max_speed: NotLoadedYet,
@@ -266,7 +167,7 @@ export default class BafangCanSystem implements IConnection {
             display_service_mileage: NotLoadedYet,
             display_last_shutdown_time: NotLoadedYet,
         };
-        this.displayState = {
+        this._displayState = {
             display_assist_levels: NotLoadedYet,
             display_ride_mode: NotLoadedYet,
             display_boost: NotLoadedYet,
@@ -274,7 +175,7 @@ export default class BafangCanSystem implements IConnection {
             display_light: NotLoadedYet,
             display_button: NotLoadedYet,
         };
-        this.controllerCodes = {
+        this._controllerCodes = {
             controller_hardware_version: NotLoadedYet,
             controller_software_version: NotLoadedYet,
             controller_model_number: NotLoadedYet,
@@ -283,7 +184,7 @@ export default class BafangCanSystem implements IConnection {
             controller_manufacturer: NotLoadedYet,
             controller_bootload_version: NotLoadedYet,
         };
-        this.displayCodes = {
+        this._displayCodes = {
             display_hardware_version: NotLoadedYet,
             display_software_version: NotLoadedYet,
             display_model_number: NotLoadedYet,
@@ -292,7 +193,7 @@ export default class BafangCanSystem implements IConnection {
             display_manufacturer: NotLoadedYet,
             display_bootload_version: NotLoadedYet,
         };
-        this.sensorCodes = {
+        this._sensorCodes = {
             sensor_hardware_version: NotLoadedYet,
             sensor_software_version: NotLoadedYet,
             sensor_model_number: NotLoadedYet,
@@ -301,7 +202,7 @@ export default class BafangCanSystem implements IConnection {
             sensor_manufacturer: NotLoadedYet,
             sensor_bootload_version: NotLoadedYet,
         };
-        this.besstCodes = {
+        this._besstCodes = {
             besst_hardware_version: NotLoadedYet,
             besst_software_version: NotLoadedYet,
             besst_serial_number: NotLoadedYet,
@@ -313,7 +214,7 @@ export default class BafangCanSystem implements IConnection {
         this.processRequestQueue = this.processRequestQueue.bind(this);
         // this.processResponseBesstPacket =
         //     this.processResponseBesstPacket.bind(this);
-        this.processResponsePacket = this.processResponsePacket.bind(this);
+        this.processBesstResponsePacket = this.processBesstResponsePacket.bind(this);
         this.processResponseCanPacket =
             this.processResponseCanPacket.bind(this);
         this.processParsedCanResponse =
@@ -321,12 +222,11 @@ export default class BafangCanSystem implements IConnection {
     }
 
     private simulationDataPublisher(): void {
-        this.sensorRealtimeData.sensor_torque++;
         this.emitter.emit('broadcast-data-controller', {
             ...this.controllerRealtimeData,
         });
         this.emitter.emit('broadcast-data-display', {
-            ...this.displayState,
+            ...this._displayState,
         });
         this.emitter.emit('broadcast-data-sensor', {
             ...this.sensorRealtimeData,
@@ -334,22 +234,18 @@ export default class BafangCanSystem implements IConnection {
     }
 
     private simulationRealtimeDataGenerator(): void {
-        this.displayState = {
+        this._displayState = {
             display_assist_levels: 5,
             display_ride_mode: BafangCanRideMode.ECO,
             display_boost: false,
             display_current_assist_level:
-                this.displayState.display_current_assist_level === 'walk'
+                this._displayState.display_current_assist_level === 'walk'
                     ? 5
                     : 'walk',
-            display_light: !this.displayState.display_light,
-            display_button: !this.displayState.display_button,
+            display_light: !this._displayState.display_light,
+            display_button: !this._displayState.display_button,
         };
-    }
-
-    public static filterHidDevices(devices: HID.Device[]): HID.Device[] {
-        return devices.filter((device) => device.product === 'BaFang Besst');
-    }
+    }    
 
     private static buildCanCommandSubpacket(
         source: number,
@@ -383,16 +279,16 @@ export default class BafangCanSystem implements IConnection {
         msg = [...msg, ...new Array(65 - msg.length).fill(0)];
         let interval;
         switch (actionCode) {
-            case PacketType.BESST_HW:
-            case PacketType.BESST_SW:
-            case PacketType.BESST_SN:
-                interval = 150;
+            case BesstRequestType.BESST_HW:
+            case BesstRequestType.BESST_SW:
+            case BesstRequestType.BESST_SN:
+                interval = 90;
                 break;
-            case PacketType.CAN_REQUEST:
-                interval = 300;
+            case BesstRequestType.CAN_REQUEST:
+                interval = 120;
                 break;
-            case PacketType.BESST_RESET:
-                interval = 3000;
+            case BesstRequestType.BESST_RESET:
+                interval = 5000;
                 break;
             default:
                 interval = 1000;
@@ -428,13 +324,6 @@ export default class BafangCanSystem implements IConnection {
         return packets;
     }
 
-    private static hexMsgDecoder(msg: number[]) {
-        return String.fromCharCode.apply(
-            null,
-            msg.slice(4, 4 + msg[3]).filter((value) => value != 0),
-        );
-    }
-
     private processRequestQueue(): void {
         if (this.packetQueue.length === 0) {
             setTimeout(this.processRequestQueue, 100);
@@ -449,41 +338,39 @@ export default class BafangCanSystem implements IConnection {
         }
         let packet = this.packetQueue.shift() as BesstRequestPacket;
         this.device?.write(packet.data);
-        this.lastWrittenPacket = packet;
         this.packetQueueBlockTime = Date.now() + packet.interval;
         setTimeout(this.processRequestQueue, packet.interval + 10);
     }
 
-    private processResponsePacket(data: Uint8Array): void {
+    private processBesstResponsePacket(data: Uint8Array): void {
         if (data.length === 0) return;
         let array: number[] = [...data];
-        // console.log('New data from device ', array);Z
         switch (array[0]) {
             case 0x10:
             case 0x11:
                 console.log('UART bike connected - its not supported');
                 break;
-            case PacketType.CAN_RESPONSE:
+            case BesstRequestType.CAN_RESPONSE:
                 BafangCanSystem.parseCanResponseFromBesst(array).forEach(
                     this.processResponseCanPacket,
                 );
                 break;
-            case PacketType.BESST_HW:
-                this.besstCodes.besst_hardware_version =
-                    BafangCanSystem.hexMsgDecoder(array);
-                this.emitter.emit('besst-data', { ...this.besstCodes });
+            case BesstRequestType.BESST_HW:
+                this._besstCodes.besst_hardware_version =
+                    hexMsgDecoder(array);
+                this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
-            case PacketType.BESST_SN:
-                this.besstCodes.besst_serial_number =
-                    BafangCanSystem.hexMsgDecoder(array);
-                this.emitter.emit('besst-data', { ...this.besstCodes });
+            case BesstRequestType.BESST_SN:
+                this._besstCodes.besst_serial_number =
+                    hexMsgDecoder(array);
+                this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
-            case PacketType.BESST_SW:
-                this.besstCodes.besst_software_version =
-                    BafangCanSystem.hexMsgDecoder(array);
-                this.emitter.emit('besst-data', { ...this.besstCodes });
+            case BesstRequestType.BESST_SW:
+                this._besstCodes.besst_software_version =
+                    hexMsgDecoder(array);
+                this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
-            case PacketType.BESST_RESET:
+            case BesstRequestType.BESST_RESET:
                 break;
             default:
                 console.log('Unknown message type - not supperted yet');
@@ -495,99 +382,121 @@ export default class BafangCanSystem implements IConnection {
         if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
             switch (packet.canOperationCode) {
                 case CanOperation.LONG_START_CMD:
-                    console.log(packet);
-                    this.lastMultipacketCanCommand = packet;
-                    this.lastMultipacketCanCommand.data = [];
-                    console.log(this.lastMultipacketCanCommand);
+                    this.lastMultipacketCanCommand[packet.sourceDeviceCode] =
+                        packet;
+                    this.lastMultipacketCanCommand[
+                        packet.sourceDeviceCode
+                    ].data = [];
                     this.packetQueue.unshift(
                         BafangCanSystem.generateBesstRequestPacket(
-                            PacketType.CAN_REQUEST,
+                            BesstRequestType.CAN_REQUEST,
                             BafangCanSystem.buildCanCommandSubpacket(
-                                this.lastMultipacketCanCommand.targetDeviceCode,
-                                this.lastMultipacketCanCommand.sourceDeviceCode,
+                                this.lastMultipacketCanCommand[
+                                    packet.sourceDeviceCode
+                                ].targetDeviceCode,
+                                this.lastMultipacketCanCommand[
+                                    packet.sourceDeviceCode
+                                ].sourceDeviceCode,
                                 CanOperation.NORMAL_ACK,
-                                this.lastMultipacketCanCommand.canCommandCode,
-                                this.lastMultipacketCanCommand
-                                    .canCommandSubCode,
+                                this.lastMultipacketCanCommand[
+                                    packet.sourceDeviceCode
+                                ].canCommandCode,
+                                this.lastMultipacketCanCommand[
+                                    packet.sourceDeviceCode
+                                ].canCommandSubCode,
                             ),
                         ),
                     );
-                    console.log(this.packetQueue);
                     break;
                 case CanOperation.LONG_TRANG_CMD:
                     //reading data
-                    if (this.lastMultipacketCanCommand != null) {
-                        this.lastMultipacketCanCommand.data = [
-                            ...this.lastMultipacketCanCommand.data,
+                    if (
+                        this.lastMultipacketCanCommand[packet.sourceDeviceCode]
+                    ) {
+                        this.lastMultipacketCanCommand[
+                            packet.sourceDeviceCode
+                        ].data = [
+                            ...this.lastMultipacketCanCommand[
+                                packet.sourceDeviceCode
+                            ].data,
                             ...packet.data,
                         ];
                         this.packetQueue.unshift(
                             BafangCanSystem.generateBesstRequestPacket(
-                                PacketType.CAN_REQUEST,
+                                BesstRequestType.CAN_REQUEST,
                                 BafangCanSystem.buildCanCommandSubpacket(
-                                    this.lastMultipacketCanCommand
-                                        .targetDeviceCode,
-                                    this.lastMultipacketCanCommand
-                                        .sourceDeviceCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].targetDeviceCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].sourceDeviceCode,
                                     CanOperation.NORMAL_ACK,
-                                    this.lastMultipacketCanCommand
-                                        .canCommandCode,
-                                    this.lastMultipacketCanCommand
-                                        .canCommandSubCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].canCommandCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].canCommandSubCode,
                                 ),
                             ),
                         );
                     }
                     break;
                 case CanOperation.LONG_END_CMD:
-                    if (this.lastMultipacketCanCommand != null) {
-                        this.lastMultipacketCanCommand.data = [
-                            ...this.lastMultipacketCanCommand.data,
+                    if (
+                        this.lastMultipacketCanCommand[packet.sourceDeviceCode]
+                    ) {
+                        this.lastMultipacketCanCommand[
+                            packet.sourceDeviceCode
+                        ].data = [
+                            ...this.lastMultipacketCanCommand[
+                                packet.sourceDeviceCode
+                            ].data,
                             ...packet.data,
                         ];
                         this.processParsedCanResponse(
-                            this.lastMultipacketCanCommand,
-                        );
-                        console.log(
-                            '[CAN LONG RESPONSE] ',
-                            JSON.stringify(this.lastMultipacketCanCommand),
+                            this.lastMultipacketCanCommand[
+                                packet.sourceDeviceCode
+                            ],
                         );
                         this.packetQueue.unshift(
                             BafangCanSystem.generateBesstRequestPacket(
-                                PacketType.CAN_REQUEST,
+                                BesstRequestType.CAN_REQUEST,
                                 BafangCanSystem.buildCanCommandSubpacket(
-                                    this.lastMultipacketCanCommand
-                                        .targetDeviceCode,
-                                    this.lastMultipacketCanCommand
-                                        .sourceDeviceCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].targetDeviceCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].sourceDeviceCode,
                                     CanOperation.NORMAL_ACK,
-                                    this.lastMultipacketCanCommand
-                                        .canCommandCode,
-                                    this.lastMultipacketCanCommand
-                                        .canCommandSubCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].canCommandCode,
+                                    this.lastMultipacketCanCommand[
+                                        packet.sourceDeviceCode
+                                    ].canCommandSubCode,
                                 ),
                             ),
                         );
-                        this.lastMultipacketCanCommand = null;
+                        delete this.lastMultipacketCanCommand[
+                            packet.sourceDeviceCode
+                        ];
                     }
                     break;
                 case CanOperation.NORMAL_ACK:
                     this.processParsedCanResponse(packet);
-                    console.log(
-                        '[CAN NORMAL RESPONSE] ',
-                        JSON.stringify(packet),
-                    );
                     break;
                 default:
                     break;
             }
         } else if (
-            packet.targetDeviceCode === 0x02 &&
-            packet.sourceDeviceCode === 0x03
+            packet.targetDeviceCode === DeviceNetworkId.DRIVE_UNIT &&
+            packet.sourceDeviceCode === DeviceNetworkId.DISPLAY
         ) {
             switch (packet.canOperationCode) {
                 case CanOperation.WRITE_CMD:
-                    console.log('[CAN INNER COMMAND] ', packet);
                     this.processParsedCanResponse(packet);
                     break;
                 default:
@@ -596,127 +505,169 @@ export default class BafangCanSystem implements IConnection {
         }
     }
 
-    private static getCurrentAssistLevel(
-        currentAssistLevelCode: number,
-        totalAssistLevels: number,
-    ): BafangCanAssistLevel {
-        let assistLevelTable: {
-            [key: number]: { [key: number]: BafangCanAssistLevel };
-        } = {
-            3: { 0: 0, 12: 1, 2: 2, 3: 3, 6: 'walk' },
-            4: { 0: 0, 1: 1, 12: 2, 21: 3, 3: 4, 6: 'walk' },
-            5: { 0: 0, 11: 1, 13: 2, 21: 3, 23: 4, 3: 5, 6: 'walk' },
-            9: {
-                0: 0,
-                1: 1,
-                11: 2,
-                12: 3,
-                13: 4,
-                2: 5,
-                21: 6,
-                22: 7,
-                23: 8,
-                3: 9,
-                6: 'walk',
-            },
-        };
-        if (
-            (totalAssistLevels <= 3 || totalAssistLevels >= 5) &&
-            totalAssistLevels != 9
-        ) {
-            totalAssistLevels = 5;
-        }
-        return assistLevelTable[totalAssistLevels][currentAssistLevelCode];
-    }
-
     private processParsedCanResponse(response: BesstCanResponsePacket) {
-        console.log(response.data);
         if (response.canCommandCode == 0x60) {
-            switch (response.canCommandSubCode) {
-                case 0x00:
-                    this.displayCodes.display_hardware_version =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x01:
-                    this.displayCodes.display_software_version =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x02:
-                    this.displayCodes.display_model_number =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x03:
-                    this.displayCodes.display_serial_number =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x04:
-                    this.displayCodes.display_customer_number =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x05:
-                    this.displayCodes.display_manufacturer =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                case 0x08:
-                    this.displayCodes.display_bootload_version =
-                        String.fromCharCode.apply(null, response.data);
-                    break;
-                default:
-                    break;
+            if (response.sourceDeviceCode == DeviceNetworkId.DISPLAY) {
+                switch (response.canCommandSubCode) {
+                    case 0x00:
+                        this._displayCodes.display_hardware_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x01:
+                        this._displayCodes.display_software_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x02:
+                        this._displayCodes.display_model_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x03:
+                        this._displayCodes.display_serial_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x04:
+                        this._displayCodes.display_customer_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x05:
+                        this._displayCodes.display_manufacturer =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x08:
+                        this._displayCodes.display_bootload_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    default:
+                        break;
+                }
+                this.emitter.emit('display-codes-data', {
+                    ...this._displayCodes,
+                });
             }
-            this.emitter.emit('display-codes-data', {
-                ...this.displayCodes,
-            });
-        } else if (response.canCommandCode == 0x63) {
+            else if (response.sourceDeviceCode == DeviceNetworkId.DRIVE_UNIT) {
+                switch (response.canCommandSubCode) {
+                    case 0x00:
+                        this._controllerCodes.controller_hardware_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x01:
+                        this._controllerCodes.controller_software_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x02:
+                        this._controllerCodes.controller_model_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x03:
+                        this._controllerCodes.controller_serial_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x04:
+                        this._controllerCodes.controller_customer_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x05:
+                        this._controllerCodes.controller_manufacturer =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x08:
+                        this._controllerCodes.controller_bootload_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    default:
+                        break;
+                }
+                this.emitter.emit('controller-codes-data', {
+                    ...this._controllerCodes,
+                });
+            }
+            else if (response.sourceDeviceCode == DeviceNetworkId.TORQUE_SENSOR) {
+                switch (response.canCommandSubCode) {
+                    case 0x00:
+                        this._sensorCodes.sensor_hardware_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x01:
+                        this._sensorCodes.sensor_software_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x02:
+                        this._sensorCodes.sensor_model_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x03:
+                        this._sensorCodes.sensor_serial_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x04:
+                        this._sensorCodes.sensor_customer_number =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x05:
+                        this._sensorCodes.sensor_manufacturer =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    case 0x08:
+                        this._sensorCodes.sensor_bootload_version =
+                            String.fromCharCode.apply(null, response.data);
+                        break;
+                    default:
+                        break;
+                }
+                this.emitter.emit('sensor-codes-data', {
+                    ...this._sensorCodes,
+                });
+            }
+        } else if (response.canCommandCode == 0x63) { //code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    this.displayState.display_assist_levels =
+                    this._displayState.display_assist_levels =
                         response.data[0] & 0b1111;
-                    (this.displayState.display_ride_mode =
+                    (this._displayState.display_ride_mode =
                         response.data[0] & 0b10000
                             ? BafangCanRideMode.BOOST
                             : BafangCanRideMode.ECO),
-                        (this.displayState.display_boost =
+                        (this._displayState.display_boost =
                             (response.data[0] & 0b100000) >> 5 === 1);
-                    this.displayState.display_current_assist_level =
-                        BafangCanSystem.getCurrentAssistLevel(
+                    this._displayState.display_current_assist_level =
+                        decodeCurrentAssistLevel(
                             response.data[1],
                             response.data[0] & 0b1111,
                         );
-                    this.displayState.display_light =
+                    this._displayState.display_light =
                         (response.data[2] & 1) === 1;
-                    this.displayState.display_button =
+                    this._displayState.display_button =
                         (response.data[2] & 0b10) >> 1 === 1;
-                    this.emitter.emit('display-state-data', {
-                        ...this.displayState,
+                    this.emitter.emit('broadcast-data-display', {
+                        ...this._displayState,
                     });
                     break;
                 case 0x01:
-                    this.displayData.display_total_mileage =
+                    this._displayData.display_total_mileage =
                         (response.data[2] << 16) +
                         (response.data[1] << 8) +
                         response.data[0];
-                    this.displayData.display_single_mileage =
+                    this._displayData.display_single_mileage =
                         ((response.data[5] << 16) +
                             (response.data[4] << 8) +
                             response.data[3]) /
                         10;
-                    this.displayData.display_max_speed =
+                    this._displayData.display_max_speed =
                         ((response.data[7] << 8) + response.data[6]) / 10;
                     this.emitter.emit('display-general-data', {
-                        ...this.displayData,
+                        ...this._displayData,
                     });
                     break;
                 case 0x02:
-                    this.displayData.display_average_speed =
+                    this._displayData.display_average_speed =
                         ((response.data[1] << 8) + response.data[0]) / 10;
-                    this.displayData.display_service_mileage =
+                    this._displayData.display_service_mileage =
                         ((response.data[4] << 16) +
                             (response.data[3] << 8) +
                             response.data[2]) /
                         10;
                     this.emitter.emit('display-general-data', {
-                        ...this.displayData,
+                        ...this._displayData,
                     });
                     break;
                 case 0x03:
@@ -724,13 +675,10 @@ export default class BafangCanSystem implements IConnection {
                 default:
                     break;
             }
-            // this.emitter.emit('display-codes-data', {
-            //     ...this.displayCodes,
-            // });
         }
-    }
+    }//TODO
 
-    connect(): Promise<boolean> {
+    public connect(): Promise<boolean> {
         if (this.devicePath === 'simulator') {
             this.simulationDataPublisherInterval = setInterval(
                 this.simulationDataPublisher,
@@ -746,25 +694,24 @@ export default class BafangCanSystem implements IConnection {
             });
         }
         this.device = new HID.HID(this.devicePath);
-        console.log(this.device);
         let vid = this.device.getDeviceInfo().vendorId;
         let pid = this.device.getDeviceInfo().productId;
         this.device.write(
             BafangCanSystem.generateBesstRequestPacket(
-                PacketType.BESST_RESET,
+                BesstRequestType.BESST_RESET,
                 [0, 0, 0, 0],
             ).data,
         );
         return new Promise<boolean>(async (resolve) => {
             await sleep(3000);
             this.device = new HID.HID(vid, pid);
-            this.device.addListener('data', this.processResponsePacket);
+            this.device.addListener('data', this.processBesstResponsePacket);
             setTimeout(this.processRequestQueue, 100);
             resolve(true);
         });
     }
 
-    disconnect(): void {
+    public disconnect(): void {
         if (this.devicePath === 'simulator') {
             console.log('Simulator disconnected');
             clearInterval(this.simulationDataPublisherInterval);
@@ -775,7 +722,7 @@ export default class BafangCanSystem implements IConnection {
         this.device = null;
     }
 
-    testConnection(): Promise<boolean> {
+    public testConnection(): Promise<boolean> {
         if (this.devicePath === 'simulator') {
             return new Promise<boolean>((resolve) => {
                 resolve(true);
@@ -792,7 +739,7 @@ export default class BafangCanSystem implements IConnection {
         });
     }
 
-    loadData(): void {
+    public loadData(): void {
         if (this.devicePath === 'simulator') {
             this.controllerRealtimeData = {
                 controller_cadence: 0,
@@ -812,7 +759,7 @@ export default class BafangCanSystem implements IConnection {
                 sensor_torque: 750,
                 sensor_cadence: 0,
             };
-            this.controllerParameters1 = {
+            this._controllerParameters1 = {
                 //TODO add controller parameters 3
                 controller_system_voltage: 36, //TODO fill with data
                 controller_current_limit: 1,
@@ -857,7 +804,12 @@ export default class BafangCanSystem implements IConnection {
                 controller_displayless_mode: false,
                 controller_lamps_always_on: false,
             };
-            this.displayData = {
+            this._controllerSpeedParameters = {
+                controller_wheel_diameter: BafangCanWheelDiameterTable[14],
+                controller_speed_limit: 25,
+                controller_circumference: 2224,
+            };
+            this._displayData = {
                 display_total_mileage: 10000,
                 display_single_mileage: 1000,
                 display_max_speed: 0,
@@ -865,7 +817,7 @@ export default class BafangCanSystem implements IConnection {
                 display_service_mileage: 0,
                 display_last_shutdown_time: 5,
             };
-            this.displayState = {
+            this._displayState = {
                 display_assist_levels: 5,
                 display_ride_mode: BafangCanRideMode.ECO,
                 display_boost: false,
@@ -873,7 +825,7 @@ export default class BafangCanSystem implements IConnection {
                 display_light: false,
                 display_button: false,
             };
-            this.controllerCodes = {
+            this._controllerCodes = {
                 controller_hardware_version: 'CR X10V.350.FC 2.1',
                 controller_software_version: 'CRX10VC3615E101004.0',
                 controller_model_number: 'CR X10V.350.FC',
@@ -882,7 +834,7 @@ export default class BafangCanSystem implements IConnection {
                 controller_manufacturer: 'BAFANG',
                 controller_bootload_version: '1', //TODO
             };
-            this.displayCodes = {
+            this._displayCodes = {
                 display_hardware_version: 'DP C221.C 2.0',
                 display_software_version: 'DPC221CE10205.1',
                 display_model_number: 'DP C221.CAN',
@@ -891,7 +843,7 @@ export default class BafangCanSystem implements IConnection {
                 display_manufacturer: 'BAFANG',
                 display_bootload_version: 'APM32.DPCAN.V3.0.1',
             };
-            this.sensorCodes = {
+            this._sensorCodes = {
                 sensor_hardware_version: 'SR PA212.32.ST.C 1.0',
                 sensor_software_version: 'SRPA212CF10101.0',
                 sensor_model_number: 'SR PA212.32.ST.C',
@@ -900,45 +852,47 @@ export default class BafangCanSystem implements IConnection {
                 sensor_manufacturer: '1', //TODO
                 sensor_bootload_version: '1', //TODO
             };
-            this.besstCodes = {
+            this._besstCodes = {
                 besst_hardware_version: 'BESST.UC 3.0.3',
                 besst_software_version: 'BSF33.05',
                 besst_serial_number: '',
             };
             setTimeout(() => {
-                this.emitter.emit('data');
-                this.emitter.emit('controller-data', {
-                    ...this.controllerCodes,
+                this.emitter.emit('controller-codes-data', {
+                    ...this._controllerCodes,
+                });
+                this.emitter.emit('controller-speed-data', {
+                    ...this._controllerSpeedParameters,
                 });
                 this.emitter.emit('display-general-data', {
-                    ...this.displayData,
+                    ...this._displayData,
                 });
-                this.emitter.emit('display-state-data', {
-                    ...this.displayState,
+                this.emitter.emit('broadcast-data-display', {
+                    ...this._displayState,
                 });
                 this.emitter.emit('display-codes-data', {
-                    ...this.displayCodes,
+                    ...this._displayCodes,
                 });
-                this.emitter.emit('sensor-data', { ...this.sensorCodes });
+                this.emitter.emit('sensor-codes-data', { ...this._sensorCodes });
             }, 1500);
             console.log('Simulator: blank data loaded');
             return;
         }
         this.packetQueue.push(
             BafangCanSystem.generateBesstRequestPacket(
-                PacketType.BESST_HW,
+                BesstRequestType.BESST_HW,
                 [0, 0, 0, 0],
             ),
         );
         this.packetQueue.push(
             BafangCanSystem.generateBesstRequestPacket(
-                PacketType.BESST_SW,
+                BesstRequestType.BESST_SW,
                 [0, 0, 0, 0],
             ),
         );
         this.packetQueue.push(
             BafangCanSystem.generateBesstRequestPacket(
-                PacketType.BESST_SN,
+                BesstRequestType.BESST_SN,
                 [0, 0, 0, 0],
             ),
         );
@@ -956,7 +910,7 @@ export default class BafangCanSystem implements IConnection {
         commandsToDisplay.forEach((command) => {
             this.packetQueue.push(
                 BafangCanSystem.generateBesstRequestPacket(
-                    PacketType.CAN_REQUEST,
+                    BesstRequestType.CAN_REQUEST,
                     BafangCanSystem.buildCanCommandSubpacket(
                         DeviceNetworkId.BESST,
                         DeviceNetworkId.DISPLAY,
@@ -969,14 +923,14 @@ export default class BafangCanSystem implements IConnection {
         });
     }
 
-    saveData(): boolean {
+    public saveData(): boolean {
         if (this.devicePath === 'simulator') {
             return true;
         }
         return false;
     }
 
-    setDisplayTime(
+    public setDisplayTime(
         hours: number,
         minutes: number,
         seconds: number,
@@ -1004,71 +958,94 @@ export default class BafangCanSystem implements IConnection {
         });
     }
 
-    cleanDisplayServiceMileage(): Promise<boolean> {
+    public cleanDisplayServiceMileage(): Promise<boolean> {
         if (this.devicePath === 'simulator') {
             console.log('Cleaned display mileage');
             return new Promise<boolean>((resolve) => {
                 resolve(true);
             });
         }
+        this.packetQueue.push(
+            BafangCanSystem.generateBesstRequestPacket(
+                BesstRequestType.CAN_REQUEST,
+                BafangCanSystem.buildCanCommandSubpacket(
+                    DeviceNetworkId.BESST,
+                    DeviceNetworkId.DISPLAY,
+                    CanOperation.WRITE_CMD,
+                    CanCommandsList.CleanServiceMileage.canCommandCode,
+                    CanCommandsList.CleanServiceMileage.canCommandSubCode,
+                ),
+                [0x00, 0x00, 0x00, 0x00, 0x00],
+            ),
+        );
         return new Promise<boolean>((resolve) => {
             resolve(false);
         });
     }
 
-    getControllerCodes(): BafangCanControllerCodes {
-        return { ...this.controllerCodes }; // method of object clonning, that is stupid but works
+    public get controllerCodes(): BafangCanControllerCodes {
+        return { ...this._controllerCodes };
     }
 
-    getControllerParameters1(): BafangCanControllerParameters1 {
-        return { ...this.controllerParameters1 }; // method of object clonning, that is stupid but works
+    public get controllerParameters1(): BafangCanControllerParameters1 {
+        return { ...this._controllerParameters1 };
     }
 
-    getDisplayData(): BafangCanDisplayData {
-        return { ...this.displayData }; // method of object clonning, that is stupid but works
+    public get controllerSpeedParameters(): BafangCanControllerSpeedParameters {
+        return { ...this._controllerSpeedParameters };
     }
 
-    getDisplayState(): BafangCanDisplayState {
-        return { ...this.displayState }; // method of object clonning, that is stupid but works
+    public get displayData(): BafangCanDisplayData {
+        return { ...this._displayData };
     }
 
-    getDisplayCodes(): BafangCanDisplayCodes {
-        return { ...this.displayCodes }; // method of object clonning, that is stupid but works
+    public get displayState(): BafangCanDisplayState {
+        return { ...this._displayState };
     }
 
-    getSensorCodes(): BafangCanSensorCodes {
-        return { ...this.sensorCodes }; // method of object clonning, that is stupid but works
+    public get displayCodes(): BafangCanDisplayCodes {
+        return { ...this._displayCodes };
     }
 
-    getBesstCodes(): BafangBesstCodes {
-        return { ...this.besstCodes }; // method of object clonning, that is stupid but works
+    public get sensorCodes(): BafangCanSensorCodes {
+        return { ...this._sensorCodes };
     }
 
-    setControllerParameters1(data: BafangCanControllerParameters1): void {
-        this.controllerParameters1 = { ...data };
+    public get besstCodes(): BafangBesstCodes {
+        return { ...this._besstCodes };
     }
 
-    setDisplayState(data: BafangCanDisplayState): void {
-        this.displayState = { ...data };
+    public set controllerParameters1(data: BafangCanControllerParameters1) {
+        this._controllerParameters1 = { ...data };
     }
 
-    setDisplayData(data: BafangCanDisplayData): void {
-        this.displayData = { ...data };
+    public set controllerSpeedParameters(
+        data: BafangCanControllerSpeedParameters,
+    ) {
+        this._controllerSpeedParameters = { ...data };
     }
 
-    setControllerCodes(data: BafangCanControllerCodes): void {
-        this.controllerCodes = { ...data };
+    public set displayState(data: BafangCanDisplayState) {
+        this._displayState = { ...data };
     }
 
-    setDisplayCodes(data: BafangCanDisplayCodes): void {
-        this.displayCodes = { ...data };
+    public set DisplayData(data: BafangCanDisplayData) {
+        this._displayData = { ...data };
     }
 
-    setSensorCodes(data: BafangCanSensorCodes): void {
-        this.sensorCodes = { ...data };
+    public set ControllerCodes(data: BafangCanControllerCodes) {
+        this._controllerCodes = { ...data };
     }
 
-    setBesstCodes(data: BafangBesstCodes): void {
-        this.besstCodes = { ...data };
+    public set DisplayCodes(data: BafangCanDisplayCodes) {
+        this._displayCodes = { ...data };
+    }
+
+    public set SensorCodes(data: BafangCanSensorCodes) {
+        this._sensorCodes = { ...data };
+    }
+
+    public set BesstCodes(data: BafangBesstCodes) {
+        this._besstCodes = { ...data };
     }
 }

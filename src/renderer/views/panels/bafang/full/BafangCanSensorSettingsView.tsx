@@ -7,7 +7,7 @@ import BafangCanSystem from '../../../../device/BafangCanSystem';
 import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-} from '../../../../device/BafangCanSystemTypes';
+} from '../../../../types/BafangCanSystemTypes';
 import NumberValueComponent from '../../../components/NumberValueComponent';
 import { NotLoadedYet } from '../../../../types/no_data';
 
@@ -26,17 +26,19 @@ class BafangCanSensorSettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.getSensorCodes(),
+            ...connection.sensorCodes,
             sensor_torque: NotLoadedYet,
             sensor_cadence: NotLoadedYet,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateRealtimeData = this.updateRealtimeData.bind(this);
-        connection.emitter.on('sensor-data', (data: BafangCanSensorCodes) =>
+        connection.emitter.on(
+            'sensor-codes-data',
+            (data: BafangCanSensorCodes) => this.setState({ ...data }),
+        );
+        connection.emitter.on('broadcast-data-sensor', (data) =>
             this.setState({ ...data }),
         );
-        connection.emitter.on('broadcast-data-sensor', this.updateRealtimeData);
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
@@ -179,10 +181,6 @@ class BafangCanSensorSettingsView extends React.Component<
                 ),
             },
         ];
-    }
-
-    updateRealtimeData(variables: any): void {
-        this.setState({ ...variables });
     }
 
     saveParameters(): void {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Descriptions, FloatButton, message } from 'antd';
+import { Typography, Descriptions, FloatButton, message, Select } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
@@ -7,16 +7,25 @@ import BafangCanSystem from '../../../../device/BafangCanSystem';
 import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
-} from '../../../../device/BafangCanSystemTypes';
-import { NotLoadedYet } from '../../../../types/no_data';
+    BafangCanControllerSpeedParameters,
+    BafangCanWheel,
+    BafangCanWheelDiameterTable,
+} from '../../../../types/BafangCanSystemTypes';
+import { NotAvailable, NotLoadedYet } from '../../../../types/no_data';
 import NumberValueComponent from '../../../components/NumberValueComponent';
 import BooleanValueComponent from '../../../components/BooleanValueComponent';
+import ParameterInputComponent from '../../../components/ParameterInput';
+import ParameterSelectComponent from '../../../components/ParameterSelect';
+
+const { Option } = Select;
 
 type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanControllerRealtime & BafangCanControllerCodes;
+type SettingsState = BafangCanControllerRealtime &
+    BafangCanControllerSpeedParameters &
+    BafangCanControllerCodes;
 
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
@@ -28,7 +37,8 @@ class BafangCanMotorSettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.getControllerCodes(),
+            ...connection.controllerSpeedParameters,
+            ...connection.controllerCodes,
             controller_cadence: NotLoadedYet,
             controller_torque: NotLoadedYet,
             controller_speed: NotLoadedYet,
@@ -44,14 +54,17 @@ class BafangCanMotorSettingsView extends React.Component<
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.on(
-            'controller-data',
-            (data: BafangCanControllerCodes) => this.setState({ ...data }),
+            'controller-speed-data',
+            (data: BafangCanControllerSpeedParameters) =>
+                this.setState({ ...data }),
         );
         connection.emitter.on(
-            'broadcast-data-controller',
-            this.updateRealtimeData,
+            'controller-codes-data',
+            (data: BafangCanControllerCodes) => this.setState({ ...data }),
+        );
+        connection.emitter.on('broadcast-data-controller', (data) =>
+            this.setState({ ...data }),
         );
     }
 
@@ -198,6 +211,76 @@ class BafangCanMotorSettingsView extends React.Component<
         ];
     }
 
+    getSpeedItems(): DescriptionsProps['items'] {
+        const {
+            controller_speed_limit,
+            controller_wheel_diameter,
+            controller_circumference,
+        } = this.state;
+        return [
+            {
+                key: 'speed_limit',
+                label: 'Speed limit',
+                children: (
+                    <ParameterInputComponent
+                        value={controller_speed_limit}
+                        unit="km/h"
+                        min={1}
+                        max={60}
+                        onNewValue={(e) => {
+                            this.setState({ controller_speed_limit: e });
+                        }}
+                        warningText="Its illegal in most countries to set speed limit bigger than 25km/h"
+                        warningBelow={0}
+                        warningAbove={25}
+                    />
+                ),
+            },
+            {
+                key: 'wheel_diameter',
+                label: 'Wheel diameter',
+                children: (
+                    <ParameterSelectComponent
+                        value={
+                            controller_wheel_diameter !== NotLoadedYet &&
+                            controller_wheel_diameter !== NotAvailable
+                                ? controller_wheel_diameter.text
+                                : controller_wheel_diameter
+                        }
+                        options={BafangCanWheelDiameterTable.map(
+                            (item) => item.text,
+                        )}
+                        onNewValue={(value) => {
+                            let wheel = BafangCanWheelDiameterTable.find(
+                                (wheel) => wheel.text === value,
+                            );
+                            this.setState({
+                                controller_wheel_diameter: wheel
+                                    ? wheel
+                                    : BafangCanWheelDiameterTable[0],
+                            });
+                        }}
+                    />
+                ),
+            },
+            {
+                key: 'circumference',
+                label: 'Wheel circumference',
+                children: (
+                    <ParameterInputComponent
+                        value={controller_circumference}
+                        unit="mm"
+                        min={controller_wheel_diameter.minimalCircumference}
+                        max={controller_wheel_diameter.maximalCircumference}
+                        onNewValue={(e) => {
+                            this.setState({ controller_circumference: e });
+                        }}
+                    />
+                ),
+            },
+        ];
+    }
+
     getOtherItems(): DescriptionsProps['items'] {
         const {
             controller_serial_number,
@@ -317,10 +400,6 @@ class BafangCanMotorSettingsView extends React.Component<
         ];
     }
 
-    updateRealtimeData(variables: any): void {
-        this.setState({ ...variables });
-    }
-
     saveParameters(): void {
         const { connection } = this.props;
         connection.saveData();
@@ -338,6 +417,13 @@ class BafangCanMotorSettingsView extends React.Component<
                     bordered
                     title="Real-Time data"
                     items={this.getRealtimeItems()}
+                    column={1}
+                />
+                <br />
+                <Descriptions
+                    bordered
+                    title="Speed settings"
+                    items={this.getSpeedItems()}
                     column={1}
                 />
                 <br />

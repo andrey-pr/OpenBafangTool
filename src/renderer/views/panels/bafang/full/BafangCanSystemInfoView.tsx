@@ -12,7 +12,7 @@ import {
     BafangCanDisplayState,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-} from '../../../../device/BafangCanSystemTypes';
+} from '../../../../types/BafangCanSystemTypes';
 import NumberValueComponent from '../../../components/NumberValueComponent';
 import StringValueComponent from '../../../components/StringValueComponent';
 import BooleanValueComponent from '../../../components/BooleanValueComponent';
@@ -37,12 +37,12 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.getControllerCodes(),
-            ...connection.getDisplayState(),
-            ...connection.getDisplayData(),
-            ...connection.getDisplayCodes(),
-            ...connection.getSensorCodes(),
-            ...connection.getBesstCodes(),
+            ...connection.controllerCodes,
+            ...connection.displayState,
+            ...connection.displayData,
+            ...connection.displayCodes,
+            ...connection.sensorCodes,
+            ...connection.besstCodes,
             controller_cadence: NotLoadedYet,
             controller_torque: NotLoadedYet,
             controller_speed: NotLoadedYet,
@@ -59,31 +59,34 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             sensor_cadence: NotLoadedYet,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        this.updateRealtimeData = this.updateRealtimeData.bind(this);
         connection.emitter.on(
-            'controller-data',
+            'controller-codes-data',
             (data: BafangCanControllerCodes) => this.setState({ ...data }),
         );
-        connection.emitter.on('display-general-data', (data: BafangCanDisplayData) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'display-general-data',
+            (data: BafangCanDisplayData) => this.setState({ ...data }),
         );
-        connection.emitter.on('display-state-data', (data: BafangCanDisplayState) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'display-codes-data',
+            (data: BafangCanDisplayCodes) => this.setState({ ...data }),
         );
-        connection.emitter.on('display-codes-data', (data: BafangCanDisplayCodes) =>
-            this.setState({ ...data }),
-        );
-        connection.emitter.on('sensor-data', (data: BafangCanSensorCodes) =>
-            this.setState({ ...data }),
+        connection.emitter.on(
+            'sensor-codes-data',
+            (data: BafangCanSensorCodes) => this.setState({ ...data }),
         );
         connection.emitter.on('besst-data', (data: BafangBesstCodes) =>
             this.setState({ ...data }),
         );
-        connection.emitter.on(
-            'broadcast-data-controller',
-            this.updateRealtimeData,
+        connection.emitter.on('broadcast-data-controller', (data) =>
+            this.setState({ ...data }),
         );
-        connection.emitter.on('broadcast-data-sensor', this.updateRealtimeData);
+        connection.emitter.on('broadcast-data-display', (data) =>
+            this.setState({ ...data }),
+        );
+        connection.emitter.on('broadcast-data-sensor', (data) =>
+            this.setState({ ...data }),
+        );
     }
 
     getControllerItems(): DescriptionsProps['items'] {
@@ -330,7 +333,11 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             {
                 key: 'current_assist_level',
                 label: 'Current assist',
-                children: <StringValueComponent value={display_current_assist_level}/>,
+                children: (
+                    <StringValueComponent
+                        value={display_current_assist_level}
+                    />
+                ),
                 contentStyle: { width: '50%' },
             },
             {
@@ -554,10 +561,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 children: <StringValueComponent value={besst_serial_number} />, //TODO add editing
             },
         ];
-    }
-
-    updateRealtimeData(variables: any): void {
-        this.setState({ ...variables });
     }
 
     render() {

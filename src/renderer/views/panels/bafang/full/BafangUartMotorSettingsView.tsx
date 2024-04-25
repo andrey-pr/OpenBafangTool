@@ -22,7 +22,7 @@ import {
     SpeedLimitByDisplay,
     SpeedmeterType,
     ThrottleMode,
-} from '../../../../device/BafangUartMotorTypes';
+} from '../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import StringInputComponent from '../../../components/StringInput';

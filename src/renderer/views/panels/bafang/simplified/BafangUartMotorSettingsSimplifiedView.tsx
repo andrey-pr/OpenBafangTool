@@ -21,7 +21,7 @@ import {
     PedalSensorSignals,
     SpeedLimitByDisplay,
     ThrottleMode,
-} from '../../../../device/BafangUartMotorTypes';
+} from '../../../../types/BafangUartMotorTypes';
 import {
     BatteryTypes,
     LowVoltageLimitsByBatteryType,

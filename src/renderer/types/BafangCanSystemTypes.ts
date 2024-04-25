@@ -1,6 +1,6 @@
 //TODO make all values nullable
 
-import { NoData } from "../types/no_data";
+import { NoData } from './no_data';
 
 export type BafangCanControllerRealtime = {
     controller_cadence: number | NoData;
@@ -23,8 +23,6 @@ export type BafangCanAssistProfile = {
 };
 
 export type BafangCanSystemVoltage = 36 | 43 | 48;
-
-
 
 export enum BafangCanPedalSensorType {
     TorqueSensor = 0,
@@ -85,6 +83,172 @@ export type BafangCanControllerParameters1 = {
     // System "Assist speed" (unknown): number;
 };
 
+export type BafangCanWheel = {
+    text: string;
+    minimalCircumference: number;
+    maximalCircumference: number;
+    code: number[];
+};
+
+export const BafangCanWheelDiameterTable: BafangCanWheel[] = [
+    {
+        text: '6″',
+        minimalCircumference: 400,
+        maximalCircumference: 880,
+        code: [0x60, 0x00]
+    },
+    {
+        text: '7″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0x70, 0x00]
+    },
+    {
+        text: '8″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0x80, 0x00]
+    },
+    {
+        text: '10″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0xA0, 0x00]
+    },
+    {
+        text: '12″',
+        minimalCircumference: 910,
+        maximalCircumference: 1300,
+        code: [0xC0, 0x00]
+    },
+    {
+        text: '14″',
+        minimalCircumference: 910,
+        maximalCircumference: 1300,
+        code: [0xE0, 0x00]
+    },
+    {
+        text: '16″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x00, 0x01]
+    },
+    {
+        text: '17″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x01]
+    },
+    {
+        text: '18″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x01]
+    },
+    {
+        text: '20″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x40, 0x01]
+    },
+    {
+        text: '22″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x60, 0x01]
+    },
+    {
+        text: '23″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x70, 0x01]
+    },
+    {
+        text: '24″',
+        minimalCircumference: 1290,
+        maximalCircumference: 2200,
+        code: [0x80, 0x01]
+    },
+    {
+        text: '25″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2200,
+        code: [0x90, 0x01]
+    },
+    {
+        text: '26″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xA0, 0x01]
+    },
+    {
+        text: '27″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xB0, 0x01]
+    },
+    {
+        text: '27.5″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xB5, 0x01]
+    },
+    {
+        text: '28″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xC0, 0x01]
+    },
+    {
+        text: '29″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xD0, 0x01]
+    },
+    {
+        text: '32″',
+        minimalCircumference: 2200,
+        maximalCircumference: 2652,
+        code: [0x00, 0x02]
+    },
+    {
+        text: '400 mm',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x00, 0x19]
+    },
+    {
+        text: '450 mm',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x2C]
+    },
+    {
+        text: '600 mm',
+        minimalCircumference: 1600,
+        maximalCircumference: 2200,
+        code: [0x80, 0x25]
+    },
+    {
+        text: '650 mm',
+        minimalCircumference: 1600,
+        maximalCircumference: 2200,
+        code: [0xA0, 0x28]
+    },
+    {
+        text: '700 mm',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xC0, 0x2B]
+    }
+];
+
+export type BafangCanControllerSpeedParameters = {
+    controller_wheel_diameter: BafangCanWheel | NoData;
+    controller_speed_limit: number | NoData;
+    controller_circumference: number | NoData;
+};
+
 export type BafangCanControllerCodes = {
     controller_hardware_version: string | NoData;
     controller_software_version: string | NoData;
@@ -119,7 +283,18 @@ export enum BafangCanRideMode {
     BOOST = 1,
 }
 
-export type BafangCanAssistLevel = 'walk' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type BafangCanAssistLevel =
+    | 'walk'
+    | 0
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9;
 
 export type BafangCanDisplayState = {
     display_assist_levels: number | NoData;

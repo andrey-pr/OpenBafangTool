@@ -21,6 +21,7 @@ import InterfaceType from '../../models/InterfaceType';
 import HID from 'node-hid';
 import filterPorts from '../../../device/serial-patcher';
 import { SerialPort } from 'serialport';
+import { filterHidDevices as filterBesstDevices } from '../../utils/BafangCanUtils';
 
 const { Option } = Select;
 
@@ -281,7 +282,7 @@ class DeviceSelectionView extends React.Component<
                                     style={{ minWidth: '150px' }}
                                 >
                                     <Option value="simulator">Simulator</Option>
-                                    {BafangCanSystem.filterHidDevices(
+                                    {filterBesstDevices(
                                         hidDeviceList,
                                     ).map((item) => {
                                         return (
