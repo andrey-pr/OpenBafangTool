@@ -4,7 +4,6 @@ import { DeviceName } from '../models/DeviceType';
 import IConnection from './Connection';
 import {
     BafangBesstCodes,
-    BafangCanAssistLevel,
     BafangCanControllerCodes,
     BafangCanControllerParameters1,
     BafangCanControllerRealtime,
@@ -71,9 +70,9 @@ export default class BafangCanSystem implements IConnection {
 
     private simulationRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
 
-    private controllerRealtimeData: BafangCanControllerRealtime;
+    private _controllerRealtimeData: BafangCanControllerRealtime;
 
-    private sensorRealtimeData: BafangCanSensorRealtime;
+    private _sensorRealtimeData: BafangCanSensorRealtime;
 
     private _controllerParameters1: BafangCanControllerParameters1;
 
@@ -102,7 +101,7 @@ export default class BafangCanSystem implements IConnection {
     constructor(devicePath: string) {
         this.devicePath = devicePath;
         this.emitter = new EventEmitter();
-        this.controllerRealtimeData = {
+        this._controllerRealtimeData = {
             controller_cadence: NotLoadedYet,
             controller_torque: NotLoadedYet,
             controller_speed: NotLoadedYet,
@@ -116,7 +115,7 @@ export default class BafangCanSystem implements IConnection {
             controller_single_trip: NotLoadedYet,
             controller_remaining_distance: NotLoadedYet,
         };
-        this.sensorRealtimeData = {
+        this._sensorRealtimeData = {
             sensor_torque: NotLoadedYet,
             sensor_cadence: NotLoadedYet,
         };
@@ -235,13 +234,13 @@ export default class BafangCanSystem implements IConnection {
 
     private simulationDataPublisher(): void {
         this.emitter.emit('broadcast-data-controller', {
-            ...this.controllerRealtimeData,
+            ...this._controllerRealtimeData,
         });
         this.emitter.emit('broadcast-data-display', {
             ...this._displayState,
         });
         this.emitter.emit('broadcast-data-sensor', {
-            ...this.sensorRealtimeData,
+            ...this._sensorRealtimeData,
         });
     }
 
@@ -754,45 +753,45 @@ export default class BafangCanSystem implements IConnection {
             response.canCommandCode == 0x31 &&
             response.canCommandSubCode == 0x00
         ) {
-            this.sensorRealtimeData.sensor_torque =
+            this._sensorRealtimeData.sensor_torque =
                 (response.data[1] << 8) + response.data[0];
-            this.sensorRealtimeData.sensor_cadence = response.data[2];
+            this._sensorRealtimeData.sensor_cadence = response.data[2];
             this.emitter.emit('broadcast-data-sensor', {
-                ...this.sensorRealtimeData,
+                ...this._sensorRealtimeData,
             });
         } else if (response.canCommandCode == 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
                     let tem = (response.data[7] << 8) + response.data[6];
-                    this.controllerRealtimeData.controller_remaining_capacity =
+                    this._controllerRealtimeData.controller_remaining_capacity =
                         response.data[0];
-                    this.controllerRealtimeData.controller_single_trip =
+                    this._controllerRealtimeData.controller_single_trip =
                         ((response.data[2] << 8) + response.data[1]) / 100;
-                    this.controllerRealtimeData.controller_cadence =
+                    this._controllerRealtimeData.controller_cadence =
                         response.data[3];
-                    this.controllerRealtimeData.controller_torque =
+                    this._controllerRealtimeData.controller_torque =
                         (response.data[5] << 8) + response.data[4];
-                    this.controllerRealtimeData.controller_remaining_distance =
+                    this._controllerRealtimeData.controller_remaining_distance =
                         tem < 65535 ? tem / 100 : NotAvailable;
                     this.emitter.emit('broadcast-data-controller', {
-                        ...this.controllerRealtimeData,
+                        ...this._controllerRealtimeData,
                     });
                     break;
                 case 0x01:
-                    this.controllerRealtimeData.controller_speed =
+                    this._controllerRealtimeData.controller_speed =
                         ((response.data[1] << 8) + response.data[0]) / 100;
-                    this.controllerRealtimeData.controller_current =
+                    this._controllerRealtimeData.controller_current =
                         ((response.data[3] << 8) + response.data[2]) / 100;
-                    this.controllerRealtimeData.controller_voltage =
+                    this._controllerRealtimeData.controller_voltage =
                         ((response.data[5] << 8) + response.data[4]) / 100;
-                    this.controllerRealtimeData.controller_temperature =
+                    this._controllerRealtimeData.controller_temperature =
                         response.data[6] - 40;
-                    this.controllerRealtimeData.controller_motor_temperature =
+                    this._controllerRealtimeData.controller_motor_temperature =
                         response.data[7] === 255
                             ? NotAvailable
                             : response.data[7] - 40;
                     this.emitter.emit('broadcast-data-controller', {
-                        ...this.controllerRealtimeData,
+                        ...this._controllerRealtimeData,
                     });
                     break;
                 case 0x03:
@@ -889,7 +888,7 @@ export default class BafangCanSystem implements IConnection {
 
     public loadData(): void {
         if (this.devicePath === 'simulator') {
-            this.controllerRealtimeData = {
+            this._controllerRealtimeData = {
                 controller_cadence: 0,
                 controller_torque: 750,
                 controller_speed: 0,
@@ -903,12 +902,11 @@ export default class BafangCanSystem implements IConnection {
                 controller_single_trip: 0,
                 controller_remaining_distance: 0,
             };
-            this.sensorRealtimeData = {
+            this._sensorRealtimeData = {
                 sensor_torque: 750,
                 sensor_cadence: 0,
             };
             this._controllerParameters1 = {
-                //TODO add controller parameters 3
                 controller_system_voltage: 36, //TODO fill with data
                 controller_current_limit: 1,
                 controller_overvoltage: 1,
@@ -978,9 +976,9 @@ export default class BafangCanSystem implements IConnection {
                 controller_software_version: 'CRX10VC3615E101004.0',
                 controller_model_number: 'CR X10V.350.FC',
                 controller_serial_number: 'CRX10V.350.FC2.1A42F5TB045999',
-                controller_customer_number: '', //TODO
+                controller_customer_number: '',
                 controller_manufacturer: 'BAFANG',
-                controller_bootload_version: '1', //TODO
+                controller_bootload_version: NotAvailable,
             };
             this._displayCodes = {
                 display_hardware_version: 'DP C221.C 2.0',
@@ -996,9 +994,9 @@ export default class BafangCanSystem implements IConnection {
                 sensor_software_version: 'SRPA212CF10101.0',
                 sensor_model_number: 'SR PA212.32.ST.C',
                 sensor_serial_number: '0000000000',
-                sensor_customer_number: '1', //TODO
-                sensor_manufacturer: '1', //TODO
-                sensor_bootload_version: '1', //TODO
+                sensor_customer_number: NotAvailable,
+                sensor_manufacturer: NotAvailable,
+                sensor_bootload_version: NotAvailable,
             };
             this._besstCodes = {
                 besst_hardware_version: 'BESST.UC 3.0.3',
@@ -1309,6 +1307,10 @@ export default class BafangCanSystem implements IConnection {
         return { ...this._controllerCodes };
     }
 
+    public get controllerRealtimeData(): BafangCanControllerRealtime {
+        return { ...this._controllerRealtimeData };
+    }
+
     public get controllerParameters1(): BafangCanControllerParameters1 {
         return { ...this._controllerParameters1 };
     }
@@ -1321,8 +1323,16 @@ export default class BafangCanSystem implements IConnection {
         return { ...this._displayData };
     }
 
+    public get displayRealtimeData(): BafangCanDisplayState {
+        return { ...this._displayState };
+    }
+
     public get displayCodes(): BafangCanDisplayCodes {
         return { ...this._displayCodes };
+    }
+
+    public get sensorRealtimeData(): BafangCanSensorRealtime {
+        return { ...this._sensorRealtimeData };
     }
 
     public get sensorCodes(): BafangCanSensorCodes {

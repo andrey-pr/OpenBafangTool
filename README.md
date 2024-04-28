@@ -109,7 +109,6 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
   - [ ] Beta
   - [ ] Stable
 - [ ] Add support of Bafang displays with UART
-- [ ] Add support of Panasonic systems
 - [ ] Add more kinds of executables
   - [x] .dmg - MacOS, on Apple Silicon and x86_64
   - [ ] Flatpak - Linux, x86_64 - in progress

@@ -17,6 +17,7 @@ import BooleanValueComponent from '../../../components/BooleanValueComponent';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
 import StringValueComponent from '../../../components/StringValueComponent';
+import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 const { Option } = Select;
 
@@ -40,150 +41,73 @@ class BafangCanMotorSettingsView extends React.Component<
         this.state = {
             ...connection.controllerSpeedParameters,
             ...connection.controllerCodes,
-            controller_cadence: NotLoadedYet,
-            controller_torque: NotLoadedYet,
-            controller_speed: NotLoadedYet,
-            controller_current: NotLoadedYet,
-            controller_voltage: NotLoadedYet,
-            controller_temperature: NotLoadedYet,
-            controller_motor_temperature: NotLoadedYet,
-            controller_walk_assistance: NotLoadedYet,
-            controller_calories: NotLoadedYet,
-            controller_remaining_capacity: NotLoadedYet,
-            controller_single_trip: NotLoadedYet,
-            controller_remaining_distance: NotLoadedYet,
+            ...connection.controllerRealtimeData,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        connection.emitter.on(
-            'controller-speed-data',
-            (data: BafangCanControllerSpeedParameters) =>
-                this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'controller-codes-data',
-            (data: BafangCanControllerCodes) => this.setState({ ...data }),
-        );
-        connection.emitter.on('broadcast-data-controller', (data) =>
-            this.setState({ ...data }),
-        );
+        this.updateData = this.updateData.bind(this);
+        connection.emitter.on('controller-speed-data', this.updateData);
+        connection.emitter.on('controller-codes-data', this.updateData);
+        connection.emitter.on('broadcast-data-controller', this.updateData);
+    }
+
+    updateData(values: any) {
+        //TODO add property check
+        this.setState({ ...values });
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
-        const {
-            controller_cadence,
-            controller_torque,
-            controller_speed,
-            controller_current,
-            controller_voltage,
-            controller_temperature,
-            controller_motor_temperature,
-            controller_remaining_capacity,
-            controller_single_trip,
-            controller_remaining_distance,
-        } = this.state;
         return [
-            {
-                key: 'capacity_left',
-                label: 'Remaining capacity',
-                children: (
-                    <NumberValueComponent
-                        value={controller_remaining_capacity}
-                        unit="mAh"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'remaining_trip',
-                label: 'Remaining trip distance',
-                children: (
-                    <NumberValueComponent
-                        value={controller_remaining_distance}
-                        unit="Km"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'single_trip',
-                label: 'Last trip distance',
-                children: (
-                    <NumberValueComponent
-                        value={controller_single_trip}
-                        unit="Km"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'cadence',
-                label: 'Cadence',
-                children: (
-                    <NumberValueComponent
-                        value={controller_cadence}
-                        unit="RPM"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'torque_value',
-                label: 'Torque value',
-                children: (
-                    <NumberValueComponent value={controller_torque} unit="mV" />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: (
-                    <NumberValueComponent value={controller_voltage} unit="V" />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'controller_temperature',
-                label: 'Controller temperature',
-                children: (
-                    <NumberValueComponent
-                        value={controller_temperature}
-                        unit="C°"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'motor_temperature',
-                label: 'Motor temperature',
-                children: (
-                    <NumberValueComponent
-                        value={controller_motor_temperature}
-                        unit="C°"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'current',
-                label: 'Current',
-                children: (
-                    <NumberValueComponent value={controller_current} unit="A" />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'speed',
-                label: 'Speed',
-                children: (
-                    <NumberValueComponent
-                        value={controller_speed}
-                        unit="Km/H"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
+            generateSimpleNumberListItem(
+                'Remaining capacity',
+                this.state.controller_remaining_capacity,
+                'mAh',
+            ),
+            generateSimpleNumberListItem(
+                'Remaining trip distance',
+                this.state.controller_remaining_distance,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Last trip distance',
+                this.state.controller_single_trip,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Cadence',
+                this.state.controller_cadence,
+                'RPM',
+            ),
+            generateSimpleNumberListItem(
+                'Torque value',
+                this.state.controller_torque,
+                'mV',
+            ),
+            generateSimpleNumberListItem(
+                'Voltage',
+                this.state.controller_voltage,
+                'V',
+            ),
+            generateSimpleNumberListItem(
+                'Controller temperature',
+                this.state.controller_temperature,
+                'C°',
+            ),
+            generateSimpleNumberListItem(
+                'Motor temperature',
+                this.state.controller_motor_temperature,
+                'C°',
+            ),
+            generateSimpleNumberListItem(
+                'Current',
+                this.state.controller_current,
+                'A',
+            ),
+            generateSimpleNumberListItem(
+                'Speed',
+                this.state.controller_speed,
+                'Km/H',
+            ),
         ];
     }
 
@@ -260,12 +184,8 @@ class BafangCanMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         const {
             controller_serial_number,
-            controller_bootload_version,
             controller_customer_number,
-            controller_hardware_version,
             controller_manufacturer,
-            controller_model_number,
-            controller_software_version,
         } = this.state;
         return [
             {
@@ -283,27 +203,18 @@ class BafangCanMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'software_version',
-                label: 'Software version',
-                children: (
-                    <StringValueComponent value={controller_software_version} />
-                ),
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: (
-                    <StringValueComponent value={controller_hardware_version} />
-                ),
-            },
-            {
-                key: 'model_number',
-                label: 'Model number',
-                children: (
-                    <StringValueComponent value={controller_model_number} />
-                ),
-            },
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.controller_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.controller_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.controller_model_number,
+            ),
             {
                 key: 'manufacturer',
                 label: 'Manufacturer',
@@ -334,13 +245,10 @@ class BafangCanMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'bootloader_version',
-                label: 'Bootloader version',
-                children: (
-                    <StringValueComponent value={controller_bootload_version} />
-                ),
-            },
+            generateSimpleStringListItem(
+                'Bootloader version',
+                this.state.controller_bootload_version,
+            ),
         ];
     }
 
@@ -387,24 +295,8 @@ class BafangCanMotorSettingsView extends React.Component<
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
+                            duration: 10,
                         });
-                        setTimeout(() => {
-                            // if (Date.now() - lastUpdateTime < 3000) {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'success',
-                            //         content: 'Read sucessfully!',
-                            //         duration: 2,
-                            //     });
-                            // } else {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'error',
-                            //         content: 'Error during reading!',
-                            //         duration: 2,
-                            //     });
-                            // }
-                        }, 3000);
                     }}
                 />
                 <FloatButton

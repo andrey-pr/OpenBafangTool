@@ -1,5 +1,3 @@
-//TODO make all values nullable
-
 import { NoData } from './no_data';
 
 export type BafangCanControllerRealtime = {

@@ -13,10 +13,11 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../types/BafangCanSystemTypes';
-import NumberValueComponent from '../../../components/NumberValueComponent';
-import StringValueComponent from '../../../components/StringValueComponent';
-import BooleanValueComponent from '../../../components/BooleanValueComponent';
-import { NotLoadedYet } from '../../../../types/no_data';
+import {
+    generateSimpleBooleanListItem,
+    generateSimpleNumberListItem,
+    generateSimpleStringListItem,
+} from '../../../../utils/UIUtils';
 
 type InfoProps = {
     connection: BafangCanSystem;
@@ -42,506 +43,257 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             ...connection.displayCodes,
             ...connection.sensorCodes,
             ...connection.besstCodes,
-            controller_cadence: NotLoadedYet,
-            controller_torque: NotLoadedYet,
-            controller_speed: NotLoadedYet,
-            controller_current: NotLoadedYet,
-            controller_voltage: NotLoadedYet,
-            controller_temperature: NotLoadedYet,
-            controller_motor_temperature: NotLoadedYet,
-            controller_walk_assistance: NotLoadedYet,
-            controller_calories: NotLoadedYet,
-            controller_remaining_capacity: NotLoadedYet,
-            controller_single_trip: NotLoadedYet,
-            controller_remaining_distance: NotLoadedYet,
-            display_assist_levels: NotLoadedYet,
-            display_ride_mode: NotLoadedYet,
-            display_boost: NotLoadedYet,
-            display_current_assist_level: NotLoadedYet,
-            display_light: NotLoadedYet,
-            display_button: NotLoadedYet,
-            sensor_torque: NotLoadedYet,
-            sensor_cadence: NotLoadedYet,
+            ...connection.controllerRealtimeData,
+            ...connection.displayRealtimeData,
+            ...connection.sensorRealtimeData,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        connection.emitter.on(
-            'controller-codes-data',
-            (data: BafangCanControllerCodes) => this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'display-general-data',
-            (data: BafangCanDisplayData) => this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'display-codes-data',
-            (data: BafangCanDisplayCodes) => this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'sensor-codes-data',
-            (data: BafangCanSensorCodes) => this.setState({ ...data }),
-        );
-        connection.emitter.on('besst-data', (data: BafangBesstCodes) =>
-            this.setState({ ...data }),
-        );
-        connection.emitter.on('broadcast-data-controller', (data) =>
-            this.setState({ ...data }),
-        );
-        connection.emitter.on('broadcast-data-display', (data) =>
-            this.setState({ ...data }),
-        );
-        connection.emitter.on('broadcast-data-sensor', (data) =>
-            this.setState({ ...data }),
-        );
+        this.updateData = this.updateData.bind(this);
+        connection.emitter.on('controller-codes-data', this.updateData);
+        connection.emitter.on('display-general-data', this.updateData);
+        connection.emitter.on('display-codes-data', this.updateData);
+        connection.emitter.on('sensor-codes-data', this.updateData);
+        connection.emitter.on('besst-data', this.updateData);
+        connection.emitter.on('broadcast-data-controller', this.updateData);
+        connection.emitter.on('broadcast-data-display', this.updateData);
+        connection.emitter.on('broadcast-data-sensor', this.updateData);
+    }
+
+    updateData(values: any) {
+        //TODO add property check
+        this.setState({ ...values });
     }
 
     getControllerItems(): DescriptionsProps['items'] {
-        const {
-            controller_cadence,
-            controller_torque,
-            controller_speed,
-            controller_current,
-            controller_voltage,
-            controller_temperature,
-            controller_motor_temperature,
-            controller_serial_number,
-            controller_bootload_version,
-            controller_customer_number,
-            controller_hardware_version,
-            controller_manufacturer,
-            controller_model_number,
-            controller_software_version,
-            controller_remaining_capacity,
-            controller_single_trip,
-            controller_remaining_distance,
-        } = this.state;
         return [
-            {
-                key: 'capacity_left',
-                label: 'Remaining capacity',
-                children: (
-                    <NumberValueComponent
-                        value={controller_remaining_capacity}
-                        unit="mAh"
-                    />
-                ),
-            },
-            {
-                key: 'remaining_trip',
-                label: 'Remaining trip distance',
-                children: (
-                    <NumberValueComponent
-                        value={controller_remaining_distance}
-                        unit="Km"
-                    />
-                ),
-            },
-            {
-                key: 'single_trip',
-                label: 'Last trip distance',
-                children: (
-                    <NumberValueComponent
-                        value={controller_single_trip}
-                        unit="Km"
-                    />
-                ),
-            },
-            {
-                key: 'cadence',
-                label: 'Cadence',
-                children: (
-                    <NumberValueComponent
-                        value={controller_cadence}
-                        unit="RPM"
-                    />
-                ),
-            },
-            {
-                key: 'torque_value',
-                label: 'Torque value',
-                children: (
-                    <NumberValueComponent value={controller_torque} unit="mV" />
-                ),
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: (
-                    <NumberValueComponent value={controller_voltage} unit="V" />
-                ),
-            },
-            {
-                key: 'controller_temperature',
-                label: 'Controller temperature',
-                children: (
-                    <NumberValueComponent
-                        value={controller_temperature}
-                        unit="C°"
-                    />
-                ),
-            },
-            {
-                key: 'motor_temperature',
-                label: 'Motor temperature',
-                children: (
-                    <NumberValueComponent
-                        value={controller_motor_temperature}
-                        unit="C°"
-                    />
-                ),
-            },
-            {
-                key: 'current',
-                label: 'Current',
-                children: (
-                    <NumberValueComponent value={controller_current} unit="A" />
-                ),
-            },
-            {
-                key: 'speed',
-                label: 'Speed',
-                children: (
-                    <NumberValueComponent
-                        value={controller_speed}
-                        unit="Km/H"
-                    />
-                ),
-            },
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: (
-                    <StringValueComponent value={controller_manufacturer} />
-                ),
-            },
-            {
-                key: 'software_version',
-                label: 'Software version',
-                children: (
-                    <StringValueComponent value={controller_software_version} />
-                ),
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: (
-                    <StringValueComponent value={controller_hardware_version} />
-                ),
-            },
-            {
-                key: 'bootloader_version',
-                label: 'Bootloader version',
-                children: (
-                    <StringValueComponent value={controller_bootload_version} />
-                ),
-            },
-            {
-                key: 'model_number',
-                label: 'Model number',
-                children: (
-                    <StringValueComponent value={controller_model_number} />
-                ),
-            },
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringValueComponent value={controller_serial_number} />
-                ),
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringValueComponent value={controller_customer_number} />
-                ),
-            },
+            generateSimpleNumberListItem(
+                'Remaining capacity',
+                this.state.controller_remaining_capacity,
+                'mAh',
+            ),
+            generateSimpleNumberListItem(
+                'Remaining trip distance',
+                this.state.controller_remaining_distance,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Last trip distance',
+                this.state.controller_single_trip,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Cadence',
+                this.state.controller_cadence,
+                'RPM',
+            ),
+            generateSimpleNumberListItem(
+                'Torque value',
+                this.state.controller_torque,
+                'mV',
+            ),
+            generateSimpleNumberListItem(
+                'Voltage',
+                this.state.controller_voltage,
+                'V',
+            ),
+            generateSimpleNumberListItem(
+                'Controller temperature',
+                this.state.controller_temperature,
+                'C°',
+            ),
+            generateSimpleNumberListItem(
+                'Motor temperature',
+                this.state.controller_motor_temperature,
+                'C°',
+            ),
+            generateSimpleNumberListItem(
+                'Current',
+                this.state.controller_current,
+                'A',
+            ),
+            generateSimpleNumberListItem(
+                'Speed',
+                this.state.controller_speed,
+                'Km/H',
+            ),
+            generateSimpleStringListItem(
+                'Manufacturer',
+                this.state.controller_manufacturer,
+            ),
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.controller_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.controller_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Bootloader version',
+                this.state.controller_bootload_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.controller_model_number,
+            ),
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.controller_serial_number,
+            ),
+            generateSimpleStringListItem(
+                'Customer number',
+                this.state.controller_customer_number,
+            ),
         ];
     }
 
     getDisplayItems(): DescriptionsProps['items'] {
-        const {
-            display_serial_number,
-            display_bootload_version,
-            display_customer_number,
-            display_hardware_version,
-            display_manufacturer,
-            display_model_number,
-            display_software_version,
-            display_assist_levels,
-            display_ride_mode,
-            display_boost,
-            display_current_assist_level,
-            display_light,
-            display_button,
-            display_total_mileage,
-            display_single_mileage,
-            display_max_speed,
-            display_average_speed,
-            display_service_mileage,
-        } = this.state;
         return [
-            {
-                key: 'assist_levels_number',
-                label: 'Assist levels number',
-                children: (
-                    <NumberValueComponent value={display_assist_levels} />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'eco_sport_mode',
-                label: 'Mode',
-                children: (
-                    <BooleanValueComponent
-                        value={display_ride_mode}
-                        textTrue="SPORT"
-                        textFalse="ECO"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'boost',
-                label: 'Boost',
-                children: (
-                    <BooleanValueComponent
-                        value={display_boost}
-                        textTrue="On"
-                        textFalse="Off"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'current_assist_level',
-                label: 'Current assist',
-                children: (
-                    <StringValueComponent
-                        value={display_current_assist_level}
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'light',
-                label: 'Light',
-                children: (
-                    <BooleanValueComponent
-                        value={display_light}
-                        textTrue="On"
-                        textFalse="Off"
-                    />
-                ),
-            },
-            {
-                key: 'button',
-                label: 'Button',
-                children: (
-                    <BooleanValueComponent
-                        value={display_button}
-                        textTrue="Pressed"
-                        textFalse="Not pressed"
-                    />
-                ), // pressed or released
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'total_mileage',
-                label: 'Total mileage',
-                children: (
-                    <NumberValueComponent
-                        value={display_total_mileage}
-                        unit="Km"
-                    />
-                ),
-            },
-            {
-                key: 'single_mileage',
-                label: 'Single mileage',
-                children: (
-                    <NumberValueComponent
-                        value={display_single_mileage}
-                        unit="Km"
-                    />
-                ),
-            },
-            {
-                key: 'max_registered_speed',
-                label: 'Max registered speed',
-                children: (
-                    <NumberValueComponent
-                        value={display_max_speed}
-                        unit="Km/H"
-                    />
-                ),
-            },
-            {
-                key: 'average_speed',
-                label: 'Average speed',
-                children: (
-                    <NumberValueComponent
-                        value={display_average_speed}
-                        unit="Km/H"
-                    />
-                ),
-            },
-            {
-                key: 'service_mileage',
-                label: 'Mileage since last service',
-                children: (
-                    <NumberValueComponent
-                        value={display_service_mileage}
-                        unit="Km"
-                    />
-                ),
-            },
-            {
-                key: 'software_version',
-                label: 'Software version',
-                children: (
-                    <StringValueComponent value={display_software_version} />
-                ),
-            },
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: <StringValueComponent value={display_manufacturer} />,
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: (
-                    <StringValueComponent value={display_hardware_version} />
-                ),
-            },
-            {
-                key: 'model_number',
-                label: 'Model number',
-                children: <StringValueComponent value={display_model_number} />,
-            },
-            {
-                key: 'bootloader_version',
-                label: 'Bootloader bersion',
-                children: (
-                    <StringValueComponent value={display_bootload_version} />
-                ),
-            },
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringValueComponent value={display_serial_number} />
-                ),
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringValueComponent value={display_customer_number} />
-                ),
-            },
+            generateSimpleNumberListItem(
+                'Assist levels number',
+                this.state.display_assist_levels,
+            ),
+            generateSimpleBooleanListItem(
+                'Mode',
+                this.state.display_ride_mode,
+                'SPORT',
+                'ECO',
+            ),
+            generateSimpleBooleanListItem(
+                'Boost',
+                this.state.display_boost,
+                'ON',
+                'OFF',
+            ),
+            generateSimpleStringListItem(
+                'Current assist',
+                this.state.display_current_assist_level,
+            ),
+            generateSimpleBooleanListItem(
+                'Light',
+                this.state.display_light,
+                'ON',
+                'OFF',
+            ),
+            generateSimpleBooleanListItem(
+                'Button',
+                this.state.display_button,
+                'Pressed',
+                'Not pressed',
+            ),
+            generateSimpleNumberListItem(
+                'Total mileage',
+                this.state.display_total_mileage,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Single mileage',
+                this.state.display_single_mileage,
+                'Km',
+            ),
+            generateSimpleNumberListItem(
+                'Max registered speed',
+                this.state.display_max_speed,
+                'Km/H',
+            ),
+            generateSimpleNumberListItem(
+                'Average speed',
+                this.state.display_average_speed,
+                'Km/H',
+            ),
+            generateSimpleNumberListItem(
+                'Mileage since last service',
+                this.state.display_service_mileage,
+                'Km',
+            ),
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.display_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Manufacturer',
+                this.state.display_manufacturer,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.display_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.display_model_number,
+            ),
+            generateSimpleStringListItem(
+                'Bootloader version',
+                this.state.display_bootload_version,
+            ),
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.display_serial_number,
+            ),
+            generateSimpleStringListItem(
+                'Customer number',
+                this.state.display_customer_number,
+            ),
         ];
     }
 
     getSensorItems(): DescriptionsProps['items'] {
-        const {
-            sensor_serial_number,
-            sensor_bootload_version,
-            sensor_customer_number,
-            sensor_hardware_version,
-            sensor_manufacturer,
-            sensor_model_number,
-            sensor_software_version,
-            sensor_torque,
-            sensor_cadence,
-        } = this.state;
         return [
-            {
-                key: 'torque_value',
-                label: 'Torque value',
-                children: (
-                    <NumberValueComponent value={sensor_torque} unit="mV" />
-                ),
-            },
-            {
-                key: 'cadence',
-                label: 'Cadence',
-                children: (
-                    <NumberValueComponent value={sensor_cadence} unit="RPM" />
-                ),
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: (
-                    <StringValueComponent value={sensor_hardware_version} />
-                ),
-            },
-            {
-                key: 'model_number',
-                label: 'Model number',
-                children: <StringValueComponent value={sensor_model_number} />,
-            },
-            {
-                key: 'bootloader_version',
-                label: 'Bootloader bersion',
-                children: (
-                    <StringValueComponent value={sensor_bootload_version} />
-                ),
-            },
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: <StringValueComponent value={sensor_serial_number} />,
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringValueComponent value={sensor_customer_number} />
-                ),
-            },
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: <StringValueComponent value={sensor_manufacturer} />,
-            },
-            {
-                key: 'software_version',
-                label: 'Software version',
-                children: (
-                    <StringValueComponent value={sensor_software_version} />
-                ),
-            },
+            generateSimpleNumberListItem(
+                'Torque value',
+                this.state.sensor_torque,
+                'mV',
+            ),
+            generateSimpleNumberListItem(
+                'Cadence',
+                this.state.sensor_cadence,
+                'RPM',
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.sensor_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.sensor_model_number,
+            ),
+            generateSimpleStringListItem(
+                'Bootloader version',
+                this.state.sensor_bootload_version,
+            ),
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.sensor_serial_number,
+            ),
+            generateSimpleStringListItem(
+                'Customer number',
+                this.state.sensor_customer_number,
+            ),
+            generateSimpleStringListItem(
+                'Manufacturer',
+                this.state.sensor_manufacturer,
+            ),
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.sensor_software_version,
+            ),
         ];
     }
 
     getBesstItems(): DescriptionsProps['items'] {
-        const {
-            besst_hardware_version,
-            besst_software_version,
-            besst_serial_number,
-        } = this.state;
         return [
-            {
-                key: 'software_version',
-                label: 'Software version',
-                children: (
-                    <StringValueComponent value={besst_software_version} />
-                ), //TODO add editing
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: (
-                    <StringValueComponent value={besst_hardware_version} />
-                ), //TODO add editing
-            },
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: <StringValueComponent value={besst_serial_number} />, //TODO add editing
-            },
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.besst_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.besst_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.besst_serial_number,
+            ),
         ];
     }
 
@@ -591,26 +343,8 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
+                            duration: 10,
                         });
-                        setTimeout(() => {
-                            //TODO
-                            // const { lastUpdateTime } = this.state;
-                            // if (Date.now() - lastUpdateTime < 3000) {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'success',
-                            //         content: 'Read sucessfully!',
-                            //         duration: 2,
-                            //     });
-                            // } else {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'error',
-                            //         content: 'Error during reading!',
-                            //         duration: 2,
-                            //     });
-                            // }
-                        }, 3000);
                     }}
                 />
             </div>
