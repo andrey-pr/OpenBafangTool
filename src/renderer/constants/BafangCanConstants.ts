@@ -4,8 +4,11 @@ export enum BesstRequestType {
     BESST_HW = 0x30,
     BESST_SN = 0x31,
     BESST_SW = 0x32,
+    BESST_ACTIVATE = 0x34,
     BESST_RESET = 0x39,
 }
+
+export const BesstActivationCode = [0x01, 0x01, 0x00, 0x00];
 
 export enum CanOperation {
     WRITE_CMD = 0x00,
@@ -26,13 +29,13 @@ export enum DeviceNetworkId {
     BROADCAST = 0x1f,
 }
 
-type CanCommand = {
+export type CanCommand = {
     canCommandCode: number;
     canCommandSubCode: number;
     applicableDevices: DeviceNetworkId[];
 };
 
-export const CanCommandsList: {
+export const CanReadCommandsList: {
     [key: string]: CanCommand;
 } = {
     HardwareVersion: {
@@ -98,6 +101,11 @@ export const CanCommandsList: {
             DeviceNetworkId.DISPLAY,
         ],
     },
+    MotorSpeedParameters: {
+        canCommandCode: 0x32,
+        canCommandSubCode: 0x03,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
     DisplayDataBlock1: {
         canCommandCode: 0x63,
         canCommandSubCode: 0x01,
@@ -106,6 +114,53 @@ export const CanCommandsList: {
     DisplayDataBlock2: {
         canCommandCode: 0x63,
         canCommandSubCode: 0x02,
+        applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
+};
+
+export const CanWriteCommandsList: {
+    [key: string]: CanCommand;
+} = {
+    SerialNumber: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x03,
+        applicableDevices: [
+            DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.DRIVE_UNIT,
+            DeviceNetworkId.TORQUE_SENSOR,
+        ],
+    },
+    CustomerNumber: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x04,
+        applicableDevices: [
+            DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.DRIVE_UNIT,
+            DeviceNetworkId.TORQUE_SENSOR,
+        ],
+    },
+    Manufacturer: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x05,
+        applicableDevices: [
+            DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.DRIVE_UNIT,
+            DeviceNetworkId.TORQUE_SENSOR,
+        ],
+    },
+    DisplayTotalMileage: {
+        canCommandCode: 0x62,
+        canCommandSubCode: 0x01,
+        applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
+    DisplayTime: {
+        canCommandCode: 0x62,
+        canCommandSubCode: 0x02,
+        applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
+    DisplaySingleMileage: {
+        canCommandCode: 0x62,
+        canCommandSubCode: 0x03,
         applicableDevices: [DeviceNetworkId.DISPLAY],
     },
     CleanServiceMileage: {

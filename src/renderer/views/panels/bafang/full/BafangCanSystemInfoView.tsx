@@ -38,7 +38,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         this.state = {
             ...connection.controllerCodes,
-            ...connection.displayState,
             ...connection.displayData,
             ...connection.displayCodes,
             ...connection.sensorCodes,
@@ -55,6 +54,12 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             controller_remaining_capacity: NotLoadedYet,
             controller_single_trip: NotLoadedYet,
             controller_remaining_distance: NotLoadedYet,
+            display_assist_levels: NotLoadedYet,
+            display_ride_mode: NotLoadedYet,
+            display_boost: NotLoadedYet,
+            display_current_assist_level: NotLoadedYet,
+            display_light: NotLoadedYet,
+            display_button: NotLoadedYet,
             sensor_torque: NotLoadedYet,
             sensor_cadence: NotLoadedYet,
         };
@@ -98,8 +103,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             controller_voltage,
             controller_temperature,
             controller_motor_temperature,
-            controller_walk_assistance,
-            controller_calories,
             controller_serial_number,
             controller_bootload_version,
             controller_customer_number,
@@ -183,27 +186,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                     <NumberValueComponent
                         value={controller_motor_temperature}
                         unit="C°"
-                    />
-                ),
-            },
-            {
-                key: 'walk_assist',
-                label: 'Walk assist status',
-                children: (
-                    <BooleanValueComponent
-                        value={controller_walk_assistance}
-                        textTrue="On"
-                        textFalse="Off"
-                    />
-                ),
-            },
-            {
-                key: 'calories',
-                label: 'Calories',
-                children: (
-                    <NumberValueComponent
-                        value={controller_calories}
-                        unit="Cal."
                     />
                 ),
             },

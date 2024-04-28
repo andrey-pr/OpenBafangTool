@@ -16,6 +16,7 @@ import NumberValueComponent from '../../../components/NumberValueComponent';
 import BooleanValueComponent from '../../../components/BooleanValueComponent';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
+import StringValueComponent from '../../../components/StringValueComponent';
 
 const { Option } = Select;
 
@@ -77,8 +78,6 @@ class BafangCanMotorSettingsView extends React.Component<
             controller_voltage,
             controller_temperature,
             controller_motor_temperature,
-            controller_walk_assistance,
-            controller_calories,
             controller_remaining_capacity,
             controller_single_trip,
             controller_remaining_distance,
@@ -162,29 +161,6 @@ class BafangCanMotorSettingsView extends React.Component<
                     <NumberValueComponent
                         value={controller_motor_temperature}
                         unit="C°"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'walk_assist',
-                label: 'Walk assist status',
-                children: (
-                    <BooleanValueComponent
-                        value={controller_walk_assistance}
-                        textTrue="On"
-                        textFalse="Off"
-                    />
-                ),
-                contentStyle: { width: '50%' },
-            },
-            {
-                key: 'calories',
-                label: 'Calories',
-                children: (
-                    <NumberValueComponent
-                        value={controller_calories}
-                        unit="Cal."
                     />
                 ),
                 contentStyle: { width: '50%' },
@@ -311,45 +287,21 @@ class BafangCanMotorSettingsView extends React.Component<
                 key: 'software_version',
                 label: 'Software version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_software_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_software_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={controller_software_version} />
                 ),
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_hardware_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_hardware_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={controller_hardware_version} />
                 ),
             },
             {
                 key: 'model_number',
                 label: 'Model number',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_model_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_model_number: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={controller_model_number} />
                 ),
             },
             {
@@ -386,15 +338,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 key: 'bootloader_version',
                 label: 'Bootloader version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_bootload_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_bootload_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={controller_bootload_version} />
                 ),
             },
         ];

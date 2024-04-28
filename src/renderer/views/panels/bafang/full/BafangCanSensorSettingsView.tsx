@@ -10,6 +10,7 @@ import {
 } from '../../../../types/BafangCanSystemTypes';
 import NumberValueComponent from '../../../components/NumberValueComponent';
 import { NotLoadedYet } from '../../../../types/no_data';
+import StringValueComponent from '../../../components/StringValueComponent';
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -94,46 +95,20 @@ class BafangCanSensorSettingsView extends React.Component<
                 key: 'software_version',
                 label: 'Software version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_software_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_software_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={sensor_software_version} />
                 ),
             },
             {
                 key: 'hardware_version',
                 label: 'Hardware version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_hardware_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_hardware_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={sensor_hardware_version} />
                 ),
             },
             {
                 key: 'model_number',
                 label: 'Model number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_model_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_model_number: e,
-                            });
-                        }}
-                    />
-                ),
+                children: <StringValueComponent value={sensor_model_number} />,
             },
             {
                 key: 'manufacturer',
@@ -169,15 +144,7 @@ class BafangCanSensorSettingsView extends React.Component<
                 key: 'bootloader_version',
                 label: 'Bootloader version',
                 children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_bootload_version}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_bootload_version: e,
-                            });
-                        }}
-                    />
+                    <StringValueComponent value={sensor_bootload_version} />
                 ),
             },
         ];
