@@ -10,7 +10,7 @@ import {
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../../../device/BafangUartMotor';
+import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import {
     AssistLevel,
     BafangUartMotorBasicParameters,
@@ -22,8 +22,8 @@ import {
     SpeedLimitByDisplay,
     SpeedmeterType,
     ThrottleMode,
-} from '../../../../types/BafangUartMotorTypes';
-import { lowVoltageLimits } from '../../../../constants/parameter_limits';
+} from '../../../../../types/BafangUartMotorTypes';
+import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import StringInputComponent from '../../../components/StringInput';
 

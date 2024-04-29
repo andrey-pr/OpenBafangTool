@@ -11,12 +11,6 @@ import {
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
-import BafangCanSystem from '../../../../device/BafangCanSystem';
-import {
-    BafangCanDisplayCodes,
-    BafangCanDisplayData,
-    BafangCanDisplayState,
-} from '../../../../types/BafangCanSystemTypes';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -26,6 +20,8 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
+import { BafangCanDisplayCodes, BafangCanDisplayData, BafangCanDisplayState } from '../../../../../types/BafangCanSystemTypes';
 
 dayjs.extend(customParseFormat);
 

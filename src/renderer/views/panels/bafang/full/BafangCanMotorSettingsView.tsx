@@ -3,14 +3,14 @@ import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
-import BafangCanSystem from '../../../../device/BafangCanSystem';
+import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
     BafangCanWheelDiameterTable,
-} from '../../../../types/BafangCanSystemTypes';
-import { NotAvailable, NotLoadedYet } from '../../../../types/no_data';
+} from '../../../../../types/BafangCanSystemTypes';
+import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
 import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';

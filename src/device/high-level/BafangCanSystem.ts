@@ -1,7 +1,8 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
-import { DeviceName } from '../models/DeviceType';
 import IConnection from './Connection';
+import HID from 'node-hid';
+import { DeviceName } from '../../types/DeviceType';
 import {
     BafangBesstCodes,
     BafangCanControllerCodes,
@@ -18,22 +19,10 @@ import {
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
     BafangCanWheelDiameterTable,
-} from '../types/BafangCanSystemTypes';
-import HID from 'node-hid';
-import { NotAvailable, NotLoadedYet } from '../types/no_data';
-import {
-    CanOperation,
-    DeviceNetworkId,
-    BesstRequestType,
-    CanReadCommandsList,
-    CanWriteCommandsList,
-    CanCommand,
-    BesstActivationCode,
-} from '../constants/BafangCanConstants';
-import {
-    decodeCurrentAssistLevel,
-    hexMsgDecoder,
-} from '../utils/BafangCanUtils';
+} from '../../types/BafangCanSystemTypes';
+import { NotAvailable, NotLoadedYet } from '../../types/no_data';
+import { decodeCurrentAssistLevel, hexMsgDecoder } from '../../utils/BafangCanUtils';
+import { BesstActivationCode, BesstRequestType, CanCommand, CanOperation, CanReadCommandsList, CanWriteCommandsList, DeviceNetworkId } from '../../constants/BafangCanConstants';
 
 type BesstRequestPacket = {
     data: number[];

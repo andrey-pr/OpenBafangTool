@@ -3,11 +3,11 @@ import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
-import BafangCanSystem from '../../../../device/BafangCanSystem';
+import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-} from '../../../../types/BafangCanSystemTypes';
+} from '../../../../../types/BafangCanSystemTypes';
 import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 type SettingsProps = {

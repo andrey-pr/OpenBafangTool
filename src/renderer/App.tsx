@@ -2,7 +2,7 @@
 import React from 'react';
 import DeviceSelectionView from './views/connect/DeviceSelectionView';
 import MainView from './views/main/MainView';
-import IConnection from './device/Connection';
+import IConnection from '../device/high-level/Connection';
 import InterfaceType from './models/InterfaceType';
 
 type AppProps = {};

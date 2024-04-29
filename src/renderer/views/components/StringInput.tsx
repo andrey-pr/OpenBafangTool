@@ -1,6 +1,6 @@
 import { Input, Tooltip } from 'antd';
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
 
 type StringInputProps = {
     value: string | NoData;

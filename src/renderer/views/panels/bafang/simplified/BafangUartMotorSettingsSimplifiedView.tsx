@@ -11,7 +11,7 @@ import {
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../../../device/BafangUartMotor';
+import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import {
     BafangUartMotorBasicParameters,
     BafangUartMotorInfo,
@@ -21,12 +21,10 @@ import {
     PedalSensorSignals,
     SpeedLimitByDisplay,
     ThrottleMode,
-} from '../../../../types/BafangUartMotorTypes';
+} from '../../../../../types/BafangUartMotorTypes';
 import {
-    BatteryTypes,
-    LowVoltageLimitsByBatteryType,
     lowVoltageLimits,
-} from '../../../../constants/parameter_limits';
+} from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 
 const { Title } = Typography;
