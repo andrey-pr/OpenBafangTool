@@ -48,6 +48,8 @@ class BesstDevice {
         this.getSerialNumber = this.getSerialNumber.bind(this);
         this.getSoftwareVersion = this.getSoftwareVersion.bind(this);
         this.getHardwareVersion = this.getHardwareVersion.bind(this);
+        this.sendCanFrame = this.sendCanFrame.bind(this);
+        this.sendCanFrameImmediately = this.sendCanFrameImmediately.bind(this);
         this.reset = this.reset.bind(this);
         this.emitter = new EventEmitter();
         this.device?.addListener('data', this.processReadedData);
@@ -60,7 +62,10 @@ class BesstDevice {
             return;
         }
         let packet = this.packetQueue.shift() as BesstWritePacket;
-        if (packet.type === BesstPacketType.CAN_REQUEST) {
+        if (
+            packet.type === BesstPacketType.CAN_REQUEST ||
+            packet.type === BesstPacketType.BESST_ACTIVATE
+        ) {
             packet.promise?.resolve();
         } else if (packet.type === BesstPacketType.BESST_HV) {
             setTimeout(() => {
@@ -253,23 +258,62 @@ class BesstDevice {
         });
     }
 
-    public activateDriveUnit(): void {
-        this.packetQueue.push(
-            generateBesstWritePacket(
-                BesstPacketType.BESST_ACTIVATE,
-                BesstActivationCode,
-            ),
-        );
-    }
-
-    public sendCanFrame(data: number[]): Promise<void> {
+    public activateDriveUnit(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.push(
                 generateBesstWritePacket(
-                    BesstPacketType.CAN_REQUEST,
-                    data,
+                    BesstPacketType.BESST_ACTIVATE,
+                    BesstActivationCode,
                     resolve,
                     reject,
+                ),
+            );
+        });
+    }
+
+    public sendCanFrame(
+        source: DeviceNetworkId,
+        target: DeviceNetworkId,
+        canOperationCode: CanOperation,
+        canCommandCode: number,
+        canCommandSubCode: number,
+        data = [0]
+    ): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.packetQueue.push(
+                buildBesstCanCommandPacket(
+                    source,
+                    target,
+                    canOperationCode,
+                    canCommandCode,
+                    canCommandSubCode,
+                    resolve,
+                    reject,
+                    data
+                ),
+            );
+        });
+    }
+
+    public sendCanFrameImmediately(
+        source: DeviceNetworkId,
+        target: DeviceNetworkId,
+        canOperationCode: CanOperation,
+        canCommandCode: number,
+        canCommandSubCode: number,
+        data = [0]
+    ): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.packetQueue.unshift(
+                buildBesstCanCommandPacket(
+                    source,
+                    target,
+                    canOperationCode,
+                    canCommandCode,
+                    canCommandSubCode,
+                    resolve,
+                    reject,
+                    data
                 ),
             );
         });

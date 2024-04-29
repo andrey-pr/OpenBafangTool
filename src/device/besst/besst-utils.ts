@@ -1,4 +1,4 @@
-import { BesstReadedCanFrame, BesstPacketType } from './besst-types';
+import { BesstReadedCanFrame, BesstPacketType, DeviceNetworkId } from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
     return String.fromCharCode.apply(
@@ -52,11 +52,13 @@ export function generateBesstWritePacket(
 }
 
 export function buildBesstCanCommandPacket(
-    source: number,
-    target: number,
+    source: DeviceNetworkId,
+    target: DeviceNetworkId,
     canOperationCode: number,
     canCommandCode: number,
     canCommandSubCode: number,
+    resolve?: any,
+    reject?: any,
     data: number[] = [0],
 ) {
     return generateBesstWritePacket(
@@ -67,6 +69,8 @@ export function buildBesstCanCommandPacket(
             ((target & 0b11111) << 3) + (canOperationCode & 0b111),
             source & 0b11111,
         ],
+        resolve,
+        reject,
         data,
     );
 }
