@@ -18,10 +18,10 @@ import {
     DeviceType,
 } from '../../models/DeviceType';
 import InterfaceType from '../../models/InterfaceType';
-import HID from 'node-hid';
-import filterPorts from '../../../device/serial-patcher';
+import filterPorts from '../../../device/serial/serial-patcher';
 import { SerialPort } from 'serialport';
-import { filterHidDevices as filterBesstDevices } from '../../utils/BafangCanUtils';
+import { listBesstDevices } from '../../../device/besst/besst';
+import HID from 'node-hid';
 
 const { Option } = Select;
 
@@ -34,7 +34,7 @@ type DeviceSelectionProps = {
 
 type DeviceSelectionState = {
     portList: string[];
-    hidDeviceList: HID.Device[];
+    besstDeviceList: HID.Device[];
     connectionChecked: boolean;
     connection: IConnection | null;
     interfaceType: InterfaceType | null;
@@ -55,7 +55,7 @@ class DeviceSelectionView extends React.Component<
         super(props);
         this.state = {
             portList: [],
-            hidDeviceList: [],
+            besstDeviceList: [],
             connectionChecked: false,
             connection: null,
             interfaceType: null,
@@ -77,7 +77,7 @@ class DeviceSelectionView extends React.Component<
                 });
             });
 
-            this.setState({ hidDeviceList: HID.devices() });
+            this.setState({ besstDeviceList: listBesstDevices() });
         }, 1000);
     }
 
@@ -85,7 +85,7 @@ class DeviceSelectionView extends React.Component<
         const { deviceSelectionHook } = this.props;
         const {
             portList,
-            hidDeviceList,
+            besstDeviceList,
             connectionChecked,
             connection,
             interfaceType,
@@ -282,9 +282,7 @@ class DeviceSelectionView extends React.Component<
                                     style={{ minWidth: '150px' }}
                                 >
                                     <Option value="simulator">Simulator</Option>
-                                    {filterBesstDevices(
-                                        hidDeviceList,
-                                    ).map((item) => {
+                                    {besstDeviceList.map((item) => {
                                         return (
                                             <Option
                                                 value={item.path}

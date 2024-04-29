@@ -21,9 +21,6 @@ import ParameterInputComponent from '../../../components/ParameterInput';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import NumberValueComponent from '../../../components/NumberValueComponent';
-import BooleanValueComponent from '../../../components/BooleanValueComponent';
-import StringValueComponent from '../../../components/StringValueComponent';
-import { NotLoadedYet } from '../../../../types/no_data';
 import {
     generateSimpleBooleanListItem,
     generateSimpleNumberListItem,
@@ -42,6 +39,7 @@ type SettingsState = BafangCanDisplayData &
         currentTimeToSet: dayjs.Dayjs | null;
     };
 
+//TODO add redux
 /* eslint-disable camelcase */
 class BafangCanDisplaySettingsView extends React.Component<
     SettingsProps,

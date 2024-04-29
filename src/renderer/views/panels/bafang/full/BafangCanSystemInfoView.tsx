@@ -32,6 +32,7 @@ type InfoState = BafangCanControllerRealtime &
     BafangCanSensorCodes &
     BafangBesstCodes;
 
+//TODO add redux
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     //TODO redesign as a dashboard and remove version fields
     constructor(props: any) {

@@ -1,9 +1,4 @@
-import { BafangCanAssistLevel } from "../types/BafangCanSystemTypes";
-import HID from 'node-hid';
-
-export function filterHidDevices(devices: HID.Device[]): HID.Device[] {
-    return devices.filter((device) => device.product === 'BaFang Besst');
-}
+import { BafangCanAssistLevel } from '../types/BafangCanSystemTypes';
 
 export function hexMsgDecoder(msg: number[]) {
     return String.fromCharCode.apply(

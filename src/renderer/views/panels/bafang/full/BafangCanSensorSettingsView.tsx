@@ -8,7 +8,6 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../types/BafangCanSystemTypes';
-import StringValueComponent from '../../../components/StringValueComponent';
 import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 type SettingsProps = {
@@ -17,6 +16,7 @@ type SettingsProps = {
 
 type SettingsState = BafangCanSensorRealtime & BafangCanSensorCodes;
 
+//TODO add redux
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
     SettingsProps,

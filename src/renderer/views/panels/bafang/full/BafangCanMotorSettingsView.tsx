@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Descriptions, FloatButton, message, Select } from 'antd';
+import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import StringInputComponent from '../../../components/StringInput';
@@ -8,18 +8,12 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
-    BafangCanWheel,
     BafangCanWheelDiameterTable,
 } from '../../../../types/BafangCanSystemTypes';
 import { NotAvailable, NotLoadedYet } from '../../../../types/no_data';
-import NumberValueComponent from '../../../components/NumberValueComponent';
-import BooleanValueComponent from '../../../components/BooleanValueComponent';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
-import StringValueComponent from '../../../components/StringValueComponent';
 import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
-
-const { Option } = Select;
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -29,6 +23,7 @@ type SettingsState = BafangCanControllerRealtime &
     BafangCanControllerSpeedParameters &
     BafangCanControllerCodes;
 
+//TODO add redux
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
     //TODO add param1

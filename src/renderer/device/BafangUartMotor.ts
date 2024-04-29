@@ -20,7 +20,7 @@ import {
     checkThrottleParameters,
 } from '../types/BafangUartMotorTypes';
 import IConnection from './Connection';
-import { closePort, openPort, writeToPort } from '../../device/port';
+import { closePort, openPort, writeToPort } from '../../device/serial/serial-port';
 
 const sleep = (ms: number) =>
     new Promise((resolve) => {
