@@ -1,6 +1,18 @@
 import HID from 'node-hid';
-import { generateBesstRequestPacket, hexMsgDecoder, parseCanResponseFromBesst } from './besst-utils';
-import { BesstRequestType } from './besst-types';
+import {
+    buildBesstCanCommandPacket,
+    generateBesstWritePacket,
+    hexMsgDecoder,
+    parseCanResponseFromBesst,
+} from './besst-utils';
+import {
+    BesstWritePacket,
+    BesstPacketType,
+    BesstActivationCode,
+    DeviceNetworkId,
+    CanOperation,
+    BesstReadedCanFrame,
+} from './besst-types';
 import { EventEmitter } from 'stream';
 
 export function listBesstDevices(): HID.Device[] {
@@ -10,6 +22,17 @@ export function listBesstDevices(): HID.Device[] {
 class BesstDevice {
     private device?: HID.HID;
     public readonly emitter: EventEmitter;
+
+    private serialNumberPromise?: { resolve: any; reject: any } = undefined;
+    private softwareVersionPromise?: { resolve: any; reject: any } = undefined;
+    private hardwareVersionPromise?: { resolve: any; reject: any } = undefined;
+
+    private packetQueue: BesstWritePacket[] = [];
+
+    private lastMultiframeCanResponse: {
+        [key: number]: BesstReadedCanFrame;
+    } = [];
+
     constructor(path?: string, vid?: number, pid?: number) {
         if (!path && (!vid || !pid)) {
             throw new Error();
@@ -19,8 +42,44 @@ class BesstDevice {
         } else {
             this.device = new HID.HID(pid as number, vid as number);
         }
-        this.device?.addListener('data', this.processReadedData);
+        this.processReadedData = this.processReadedData.bind(this);
+        this.processWriteQueue = this.processWriteQueue.bind(this);
+        this.processCanFrame = this.processCanFrame.bind(this);
+        this.getSerialNumber = this.getSerialNumber.bind(this);
+        this.getSoftwareVersion = this.getSoftwareVersion.bind(this);
+        this.getHardwareVersion = this.getHardwareVersion.bind(this);
+        this.reset = this.reset.bind(this);
         this.emitter = new EventEmitter();
+        this.device?.addListener('data', this.processReadedData);
+        setTimeout(this.processWriteQueue, 100);
+    }
+
+    private processWriteQueue(): void {
+        if (this.packetQueue.length === 0) {
+            setTimeout(this.processWriteQueue, 100);
+            return;
+        }
+        let packet = this.packetQueue.shift() as BesstWritePacket;
+        if (packet.type === BesstPacketType.CAN_REQUEST) {
+            packet.promise?.resolve();
+        } else if (packet.type === BesstPacketType.BESST_HV) {
+            setTimeout(() => {
+                this.hardwareVersionPromise?.reject();
+                this.hardwareVersionPromise = undefined;
+            }, packet.timeout);
+        } else if (packet.type === BesstPacketType.BESST_SV) {
+            setTimeout(() => {
+                this.softwareVersionPromise?.reject();
+                this.softwareVersionPromise = undefined;
+            }, packet.timeout);
+        } else if (packet.type === BesstPacketType.BESST_SN) {
+            setTimeout(() => {
+                this.serialNumberPromise?.reject();
+                this.serialNumberPromise = undefined;
+            }, packet.timeout);
+        }
+        this.device?.write(packet.data);
+        setTimeout(this.processWriteQueue, packet.interval + 10);
     }
 
     private processReadedData(data: Uint8Array): void {
@@ -31,46 +90,189 @@ class BesstDevice {
             case 0x11:
                 console.log('UART bike connected - its not supported');
                 break;
-            case BesstRequestType.CAN_RESPONSE:
-                parseCanResponseFromBesst(array).forEach(console.log);
+            case BesstPacketType.CAN_RESPONSE:
+                parseCanResponseFromBesst(array).forEach(this.processCanFrame);
                 break;
-            case BesstRequestType.BESST_HW:
-                console.log('HW:', hexMsgDecoder(array));
+            case BesstPacketType.BESST_HV:
+                this.hardwareVersionPromise?.resolve(hexMsgDecoder(array));
+                this.hardwareVersionPromise = undefined;
                 break;
-            case BesstRequestType.BESST_SN:
-                console.log('SN:', hexMsgDecoder(array));
+            case BesstPacketType.BESST_SN:
+                this.serialNumberPromise?.resolve(hexMsgDecoder(array));
+                this.serialNumberPromise = undefined;
                 break;
-            case BesstRequestType.BESST_SW:
-                console.log('SW:', hexMsgDecoder(array));
+            case BesstPacketType.BESST_SV:
+                this.softwareVersionPromise?.resolve(hexMsgDecoder(array));
+                this.softwareVersionPromise = undefined;
                 break;
-            case BesstRequestType.BESST_RESET:
-            case BesstRequestType.BESST_ACTIVATE:
+            case BesstPacketType.BESST_RESET:
+            case BesstPacketType.BESST_ACTIVATE:
                 break;
             default:
-                console.log('Unknown message type - not supperted yet');
+                console.log('Unknown message type - not supported yet');
                 break;
         }
     }
 
-    public serialNumber(): void {
-        this.device?.write(
-            generateBesstRequestPacket(BesstRequestType.BESST_SN, [0, 0, 0, 0])
-                .data,
+    private processCanFrame(packet: BesstReadedCanFrame): void {
+        if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
+            if (packet.canOperationCode === CanOperation.MULTIFRAME_START) {
+                this.lastMultiframeCanResponse[packet.sourceDeviceCode] =
+                    packet;
+                this.lastMultiframeCanResponse[packet.sourceDeviceCode].data =
+                    [];
+                this.packetQueue.unshift(
+                    buildBesstCanCommandPacket(
+                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+                            .targetDeviceCode,
+                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+                            .sourceDeviceCode,
+                        CanOperation.NORMAL_ACK,
+                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+                            .canCommandCode,
+                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+                            .canCommandSubCode,
+                    ),
+                );
+            } else if (packet.canOperationCode === CanOperation.MULTIFRAME) {
+                if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
+                    this.lastMultiframeCanResponse[
+                        packet.sourceDeviceCode
+                    ].data = [
+                        ...this.lastMultiframeCanResponse[
+                            packet.sourceDeviceCode
+                        ].data,
+                        ...packet.data,
+                    ];
+                    this.packetQueue.unshift(
+                        buildBesstCanCommandPacket(
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].targetDeviceCode,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].sourceDeviceCode,
+                            CanOperation.NORMAL_ACK,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].canCommandCode,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].canCommandSubCode,
+                        ),
+                    );
+                }
+            } else if (
+                packet.canOperationCode === CanOperation.MULTIFRAME_END
+            ) {
+                if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
+                    this.lastMultiframeCanResponse[
+                        packet.sourceDeviceCode
+                    ].data = [
+                        ...this.lastMultiframeCanResponse[
+                            packet.sourceDeviceCode
+                        ].data,
+                        ...packet.data,
+                    ];
+                    this.emitter.emit(
+                        'can',
+                        this.lastMultiframeCanResponse[packet.sourceDeviceCode],
+                    );
+                    this.packetQueue.unshift(
+                        buildBesstCanCommandPacket(
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].targetDeviceCode,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].sourceDeviceCode,
+                            CanOperation.NORMAL_ACK,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].canCommandCode,
+                            this.lastMultiframeCanResponse[
+                                packet.sourceDeviceCode
+                            ].canCommandSubCode,
+                        ),
+                    );
+                    delete this.lastMultiframeCanResponse[
+                        packet.sourceDeviceCode
+                    ];
+                }
+            } else if (packet.canOperationCode === CanOperation.NORMAL_ACK) {
+                this.emitter.emit('can', packet);
+            }
+        } else if (packet.canOperationCode === CanOperation.WRITE_CMD) {
+            this.emitter.emit('can', packet);
+        } else {
+            console.log('unknown command');
+        }
+    }
+
+    public getSerialNumber(): Promise<string> {
+        this.packetQueue.push(
+            generateBesstWritePacket(BesstPacketType.BESST_SN, [0, 0, 0, 0]),
+        );
+        return new Promise<string>((resolve, reject) => {
+            this.serialNumberPromise = { resolve, reject };
+        });
+    }
+
+    public getSoftwareVersion(): Promise<string> {
+        this.packetQueue.push(
+            generateBesstWritePacket(BesstPacketType.BESST_SV, [0, 0, 0, 0]),
+        );
+        return new Promise<string>((resolve, reject) => {
+            this.softwareVersionPromise = { resolve, reject };
+        });
+    }
+
+    public getHardwareVersion(): Promise<string> {
+        this.packetQueue.push(
+            generateBesstWritePacket(BesstPacketType.BESST_HV, [0, 0, 0, 0]),
+        );
+        return new Promise<string>((resolve, reject) => {
+            this.hardwareVersionPromise = { resolve, reject };
+        });
+    }
+
+    public reset(): Promise<void> {
+        let vid = this.device?.getDeviceInfo().vendorId;
+        let pid = this.device?.getDeviceInfo().productId;
+        this.device?.removeAllListeners();
+        this.packetQueue = [];
+        this.packetQueue.push(
+            generateBesstWritePacket(BesstPacketType.BESST_RESET, [0, 0, 0, 0]),
+        );
+        return new Promise<void>(async (resolve) => {
+            setTimeout(() => {
+                this.device = new HID.HID(vid, pid);
+                this.device.addListener('data', this.processReadedData);
+                resolve();
+            }, 4500);
+        });
+    }
+
+    public activateDriveUnit(): void {
+        this.packetQueue.push(
+            generateBesstWritePacket(
+                BesstPacketType.BESST_ACTIVATE,
+                BesstActivationCode,
+            ),
         );
     }
 
-    public softwareVersion(): void {
-        this.device?.write(
-            generateBesstRequestPacket(BesstRequestType.BESST_SW, [0, 0, 0, 0])
-                .data,
-        );
-    }
-
-    public hardwareVersion(): void {
-        this.device?.write(
-            generateBesstRequestPacket(BesstRequestType.BESST_HW, [0, 0, 0, 0])
-                .data,
-        );
+    public sendCanFrame(data: number[]): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.packetQueue.push(
+                generateBesstWritePacket(
+                    BesstPacketType.CAN_REQUEST,
+                    data,
+                    resolve,
+                    reject,
+                ),
+            );
+        });
     }
 
     public disconnect(): void {
@@ -78,3 +280,5 @@ class BesstDevice {
         this.device = undefined;
     }
 }
+
+export default BesstDevice;

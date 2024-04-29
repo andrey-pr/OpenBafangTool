@@ -1,9 +1,9 @@
-export enum BesstRequestType {
+export enum BesstPacketType {
     CAN_REQUEST = 0x15,
     CAN_RESPONSE = 0x12,
-    BESST_HW = 0x30,
+    BESST_HV = 0x30,
     BESST_SN = 0x31,
-    BESST_SW = 0x32,
+    BESST_SV = 0x32,
     BESST_ACTIVATE = 0x34,
     BESST_RESET = 0x39,
 }
@@ -15,10 +15,10 @@ export enum CanOperation {
     READ_CMD = 0x01,
     NORMAL_ACK = 0x02,
     ERROR_ACK = 0x03,
-    LONG_START_CMD = 0x04,
-    LONG_TRANG_CMD = 0x05,
-    LONG_END_CMD = 0x06,
-    LONG_WARNING_CMD = 0x07,
+    MULTIFRAME_START = 0x04,
+    MULTIFRAME = 0x05,
+    MULTIFRAME_END = 0x06,
+    MULTIFRAME_WARNING = 0x07,
 }
 
 export enum DeviceNetworkId {
@@ -29,7 +29,7 @@ export enum DeviceNetworkId {
     BROADCAST = 0x1f,
 }
 
-export type BesstCanResponsePacket = {
+export type BesstReadedCanFrame = {
     canCommandCode: number;
     canCommandSubCode: number;
     canOperationCode: CanOperation;
@@ -37,4 +37,12 @@ export type BesstCanResponsePacket = {
     targetDeviceCode: DeviceNetworkId;
     dataLength: number;
     data: number[];
+};
+
+export type BesstWritePacket = {
+    data: number[];
+    interval: number;
+    timeout: number;
+    type: BesstPacketType;
+    promise?: { resolve: any; reject: any }; // TODO fix types
 };

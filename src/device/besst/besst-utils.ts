@@ -1,4 +1,4 @@
-import { BesstCanResponsePacket, BesstRequestType } from './besst-types';
+import { BesstReadedCanFrame, BesstPacketType } from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
     return String.fromCharCode.apply(
@@ -7,9 +7,11 @@ export function hexMsgDecoder(msg: number[]) {
     );
 }
 
-export function generateBesstRequestPacket(
+export function generateBesstWritePacket(
     actionCode: number,
     cmd: number[],
+    resolve?: any,
+    reject?: any,
     data: number[] = [0],
 ) {
     let msg = [0, actionCode || 0x15, 0, 0, ...cmd, data.length || 0, ...data];
@@ -17,21 +19,21 @@ export function generateBesstRequestPacket(
     let interval;
     let timeout;
     switch (actionCode) {
-        case BesstRequestType.BESST_HW:
-        case BesstRequestType.BESST_SW:
-        case BesstRequestType.BESST_SN:
+        case BesstPacketType.BESST_HV:
+        case BesstPacketType.BESST_SV:
+        case BesstPacketType.BESST_SN:
             interval = 90;
             timeout = 200;
             break;
-        case BesstRequestType.CAN_REQUEST:
+        case BesstPacketType.CAN_REQUEST:
             interval = 120;
             timeout = 1000;
             break;
-        case BesstRequestType.BESST_RESET:
+        case BesstPacketType.BESST_RESET:
             interval = 5000;
             timeout = -1;
             break;
-        case BesstRequestType.BESST_ACTIVATE:
+        case BesstPacketType.BESST_ACTIVATE:
             interval = 3000;
             timeout = -1;
             break;
@@ -45,6 +47,7 @@ export function generateBesstRequestPacket(
         interval: interval,
         timeout: timeout,
         type: actionCode,
+        promise: resolve && reject ? { resolve, reject } : undefined,
     };
 }
 
@@ -56,8 +59,8 @@ export function buildBesstCanCommandPacket(
     canCommandSubCode: number,
     data: number[] = [0],
 ) {
-    return generateBesstRequestPacket(
-        BesstRequestType.CAN_REQUEST,
+    return generateBesstWritePacket(
+        BesstPacketType.CAN_REQUEST,
         [
             canCommandSubCode,
             canCommandCode,
@@ -70,8 +73,8 @@ export function buildBesstCanCommandPacket(
 
 export function parseCanResponseFromBesst(
     array: number[],
-): BesstCanResponsePacket[] {
-    let packets: BesstCanResponsePacket[] = [];
+): BesstReadedCanFrame[] {
+    let packets: BesstReadedCanFrame[] = [];
     array = array.slice(3);
     while (array.length > 0) {
         if (array.slice(0, 13).filter((value) => value != 0).length !== 0) {

@@ -279,8 +279,8 @@ export default class BafangCanSystem implements IConnection {
         msg = [...msg, ...new Array(65 - msg.length).fill(0)];
         let interval;
         switch (actionCode) {
-            case BesstRequestType.BESST_HW:
-            case BesstRequestType.BESST_SW:
+            case BesstRequestType.BESST_HV:
+            case BesstRequestType.BESST_SV:
             case BesstRequestType.BESST_SN:
                 interval = 90;
                 break;
@@ -358,7 +358,7 @@ export default class BafangCanSystem implements IConnection {
                     this.processResponseCanPacket,
                 );
                 break;
-            case BesstRequestType.BESST_HW:
+            case BesstRequestType.BESST_HV:
                 this._besstCodes.besst_hardware_version = hexMsgDecoder(array);
                 this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
@@ -366,7 +366,7 @@ export default class BafangCanSystem implements IConnection {
                 this._besstCodes.besst_serial_number = hexMsgDecoder(array);
                 this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
-            case BesstRequestType.BESST_SW:
+            case BesstRequestType.BESST_SV:
                 this._besstCodes.besst_software_version = hexMsgDecoder(array);
                 this.emitter.emit('besst-data', { ...this._besstCodes });
                 break;
@@ -374,7 +374,7 @@ export default class BafangCanSystem implements IConnection {
             case BesstRequestType.BESST_ACTIVATE:
                 break;
             default:
-                console.log('Unknown message type - not supperted yet');
+                console.log('Unknown message type - not supported yet');
                 break;
         }
     }
@@ -1017,13 +1017,13 @@ export default class BafangCanSystem implements IConnection {
         }
         this.packetQueue.push(
             BafangCanSystem.generateBesstRequestPacket(
-                BesstRequestType.BESST_HW,
+                BesstRequestType.BESST_HV,
                 [0, 0, 0, 0],
             ),
         );
         this.packetQueue.push(
             BafangCanSystem.generateBesstRequestPacket(
-                BesstRequestType.BESST_SW,
+                BesstRequestType.BESST_SV,
                 [0, 0, 0, 0],
             ),
         );

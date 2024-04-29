@@ -20,7 +20,7 @@ import {
 import InterfaceType from '../../models/InterfaceType';
 import filterPorts from '../../../device/serial/serial-patcher';
 import { SerialPort } from 'serialport';
-import { listBesstDevices } from '../../../device/besst/besst';
+import BesstDevice, { listBesstDevices } from '../../../device/besst/besst';
 import HID from 'node-hid';
 
 const { Option } = Select;

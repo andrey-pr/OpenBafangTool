@@ -1,9 +1,9 @@
 export enum BesstRequestType {
     CAN_REQUEST = 0x15,
     CAN_RESPONSE = 0x12,
-    BESST_HW = 0x30,
+    BESST_HV = 0x30,
     BESST_SN = 0x31,
-    BESST_SW = 0x32,
+    BESST_SV = 0x32,
     BESST_ACTIVATE = 0x34,
     BESST_RESET = 0x39,
 }
