@@ -1,6 +1,6 @@
 import { DescriptionsItemType } from 'antd/es/descriptions';
 import StringValueComponent from '../views/components/StringValueComponent';
-import { NoData } from '../types/no_data';
+import { NoData } from '../../types/no_data';
 import NumberValueComponent from '../views/components/NumberValueComponent';
 import { ReactNode } from 'react';
 import BooleanValueComponent from '../views/components/BooleanValueComponent';

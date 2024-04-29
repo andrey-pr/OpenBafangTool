@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
 import log from 'electron-log/renderer';
-import { DeviceName } from '../models/DeviceType';
+import { DeviceName } from '../../types/DeviceType';
 import {
     AssistLevel,
     BafangUartMotorBasicParameters,
@@ -18,7 +18,7 @@ import {
     checkInfo,
     checkPedalParameters,
     checkThrottleParameters,
-} from '../types/BafangUartMotorTypes';
+} from '../../types/BafangUartMotorTypes';
 import IConnection from './Connection';
 import { closePort, openPort, writeToPort } from '../../device/serial/serial-port';
 

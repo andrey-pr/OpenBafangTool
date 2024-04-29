@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
-import BafangCanSystem from '../../../../device/BafangCanSystem';
+import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangBesstCodes,
     BafangCanControllerCodes,
@@ -12,7 +12,7 @@ import {
     BafangCanDisplayState,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-} from '../../../../types/BafangCanSystemTypes';
+} from '../../../../../types/BafangCanSystemTypes';
 import {
     generateSimpleBooleanListItem,
     generateSimpleNumberListItem,
