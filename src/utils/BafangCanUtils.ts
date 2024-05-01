@@ -1,3 +1,4 @@
+import { BesstReadedCanFrame } from '../device/besst/besst-types';
 import {
     BafangBesstCodes,
     BafangCanAssistLevel,
@@ -208,8 +209,7 @@ export function getControllerParameters1Demo(): BafangCanControllerParameters1 {
         controller_battery_capacity: 1,
         controller_max_current_on_low_charge: 1,
         controller_full_capacity_range: 1,
-        controller_pedal_sensor_type:
-            BafangCanPedalSensorType.TorqueSensor,
+        controller_pedal_sensor_type: BafangCanPedalSensorType.TorqueSensor,
         controller_coaster_brake: false,
         controller_speed_sensor_channel_number: 1,
         controller_motor_type: BafangCanMotorType.HubMotor,
@@ -305,6 +305,272 @@ export function getBesstCodesDemo(): BafangBesstCodes {
         besst_software_version: 'BSF33.05',
         besst_serial_number: '',
     };
+}
+
+export function processCodeAnswerFromController(
+    answer: BesstReadedCanFrame,
+    dto: BafangCanControllerCodes,
+): void {
+    switch (answer.canCommandSubCode) {
+        case 0x00:
+            dto.controller_hardware_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x01:
+            dto.controller_software_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x02:
+            dto.controller_model_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x03:
+            dto.controller_serial_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x04:
+            dto.controller_customer_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x05:
+            dto.controller_manufacturer = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x08:
+            dto.controller_bootload_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        default:
+            break;
+    }
+}
+
+export function processCodeAnswerFromDisplay(
+    answer: BesstReadedCanFrame,
+    dto: BafangCanDisplayCodes,
+): void {
+    switch (answer.canCommandSubCode) {
+        case 0x00:
+            dto.display_hardware_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x01:
+            dto.display_software_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x02:
+            dto.display_model_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x03:
+            dto.display_serial_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x04:
+            dto.display_customer_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x05:
+            dto.display_manufacturer = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x08:
+            dto.display_bootload_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        default:
+            break;
+    }
+}
+
+export function processCodeAnswerFromSensor(
+    answer: BesstReadedCanFrame,
+    dto: BafangCanSensorCodes,
+): void {
+    switch (answer.canCommandSubCode) {
+        case 0x00:
+            dto.sensor_hardware_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x01:
+            dto.sensor_software_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x02:
+            dto.sensor_model_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x03:
+            dto.sensor_serial_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x04:
+            dto.sensor_customer_number = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x05:
+            dto.sensor_manufacturer = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        case 0x08:
+            dto.sensor_bootload_version = String.fromCharCode.apply(
+                null,
+                answer.data,
+            );
+            break;
+        default:
+            break;
+    }
+}
+
+export function parseDisplayPackage0(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanDisplayState,
+): void {
+    dto.display_assist_levels = packet.data[0] & 0b1111;
+    (dto.display_ride_mode =
+        packet.data[0] & 0b10000
+            ? BafangCanRideMode.BOOST
+            : BafangCanRideMode.ECO),
+        (dto.display_boost = (packet.data[0] & 0b100000) >> 5 === 1);
+    dto.display_current_assist_level = decodeCurrentAssistLevel(
+        packet.data[1],
+        packet.data[0] & 0b1111,
+    );
+    dto.display_light = (packet.data[2] & 1) === 1;
+    dto.display_button = (packet.data[2] & 0b10) >> 1 === 1;
+}
+
+export function parseDisplayPackage1(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanDisplayData,
+): void {
+    dto.display_total_mileage =
+        (packet.data[2] << 16) + (packet.data[1] << 8) + packet.data[0];
+    dto.display_single_mileage =
+        ((packet.data[5] << 16) + (packet.data[4] << 8) + packet.data[3]) / 10;
+    dto.display_max_speed = ((packet.data[7] << 8) + packet.data[6]) / 10;
+}
+
+export function parseDisplayPackage2(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanDisplayData,
+): void {
+    dto.display_average_speed = ((packet.data[1] << 8) + packet.data[0]) / 10;
+    dto.display_service_mileage =
+        ((packet.data[4] << 16) + (packet.data[3] << 8) + packet.data[2]) / 10;
+}
+
+export function parseControllerPackage0(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanControllerRealtime,
+): void {
+    let tem = (packet.data[7] << 8) + packet.data[6];
+    dto.controller_remaining_capacity = packet.data[0];
+    dto.controller_single_trip = ((packet.data[2] << 8) + packet.data[1]) / 100;
+    dto.controller_cadence = packet.data[3];
+    dto.controller_torque = (packet.data[5] << 8) + packet.data[4];
+    dto.controller_remaining_distance = tem < 65535 ? tem / 100 : NotAvailable;
+}
+
+export function parseControllerPackage1(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanControllerRealtime,
+): void {
+    dto.controller_speed = ((packet.data[1] << 8) + packet.data[0]) / 100;
+    dto.controller_current = ((packet.data[3] << 8) + packet.data[2]) / 100;
+    dto.controller_voltage = ((packet.data[5] << 8) + packet.data[4]) / 100;
+    dto.controller_temperature = packet.data[6] - 40;
+    dto.controller_motor_temperature =
+        packet.data[7] === 255 ? NotAvailable : packet.data[7] - 40;
+}
+
+export function parseControllerPackage3(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanControllerSpeedParameters,
+): void {
+    let diameter = BafangCanWheelDiameterTable.find(
+        (item) =>
+            item.code[0] == packet.data[2] && item.code[1] == packet.data[3],
+    );
+    dto.controller_speed_limit = ((packet.data[1] << 8) + packet.data[0]) / 100;
+    if (diameter) dto.controller_wheel_diameter = diameter;
+    dto.controller_circumference = (packet.data[5] << 8) + packet.data[4];
+}
+
+export function parseSensorPackage(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanSensorRealtime,
+): void {
+    dto.sensor_torque = (packet.data[1] << 8) + packet.data[0];
+    dto.sensor_cadence = packet.data[2];
+}
+
+export function serializeMileage(mileage: number): number[] {
+    return [
+        mileage & 0b11111111,
+        (mileage & 0b1111111100000000) >> 8,
+        (mileage & 0b111111110000000000000000) >> 16,
+    ];
+}
+
+export function serializeString(value: string): number[] {
+    return [...Buffer.from(value)];
+}
+
+export function validateTime(
+    hours: number,
+    minutes: number,
+    seconds: number,
+): boolean {
+    return (
+        hours <= 0 &&
+        hours >= 23 &&
+        minutes <= 0 &&
+        minutes >= 59 &&
+        seconds <= 0 &&
+        seconds >= 59
+    );
 }
 
 export function decodeCurrentAssistLevel(

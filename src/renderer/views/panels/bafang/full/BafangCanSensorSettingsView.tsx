@@ -8,7 +8,7 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../../types/BafangCanSystemTypes';
-import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import { generateEditableStringListItem, generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -38,7 +38,7 @@ class BafangCanSensorSettingsView extends React.Component<
 
     updateData(values: any) {
         //TODO add property check
-        this.setState({ ...values });
+        this.setState(values);
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
@@ -63,22 +63,14 @@ class BafangCanSensorSettingsView extends React.Component<
             sensor_manufacturer,
         } = this.state;
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_serial_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_serial_number: e,
-                            });
-                        }}
-                        errorOnEmpty
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Serial number',
+                sensor_serial_number,
+                (e) =>
+                    this.setState({
+                        sensor_serial_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Software version',
                 this.state.sensor_software_version,
@@ -91,36 +83,22 @@ class BafangCanSensorSettingsView extends React.Component<
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_manufacturer}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_manufacturer: e,
-                            });
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={sensor_customer_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                sensor_customer_number: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Manufacturer',
+                sensor_manufacturer,
+                (e) =>
+                    this.setState({
+                        sensor_manufacturer: e,
+                    }),
+            ),
+            generateEditableStringListItem(
+                'Customer number',
+                sensor_customer_number,
+                (e) =>
+                    this.setState({
+                        sensor_customer_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Bootloader version',
                 this.state.sensor_bootload_version,
@@ -165,8 +143,18 @@ class BafangCanSensorSettingsView extends React.Component<
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
-                            duration: 10,
+                            duration: 60,
                         });
+                        connection.emitter.once(
+                            'reading-finish',
+                            (readedSuccessfully, readededUnsuccessfully) =>
+                                message.open({
+                                    key: 'loading',
+                                    type: 'info',
+                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    duration: 5,
+                                }),
+                        );
                     }}
                 />
                 <FloatButton

@@ -6,9 +6,9 @@ import {
     ArrowLeftOutlined,
     CarOutlined,
     DesktopOutlined,
-    RotateRightOutlined
+    RotateRightOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, message } from 'antd';
 import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
 import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
 import IConnection from '../../../device/high-level/Connection';
@@ -213,6 +213,22 @@ class MainView extends React.Component<MainProps, MainState> {
         this.switchTab = this.switchTab.bind(this);
         const { connection } = this.props;
         connection.loadData();
+        message.open({
+            key: 'loading',
+            type: 'loading',
+            content: 'Loading...',
+            duration: 60,
+        });
+        connection.emitter.once(
+            'reading-finish',
+            (readedSuccessfully, readededUnsuccessfully) =>
+                message.open({
+                    key: 'loading',
+                    type: 'info',
+                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    duration: 5,
+                }),
+        );
     }
 
     switchTab(event: { key: string }) {

@@ -10,18 +10,22 @@ import {
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
-import StringInputComponent from '../../../components/StringInput';
-import ParameterInputComponent from '../../../components/ParameterInput';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import NumberValueComponent from '../../../components/NumberValueComponent';
 import {
+    generateEditableNumberListItem,
+    generateEditableStringListItem,
     generateSimpleBooleanListItem,
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
-import { BafangCanDisplayCodes, BafangCanDisplayData, BafangCanDisplayState } from '../../../../../types/BafangCanSystemTypes';
+import {
+    BafangCanDisplayCodes,
+    BafangCanDisplayData,
+    BafangCanDisplayState,
+} from '../../../../../types/BafangCanSystemTypes';
 
 dayjs.extend(customParseFormat);
 
@@ -54,17 +58,15 @@ class BafangCanDisplaySettingsView extends React.Component<
         this.getStateItems = this.getStateItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        connection.emitter.on(
-            'display-general-data',
-            (data: BafangCanDisplayData) => this.setState({ ...data }),
-        );
-        connection.emitter.on(
-            'display-codes-data',
-            (data: BafangCanDisplayCodes) => this.setState({ ...data }),
-        );
-        connection.emitter.on('broadcast-data-display', (data) =>
-            this.setState({ ...data }),
-        );
+        this.updateData = this.updateData.bind(this);
+        connection.emitter.on('display-general-data', this.updateData);
+        connection.emitter.on('display-codes-data', this.updateData);
+        connection.emitter.on('broadcast-data-display', this.updateData);
+    }
+
+    updateData(values: any) {
+        //TODO add property check
+        this.setState(values);
     }
 
     getRecordsItems(): DescriptionsProps['items'] {
@@ -74,41 +76,28 @@ class BafangCanDisplaySettingsView extends React.Component<
             display_service_mileage,
         } = this.state;
         return [
-            {
-                key: 'total_mileage',
-                label: 'Total mileage',
-                children: (
-                    <ParameterInputComponent
-                        value={display_total_mileage}
-                        unit="Km"
-                        min={0}
-                        max={1000000}
-                        onNewValue={(e) => {
-                            this.setState({
-                                display_total_mileage: e,
-                            });
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'single_mileage',
-                label: 'Single trip mileage',
-                children: (
-                    <ParameterInputComponent
-                        value={display_single_mileage}
-                        unit="Km"
-                        min={0}
-                        max={display_total_mileage as number}
-                        decimalPlaces={1}
-                        onNewValue={(e) => {
-                            this.setState({
-                                display_single_mileage: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableNumberListItem(
+                'Total mileage',
+                display_total_mileage,
+                (e) =>
+                    this.setState({
+                        display_total_mileage: e,
+                    }),
+                'Km',
+                0,
+                1000000,
+            ),
+            generateEditableNumberListItem(
+                'Single trip mileage',
+                display_single_mileage,
+                (e) =>
+                    this.setState({
+                        display_single_mileage: e,
+                    }),
+                'Km',
+                0,
+                display_total_mileage as number,
+            ),
             generateSimpleNumberListItem(
                 'Max registered speed',
                 this.state.display_max_speed,
@@ -158,6 +147,15 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                 duration: 2,
                                             });
                                         }
+                                    })
+                                    .catch((error) => {
+                                        console.log(error);
+                                        message.open({
+                                            key: 'cleaning_service_mileage',
+                                            type: 'error',
+                                            content: 'Error during cleaning!',
+                                            duration: 2,
+                                        });
                                     });
                             }}
                             okText="Yes"
@@ -275,21 +273,14 @@ class BafangCanDisplaySettingsView extends React.Component<
             display_manufacturer,
         } = this.state;
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={display_serial_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                display_serial_number: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Serial number',
+                display_serial_number,
+                (e) =>
+                    this.setState({
+                        display_serial_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Software version',
                 this.state.display_software_version,
@@ -302,36 +293,22 @@ class BafangCanDisplaySettingsView extends React.Component<
                 'Model number',
                 this.state.display_model_number,
             ),
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={display_manufacturer}
-                        onNewValue={(e) => {
-                            this.setState({
-                                display_manufacturer: e,
-                            });
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={display_customer_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                display_customer_number: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Manufacturer',
+                display_manufacturer,
+                (e) =>
+                    this.setState({
+                        display_manufacturer: e,
+                    }),
+            ),
+            generateEditableStringListItem(
+                'Customer number',
+                display_customer_number,
+                (e) =>
+                    this.setState({
+                        display_customer_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Bootloader version',
                 this.state.display_bootload_version,
@@ -384,24 +361,18 @@ class BafangCanDisplaySettingsView extends React.Component<
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
+                            duration: 60,
                         });
-                        setTimeout(() => {
-                            // if (Date.now() - lastUpdateTime < 3000) {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'success',
-                            //         content: 'Read sucessfully!',
-                            //         duration: 2,
-                            //     });
-                            // } else {
-                            //     message.open({
-                            //         key: 'loading',
-                            //         type: 'error',
-                            //         content: 'Error during reading!',
-                            //         duration: 2,
-                            //     });
-                            // }
-                        }, 3000);
+                        connection.emitter.once(
+                            'reading-finish',
+                            (readedSuccessfully, readededUnsuccessfully) =>
+                                message.open({
+                                    key: 'loading',
+                                    type: 'info',
+                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    duration: 5,
+                                }),
+                        );
                     }}
                 />
                 <Popconfirm

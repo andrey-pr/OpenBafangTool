@@ -1,5 +1,5 @@
-export type NoData = {text: string};
+export type NoData = {text: string} | null;
 
-export const NotLoadedYet: NoData = {text: 'Not loaded yet'};
+export const NotLoadedYet: NoData = null;
 
-export const NotAvailable: NoData = {text: 'Not available for this hardware'};
+export const NotAvailable: NoData = null;

@@ -13,7 +13,7 @@ import {
 import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
-import { generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import { generateEditableStringListItem, generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -48,7 +48,7 @@ class BafangCanMotorSettingsView extends React.Component<
 
     updateData(values: any) {
         //TODO add property check
-        this.setState({ ...values });
+        this.setState(values);
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
@@ -183,21 +183,14 @@ class BafangCanMotorSettingsView extends React.Component<
             controller_manufacturer,
         } = this.state;
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_serial_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_serial_number: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Serial number',
+                controller_serial_number,
+                (e) =>
+                    this.setState({
+                        controller_serial_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Software version',
                 this.state.controller_software_version,
@@ -210,36 +203,22 @@ class BafangCanMotorSettingsView extends React.Component<
                 'Model number',
                 this.state.controller_model_number,
             ),
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_manufacturer}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_manufacturer: e,
-                            });
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'customer_number',
-                label: 'Customer number',
-                children: (
-                    <StringInputComponent
-                        maxLength={40}
-                        value={controller_customer_number}
-                        onNewValue={(e) => {
-                            this.setState({
-                                controller_customer_number: e,
-                            });
-                        }}
-                    />
-                ),
-            },
+            generateEditableStringListItem(
+                'Manufacturer',
+                controller_manufacturer,
+                (e) =>
+                    this.setState({
+                        controller_manufacturer: e,
+                    }),
+            ),
+            generateEditableStringListItem(
+                'Customer number',
+                controller_customer_number,
+                (e) =>
+                    this.setState({
+                        controller_customer_number: e,
+                    }),
+            ),
             generateSimpleStringListItem(
                 'Bootloader version',
                 this.state.controller_bootload_version,
@@ -290,8 +269,18 @@ class BafangCanMotorSettingsView extends React.Component<
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
-                            duration: 10,
+                            duration: 60,
                         });
+                        connection.emitter.once(
+                            'reading-finish',
+                            (readedSuccessfully, readededUnsuccessfully) =>
+                                message.open({
+                                    key: 'loading',
+                                    type: 'info',
+                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    duration: 5,
+                                }),
+                        );
                     }}
                 />
                 <FloatButton

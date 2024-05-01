@@ -5,8 +5,8 @@ import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
 type ParameterInputProps = {
     value: number | NoData | null;
     unit?: ReactNode;
-    min: number;
-    max: number;
+    min?: number;
+    max?: number;
     onNewValue: (value: number) => void;
     warningText?: string;
     warningBelow?: number;

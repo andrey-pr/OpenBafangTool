@@ -62,7 +62,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     updateData(values: any) {
         //TODO add property check
-        this.setState({ ...values });
+        this.setState(values);
     }
 
     getControllerItems(): DescriptionsProps['items'] {
@@ -344,8 +344,18 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
-                            duration: 10,
+                            duration: 60,
                         });
+                        connection.emitter.once(
+                            'reading-finish',
+                            (readedSuccessfully, readededUnsuccessfully) =>
+                                message.open({
+                                    key: 'loading',
+                                    type: 'info',
+                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    duration: 5,
+                                }),
+                        );
                     }}
                 />
             </div>

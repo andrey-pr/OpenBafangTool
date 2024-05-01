@@ -243,6 +243,7 @@ export default class BafangUartMotor implements IConnection {
                 break;
         }
         this.emitter.emit('data');
+        this.emitter.emit('reading-finish', 7, 0);
     }
 
     connect(): Promise<boolean> {
