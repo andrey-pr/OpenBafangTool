@@ -555,7 +555,7 @@ export function serializeMileage(mileage: number): number[] {
 }
 
 export function serializeString(value: string): number[] {
-    return [...Buffer.from(value)];
+    return [...Buffer.from(value), 0];
 }
 
 export function validateTime(

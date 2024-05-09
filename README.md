@@ -9,7 +9,7 @@
 <h3 align="center">OpenBafangTool</h3>
 
   <p align="center">
-    Open-source e-bike Configuration&Diagnostics software - tune your Bafang BBS01, BBS02, BBSHD and more
+    Open-source e-bike Configuration&Diagnostics software - tune any kind of your Bafang device - M500, M510, M600, M420, BBS01, BBS02, BBSHD, display or any other
     <br />
     <a href="docs"><strong>Explore the docs</strong></a>
     <br />
@@ -47,7 +47,7 @@
 
 The goal of project is to replace official diagnostic tools for ebikes, that available only for official dealers, with open source alternative to let people repair and configure their bikes at home. For example, you can read and erase error codes, or limit power if physical power of your motor is too big for your country rules (possibilities depend on motor brand and model). Second goal of project is to document protocols of as much systems as possible to let other developers use them in their projects.
 
-Currently this program supports only Bafangs with UART and have nearly same functions as [Stefan Penoff's Bafang Configuration Tool](https://penoff.me/2016/01/13/e-bike-conversion-software/), but I have plan to improve it. Right now I'm working on hacking Yamaha protocol, Bafang with CAN and Brose planned later. So you can configure motors like BBS01, BBS02, BBSHD and some other mid-drive models.
+Currently this program supports any kinds of Bafang - motors with UART (BBS01, BBS02, etc) and with CAN (M500, M600, M420, etc). Currently not all features of CAN motors are supported, more features will be available in next versions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -58,7 +58,17 @@ You can download executables for Windows and Linux (AppImage) [here](https://git
 
 ### Prerequisites
 
-Minimal set of hardware that you need to use this program (also possible to test program in simulator mode without real hardware):
+#### Minimal set of hardware that you need to use this program for motors with CAN (also possible to test program in simulator mode without real hardware):
+
+![Programming cable](docs/assets/readme/besst-tool.jpeg)
+
+Official Bafang BESST Tool device - you can buy it in many shops for 150\$ or sometimes for 100\$. In the future program will support cheap Canable hardware, that costs from 10\$ to 20\$.
+
+![Motor](docs/assets/readme/motor-m600.webp)
+
+Motor that you want to configure. 
+
+#### Minimal set of hardware that you need to use this program for motors with UART (also possible to test program in simulator mode without real hardware):
 
 ![Programming cable](docs/assets/readme/cable.webp)
 
@@ -74,18 +84,19 @@ Also better to have USB isolator, that will protect your computer in case when m
 
 ### Installation
 
-Current build of program are portable, so just download executable and launch it. Also, if you use Linux, you may need to unblock your serial ports in way, dependent on your distributive.
+Current build of program are portable, so just download executable and launch it. Also, if you use Linux, you may need to unblock your serial ports or hid device in way, dependent on your distributive.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.md) or you can use any manual from internet. Here is some examples what you can do with this parameters:
+There are docs on each parameter in program or you can use any manual from internet. Here is some examples what you can do with this parameters:
 
 1. You can set wheel size when you want to install motor kit on your bike, to show correct speed on display.
 2. You can adjust speed limit or current limit to comply with local rules, if they are different from default value. **Its strongly not recommended to set limit higher than its allowed in your region!**
 3. According user reports, some motor modifications starts only after one full pedal rotation - in that case, you can lower parameter "Signal No." to start motor after quarter of rotation or less.
+4. You can use diagnostic data from program to physically repair your motor.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -96,12 +107,6 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
   - [x] Find hardware
   - [x] Alpha
   - [x] Beta
-  - [ ] Stable
-- [ ] Add support of Yamaha systems
-  - [ ] Find hardware
-  - [x] Research protocol - in progress
-  - [ ] Alpha
-  - [ ] Beta
   - [ ] Stable
 - [ ] Add support of Bafang systems with CAN
   - [*] Find hardware
@@ -114,6 +119,7 @@ There are docs on each parameter [here](docs/Bafang%20UART%20motor%20parameters.
   - [ ] Flatpak - Linux, x86_64 - in progress
 - [ ] Add multi-language interface
 - [x] Add simple mode for beginners
+- [ ] Add support of cheap Canable USB-CAN convertrs
 
 You can open [issue](https://github.com/andrey-pr/OpenBafangTool/issues) for request a new feature.
 
@@ -141,6 +147,7 @@ Project Link: [https://github.com/andrey-pr/OpenBafangTool](https://github.com/a
 ## Acknowledgments
 
 * [Stefan Penoff - author of original Bafang Configuration Tool project](https://penoff.me/2016/01/13/e-bike-conversion-software/)
+* [Tomblarom - project consultant and my good friend](https://github.com/Tomblarom)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

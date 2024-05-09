@@ -50,7 +50,6 @@ export const CanReadCommandsList: {
         canCommandSubCode: 0x04,
         applicableDevices: [
             DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
         ],
     },
@@ -58,7 +57,6 @@ export const CanReadCommandsList: {
         canCommandCode: 0x60,
         canCommandSubCode: 0x05,
         applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
         ],
@@ -67,8 +65,6 @@ export const CanReadCommandsList: {
         canCommandCode: 0x60,
         canCommandSubCode: 0x08,
         applicableDevices: [
-            DeviceNetworkId.TORQUE_SENSOR,
-            DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
         ],
     },
@@ -138,5 +134,10 @@ export const CanWriteCommandsList: {
         canCommandCode: 0x63,
         canCommandSubCode: 0x02,
         applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
+    MotorSpeedParameters: {
+        canCommandCode: 0x32,
+        canCommandSubCode: 0x03,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
     },
 };

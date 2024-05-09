@@ -8,7 +8,7 @@ import {
     DesktopOutlined,
     RotateRightOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, message } from 'antd';
+import { Layout, Menu, Spin, message } from 'antd';
 import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
 import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
 import IConnection from '../../../device/high-level/Connection';
@@ -22,6 +22,7 @@ import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
 import BafangCanMotorSettingsView from '../panels/bafang/full/BafangCanMotorSettingsView';
 import BafangCanDisplaySettingsView from '../panels/bafang/full/BafangCanDisplaySettingsView';
 import BafangCanSensorSettingsView from '../panels/bafang/full/BafangCanSensorSettingsView';
+import { DeviceName } from '../../../types/DeviceType';
 
 const { Sider } = Layout;
 
@@ -33,173 +34,21 @@ type MainProps = {
 
 type MainState = {
     tab: string;
+    loading: boolean;
 };
 
-const menuItems = {
+const initial_tab_table = {
     bafang_uart_motor: {
-        simplified: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_uart_motor_settings_simplified',
-                icon: <SettingOutlined />,
-                label: 'Parameters',
-            },
-            {
-                key: 'bafang_uart_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                    {
-                        key: `manual_${DocPages.BafangUartMotorParamsSimplifiedDocument}`,
-                        label: 'Parameters',
-                    },
-                ],
-            },
-        ],
-        full: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_uart_motor_info',
-                icon: <InfoCircleOutlined />,
-                label: 'Info',
-            },
-            {
-                key: 'bafang_uart_motor_settings',
-                icon: <SettingOutlined />,
-                label: 'Parameters',
-            },
-            {
-                key: 'bafang_uart_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                    {
-                        key: `manual_${DocPages.BafangUartMotorParamsDocument}`,
-                        label: 'Parameters',
-                    },
-                    {
-                        key: `manual_${DocPages.BafangUartMotorAPIDocument}`,
-                        label: 'Motor Protocol',
-                    },
-                    {
-                        key: `manual_${DocPages.BafangUartProtocolDocument}`,
-                        label: 'UART Protocol',
-                    },
-                ],
-            },
-        ],
+        simplified: 'bafang_uart_motor_settings_simplified',
+        full: 'bafang_uart_motor_info',
     },
     bafang_uart_display: {
-        simplified: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                ],
-            },
-        ],
-        full: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                ],
-            },
-        ],
+        simplified: 'bafang_motor_manual',
+        full: 'bafang_motor_manual',
     },
     bafang_can_system: {
-        simplified: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                ],
-            },
-        ],
-        full: [
-            {
-                key: 'back',
-                icon: <ArrowLeftOutlined />,
-                label: 'Back',
-            },
-            {
-                key: 'bafang_can_system_info',
-                icon: <InfoCircleOutlined />,
-                label: 'General Info',
-            },
-            {
-                key: 'bafang_can_motor_settings',
-                icon: <CarOutlined />,
-                label: 'Motor settings',
-            },
-            {
-                key: 'bafang_can_display_settings',
-                icon: <DesktopOutlined />,
-                label: 'Display settings',
-            },
-            {
-                key: 'bafang_can_sensor_settings',
-                icon: <RotateRightOutlined />,
-                label: 'Sensor settings',
-            },
-            {
-                key: 'bafang_can_motor_manual',
-                icon: <BookOutlined />,
-                label: 'Manual',
-                children: [
-                    {
-                        key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                        label: 'General manual',
-                    },
-                ],
-            },
-        ],
+        simplified: 'bafang_motor_manual',
+        full: 'bafang_can_system_info',
     },
 };
 
@@ -207,28 +56,210 @@ class MainView extends React.Component<MainProps, MainState> {
     constructor(props: MainProps) {
         super(props);
         this.state = {
-            tab: menuItems[props.connection.deviceName][props.interfaceType][1]
-                .key,
+            tab: initial_tab_table[props.connection.deviceName][
+                props.interfaceType
+            ],
+            loading: true,
         };
         this.switchTab = this.switchTab.bind(this);
+        this.menuItems = this.menuItems.bind(this);
         const { connection } = this.props;
-        connection.loadData();
-        message.open({
-            key: 'loading',
-            type: 'loading',
-            content: 'Loading...',
-            duration: 60,
-        });
+        setTimeout(() => this.setState({ loading: false }), 60000);
         connection.emitter.once(
             'reading-finish',
-            (readedSuccessfully, readededUnsuccessfully) =>
+            (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'loading',
                     type: 'info',
                     content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
                     duration: 5,
-                }),
+                });
+                this.setState({ loading: false });
+            },
         );
+        connection.loadData();
+    }
+
+    menuItems() {
+        return {
+            bafang_uart_motor: {
+                simplified: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_uart_motor_settings_simplified',
+                        icon: <SettingOutlined />,
+                        label: 'Parameters',
+                    },
+                    {
+                        key: 'bafang_uart_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                            {
+                                key: `manual_${DocPages.BafangUartMotorParamsSimplifiedDocument}`,
+                                label: 'Parameters',
+                            },
+                        ],
+                    },
+                ],
+                full: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_uart_motor_info',
+                        icon: <InfoCircleOutlined />,
+                        label: 'Info',
+                    },
+                    {
+                        key: 'bafang_uart_motor_settings',
+                        icon: <SettingOutlined />,
+                        label: 'Parameters',
+                    },
+                    {
+                        key: 'bafang_uart_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                            {
+                                key: `manual_${DocPages.BafangUartMotorParamsDocument}`,
+                                label: 'Parameters',
+                            },
+                            {
+                                key: `manual_${DocPages.BafangUartMotorAPIDocument}`,
+                                label: 'Motor Protocol',
+                            },
+                            {
+                                key: `manual_${DocPages.BafangUartProtocolDocument}`,
+                                label: 'UART Protocol',
+                            },
+                        ],
+                    },
+                ],
+            },
+            bafang_uart_display: {
+                simplified: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                        ],
+                    },
+                ],
+                full: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                        ],
+                    },
+                ],
+            },
+            bafang_can_system: {
+                simplified: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                        ],
+                    },
+                ],
+                full: [
+                    {
+                        key: 'back',
+                        icon: <ArrowLeftOutlined />,
+                        label: 'Back',
+                    },
+                    {
+                        key: 'bafang_can_system_info',
+                        icon: <InfoCircleOutlined />,
+                        label: 'General Info',
+                    },
+                    {
+                        key: 'bafang_can_motor_settings',
+                        icon: <CarOutlined />,
+                        label: 'Motor settings',
+                        disabled:
+                            this.props.connection.deviceName ===
+                                DeviceName.BafangCanSystem &&
+                            !this.props.connection.isControllerAvailable,
+                    },
+                    {
+                        key: 'bafang_can_display_settings',
+                        icon: <DesktopOutlined />,
+                        label: 'Display settings',
+                        disabled:
+                            this.props.connection.deviceName ===
+                                DeviceName.BafangCanSystem &&
+                            !this.props.connection.isDisplayAvailable,
+                    },
+                    {
+                        key: 'bafang_can_sensor_settings',
+                        icon: <RotateRightOutlined />,
+                        label: 'Sensor settings',
+                        disabled:
+                            this.props.connection.deviceName ===
+                                DeviceName.BafangCanSystem &&
+                            !this.props.connection.isSensorAvailable,
+                    },
+                    {
+                        key: 'bafang_can_motor_manual',
+                        icon: <BookOutlined />,
+                        label: 'Manual',
+                        children: [
+                            {
+                                key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
+                                label: 'General manual',
+                            },
+                        ],
+                    },
+                ],
+            },
+        };
     }
 
     switchTab(event: { key: string }) {
@@ -241,9 +272,10 @@ class MainView extends React.Component<MainProps, MainState> {
 
     render() {
         const { connection, interfaceType } = this.props;
-        const { tab } = this.state;
+        const { tab, loading } = this.state;
         return (
             <Layout hasSider>
+                <Spin spinning={loading} fullscreen />
                 <Sider
                     style={{
                         overflow: 'auto',
@@ -260,10 +292,15 @@ class MainView extends React.Component<MainProps, MainState> {
                         theme="dark"
                         mode="inline"
                         defaultSelectedKeys={[
-                            menuItems[connection.deviceName][interfaceType][1]
-                                .key,
+                            this.menuItems()[connection.deviceName][
+                                interfaceType
+                            ][1].key,
                         ]}
-                        items={menuItems[connection.deviceName][interfaceType]}
+                        items={
+                            this.menuItems()[connection.deviceName][
+                                interfaceType
+                            ]
+                        }
                         onSelect={this.switchTab}
                     />
                 </Sider>

@@ -8,7 +8,11 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../../types/BafangCanSystemTypes';
-import { generateEditableStringListItem, generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import {
+    generateEditableStringListItem,
+    generateSimpleNumberListItem,
+    generateSimpleStringListItem,
+} from '../../../../utils/UIUtils';
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -63,13 +67,10 @@ class BafangCanSensorSettingsView extends React.Component<
             sensor_manufacturer,
         } = this.state;
         return [
-            generateEditableStringListItem(
+            generateSimpleStringListItem(
                 'Serial number',
                 sensor_serial_number,
-                (e) =>
-                    this.setState({
-                        sensor_serial_number: e,
-                    }),
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
             generateSimpleStringListItem(
                 'Software version',
@@ -83,14 +84,14 @@ class BafangCanSensorSettingsView extends React.Component<
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            generateEditableStringListItem(
-                'Manufacturer',
-                sensor_manufacturer,
-                (e) =>
-                    this.setState({
-                        sensor_manufacturer: e,
-                    }),
-            ),
+            // generateEditableStringListItem(
+            //     'Manufacturer',
+            //     sensor_manufacturer,
+            //     (e) =>
+            //         this.setState({
+            //             sensor_manufacturer: e,
+            //         }),
+            // ),
             generateEditableStringListItem(
                 'Customer number',
                 sensor_customer_number,
@@ -99,17 +100,33 @@ class BafangCanSensorSettingsView extends React.Component<
                         sensor_customer_number: e,
                     }),
             ),
-            generateSimpleStringListItem(
-                'Bootloader version',
-                this.state.sensor_bootload_version,
-            ),
+            // generateSimpleStringListItem(
+            //     'Bootloader version',
+            //     this.state.sensor_bootload_version,
+            // ),
         ];
     }
 
     saveParameters(): void {
         const { connection } = this.props;
         connection.sensorCodes = this.state as BafangCanSensorCodes;
-        connection.saveData();
+        connection.saveSensorData();
+        message.open({
+            key: 'writing',
+            type: 'loading',
+            content: 'Writing...',
+            duration: 60,
+        });
+        connection.emitter.once(
+            'sensor-writing-finish',
+            (readedSuccessfully, readededUnsuccessfully) =>
+                message.open({
+                    key: 'writing',
+                    type: 'info',
+                    content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    duration: 5,
+                }),
+        );
     }
 
     render() {
@@ -169,4 +186,3 @@ class BafangCanSensorSettingsView extends React.Component<
 }
 
 export default BafangCanSensorSettingsView;
-

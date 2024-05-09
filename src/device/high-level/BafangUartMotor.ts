@@ -20,7 +20,11 @@ import {
     checkThrottleParameters,
 } from '../../types/BafangUartMotorTypes';
 import IConnection from './Connection';
-import { closePort, openPort, writeToPort } from '../../device/serial/serial-port';
+import {
+    closePort,
+    openPort,
+    writeToPort,
+} from '../../device/serial/serial-port';
 
 const sleep = (ms: number) =>
     new Promise((resolve) => {
@@ -263,7 +267,7 @@ export default class BafangUartMotor implements IConnection {
                 ready = true;
             },
             (err: Error | null) => {
-                if(!err) return;
+                if (!err) return;
                 console.log('Serial port error ', err);
                 success = false;
                 ready = true;
@@ -364,7 +368,10 @@ export default class BafangUartMotor implements IConnection {
                 throttle_speed_limit: 32,
                 throttle_start_current: 10,
             };
-            setTimeout(() => this.emitter.emit('data'), 300);
+            setTimeout(() => {
+                this.emitter.emit('data');
+                this.emitter.emit('reading-finish', 7, 0);
+            }, 300);
             console.log('Simulator: blank data loaded');
             return;
         }

@@ -13,7 +13,11 @@ import {
 import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
-import { generateEditableStringListItem, generateSimpleNumberListItem, generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import {
+    generateEditableStringListItem,
+    generateSimpleNumberListItem,
+    generateSimpleStringListItem,
+} from '../../../../utils/UIUtils';
 
 type SettingsProps = {
     connection: BafangCanSystem;
@@ -41,7 +45,7 @@ class BafangCanMotorSettingsView extends React.Component<
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
-        connection.emitter.on('controller-speed-data', this.updateData);
+        connection.emitter.once('controller-speed-data', this.updateData);
         connection.emitter.on('controller-codes-data', this.updateData);
         connection.emitter.on('broadcast-data-controller', this.updateData);
     }
@@ -56,7 +60,7 @@ class BafangCanMotorSettingsView extends React.Component<
             generateSimpleNumberListItem(
                 'Remaining capacity',
                 this.state.controller_remaining_capacity,
-                'mAh',
+                '%',
             ),
             generateSimpleNumberListItem(
                 'Remaining trip distance',
@@ -165,8 +169,8 @@ class BafangCanMotorSettingsView extends React.Component<
                     <ParameterInputComponent
                         value={controller_circumference}
                         unit="mm"
-                        min={controller_wheel_diameter.minimalCircumference}
-                        max={controller_wheel_diameter.maximalCircumference}
+                        min={controller_wheel_diameter?.minimalCircumference}
+                        max={controller_wheel_diameter?.maximalCircumference}
                         onNewValue={(e) => {
                             this.setState({ controller_circumference: e });
                         }}
@@ -183,13 +187,10 @@ class BafangCanMotorSettingsView extends React.Component<
             controller_manufacturer,
         } = this.state;
         return [
-            generateEditableStringListItem(
+            generateSimpleStringListItem(
                 'Serial number',
                 controller_serial_number,
-                (e) =>
-                    this.setState({
-                        controller_serial_number: e,
-                    }),
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',
@@ -211,24 +212,43 @@ class BafangCanMotorSettingsView extends React.Component<
                         controller_manufacturer: e,
                     }),
             ),
-            generateEditableStringListItem(
-                'Customer number',
-                controller_customer_number,
-                (e) =>
-                    this.setState({
-                        controller_customer_number: e,
-                    }),
-            ),
-            generateSimpleStringListItem(
-                'Bootloader version',
-                this.state.controller_bootload_version,
-            ),
+            // generateEditableStringListItem(
+            //     'Customer number',
+            //     controller_customer_number,
+            //     (e) =>
+            //         this.setState({
+            //             controller_customer_number: e,
+            //         }),
+            // ),
+            // generateSimpleStringListItem(
+            //     'Bootloader version',
+            //     this.state.controller_bootload_version,
+            // ),
         ];
     }
 
     saveParameters(): void {
         const { connection } = this.props;
-        connection.saveData();
+        connection.controllerSpeedParameters = this
+            .state as BafangCanControllerSpeedParameters;
+        connection.controllerCodes = this.state as BafangCanControllerCodes;
+        connection.saveControllerData();
+        message.open({
+            key: 'writing',
+            type: 'loading',
+            content: 'Writing...',
+            duration: 60,
+        });
+        connection.emitter.once(
+            'controller-writing-finish',
+            (readedSuccessfully, readededUnsuccessfully) =>
+                message.open({
+                    key: 'writing',
+                    type: 'info',
+                    content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    duration: 5,
+                }),
+        );
     }
 
     render() {

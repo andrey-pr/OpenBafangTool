@@ -19,6 +19,8 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 
+const { Text } = Typography;
+
 type InfoProps = {
     connection: BafangCanSystem;
 };
@@ -70,7 +72,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleNumberListItem(
                 'Remaining capacity',
                 this.state.controller_remaining_capacity,
-                'mAh',
+                '%',
             ),
             generateSimpleNumberListItem(
                 'Remaining trip distance',
@@ -129,10 +131,10 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Hardware version',
                 this.state.controller_hardware_version,
             ),
-            generateSimpleStringListItem(
-                'Bootloader version',
-                this.state.controller_bootload_version,
-            ),
+            // generateSimpleStringListItem(
+            //     'Bootloader version',
+            //     this.state.controller_bootload_version,
+            // ),
             generateSimpleStringListItem(
                 'Model number',
                 this.state.controller_model_number,
@@ -140,11 +142,12 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.controller_serial_number,
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
-            generateSimpleStringListItem(
-                'Customer number',
-                this.state.controller_customer_number,
-            ),
+            // generateSimpleStringListItem(
+            //     'Customer number',
+            //     this.state.controller_customer_number,
+            // ),
         ];
     }
 
@@ -230,6 +233,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.display_serial_number,
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
             generateSimpleStringListItem(
                 'Customer number',
@@ -258,22 +262,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            generateSimpleStringListItem(
-                'Bootloader version',
-                this.state.sensor_bootload_version,
-            ),
+            // generateSimpleStringListItem(
+            //     'Bootloader version',
+            //     this.state.sensor_bootload_version,
+            // ),
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.sensor_serial_number,
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
             generateSimpleStringListItem(
                 'Customer number',
                 this.state.sensor_customer_number,
             ),
-            generateSimpleStringListItem(
-                'Manufacturer',
-                this.state.sensor_manufacturer,
-            ),
+            // generateSimpleStringListItem(
+            //     'Manufacturer',
+            //     this.state.sensor_manufacturer,
+            // ),
             generateSimpleStringListItem(
                 'Software version',
                 this.state.sensor_software_version,
@@ -294,6 +299,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.besst_serial_number,
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
         ];
     }
@@ -306,27 +312,59 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                     Info
                 </Typography.Title>
                 <br />
-                <Descriptions
-                    bordered
-                    title="Controller"
-                    items={this.getControllerItems()}
-                    column={1}
-                    style={{ marginBottom: '20px' }}
-                />
-                <Descriptions
-                    bordered
-                    title="Display"
-                    items={this.getDisplayItems()}
-                    column={1}
-                    style={{ marginBottom: '20px' }}
-                />
-                <Descriptions
-                    bordered
-                    title="Sensor"
-                    items={this.getSensorItems()}
-                    column={1}
-                    style={{ marginBottom: '20px' }}
-                />
+                {!connection.isControllerAvailable && (
+                    <>
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Controller is not connected
+                            </Text>
+                        </div>
+                        <br />
+                    </>
+                )}
+                {!connection.isDisplayAvailable && (
+                    <>
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">Display is not connected</Text>
+                        </div>
+                        <br />
+                    </>
+                )}
+                {!connection.isSensorAvailable && (
+                    <>
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">Sensor is not connected</Text>
+                        </div>
+                        <br />
+                    </>
+                )}
+                {connection.isControllerAvailable && (
+                    <Descriptions
+                        bordered
+                        title="Controller"
+                        items={this.getControllerItems()}
+                        column={1}
+                        style={{ marginBottom: '20px' }}
+                    />
+                )}
+                {connection.isDisplayAvailable && (
+                    <Descriptions
+                        bordered
+                        title="Display"
+                        items={this.getDisplayItems()}
+                        column={1}
+                        style={{ marginBottom: '20px' }}
+                    />
+                )}
+                {connection.isSensorAvailable && (
+                    <Descriptions
+                        bordered
+                        title="Sensor"
+                        items={this.getSensorItems()}
+                        column={1}
+                        style={{ marginBottom: '20px' }}
+                    />
+                )}
                 <Descriptions
                     bordered
                     title="BESST Tool"

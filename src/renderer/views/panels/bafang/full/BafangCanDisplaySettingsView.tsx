@@ -149,7 +149,6 @@ class BafangCanDisplaySettingsView extends React.Component<
                                         }
                                     })
                                     .catch((error) => {
-                                        console.log(error);
                                         message.open({
                                             key: 'cleaning_service_mileage',
                                             type: 'error',
@@ -273,13 +272,10 @@ class BafangCanDisplaySettingsView extends React.Component<
             display_manufacturer,
         } = this.state;
         return [
-            generateEditableStringListItem(
+            generateSimpleStringListItem(
                 'Serial number',
                 display_serial_number,
-                (e) =>
-                    this.setState({
-                        display_serial_number: e,
-                    }),
+                "Please note, that serial number could be easily changed, so it should never be used for security",
             ),
             generateSimpleStringListItem(
                 'Software version',
@@ -320,7 +316,23 @@ class BafangCanDisplaySettingsView extends React.Component<
         const { connection } = this.props;
         connection.displayData = this.state as BafangCanDisplayData;
         connection.displayCodes = this.state as BafangCanDisplayCodes;
-        connection.saveData();
+        connection.saveDisplayData();
+        message.open({
+            key: 'writing',
+            type: 'loading',
+            content: 'Writing...',
+            duration: 60,
+        });
+        connection.emitter.once(
+            'display-writing-finish',
+            (readedSuccessfully, readededUnsuccessfully) =>
+                message.open({
+                    key: 'writing',
+                    type: 'info',
+                    content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    duration: 5,
+                }),
+        );
     }
 
     render() {

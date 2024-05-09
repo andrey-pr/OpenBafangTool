@@ -6,7 +6,7 @@ export default interface IConnection {
     disconnect(): void;
     testConnection(): Promise<boolean>;
     deviceName: DeviceName;
-    loadData(): void;
     emitter: EventEmitter;
+    loadData(): void;
     saveData(): boolean;
 }

@@ -6,13 +6,26 @@ import { ReactNode } from 'react';
 import BooleanValueComponent from '../views/components/BooleanValueComponent';
 import StringInputComponent from '../views/components/StringInput';
 import ParameterInputComponent from '../views/components/ParameterInput';
+import { Typography } from 'antd';
+
+const { Text } = Typography;
 
 export function generateSimpleStringListItem(
     text: string,
     content: string | number | NoData,
+    note?: string,
 ): DescriptionsItemType {
     return {
-        label: text,
+        label: (
+            <>
+                {text}
+                {note && (
+                    <>
+                        <br /> <Text italic>{note}</Text>
+                    </>
+                )}
+            </>
+        ),
         children: <StringValueComponent value={content} />,
         contentStyle: { width: '50%' },
     };
