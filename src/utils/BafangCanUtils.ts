@@ -395,6 +395,9 @@ export function processCodeAnswerFromDisplay(
                 answer.data,
             );
             break;
+        case 0x07:
+            console.log('Errors:', answer.data);
+            break;
         case 0x08:
             dto.display_bootload_version = String.fromCharCode.apply(
                 null,
@@ -492,6 +495,18 @@ export function validateTime(
         seconds <= 0 &&
         seconds >= 59
     );
+}
+
+export function parseErrorCodes(
+    answer: BesstReadedCanFrame,
+    dto: number[],
+): void {
+    dto.splice(0, dto.length);
+    let errorString = String.fromCharCode.apply(null, answer.data);
+    while (errorString.length >= 2) {
+        dto.push(parseInt(errorString.substring(0, 2)));
+        errorString = errorString.substring(2);
+    }
 }
 
 export function parseDisplayPackage0(

@@ -47,6 +47,8 @@ export default class BafangCanSystem implements IConnection {
 
     private _displayState: types.BafangCanDisplayState;
 
+    private _displayErrorCodes: number[];
+
     private _controllerCodes: types.BafangCanControllerCodes;
 
     private _displayCodes: types.BafangCanDisplayCodes;
@@ -73,6 +75,7 @@ export default class BafangCanSystem implements IConnection {
             utils.getEmptyControllerSpeedParameters();
         this._displayData = utils.getEmptyDisplayData();
         this._displayState = utils.getEmptyDisplayRealtimeData();
+        this._displayErrorCodes = [];
         this._controllerCodes = utils.getEmptyControllerCodes();
         this._displayCodes = utils.getEmptyDisplayCodes();
         this._sensorCodes = utils.getEmptySensorCodes();
@@ -200,14 +203,22 @@ export default class BafangCanSystem implements IConnection {
                 return;
             }
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
-                utils.processCodeAnswerFromDisplay(
-                    response,
-                    this._displayCodes,
-                );
-                this.emitter.emit(
-                    'display-codes-data',
-                    deepCopy(this._displayCodes),
-                );
+                if (response.canCommandSubCode === 0x07) {
+                    utils.parseErrorCodes(response, this._displayErrorCodes);
+                    this.emitter.emit(
+                        'display-error-codes',
+                        this._displayErrorCodes,
+                    );
+                } else {
+                    utils.processCodeAnswerFromDisplay(
+                        response,
+                        this._displayCodes,
+                    );
+                    this.emitter.emit(
+                        'display-codes-data',
+                        deepCopy(this._displayCodes),
+                    );
+                }
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
             ) {
@@ -375,6 +386,7 @@ export default class BafangCanSystem implements IConnection {
                 utils.getControllerSpeedParametersDemo();
             this._displayData = utils.getDisplayDemoData();
             this._displayState = utils.getDisplayRealtimeDemoData();
+            this._displayErrorCodes = [14, 21, -1];
             this._controllerCodes = utils.getControllerCodesEmpty();
             this._displayCodes = utils.getDisplayCodesDemo();
             this._sensorCodes = utils.getSensorCodesDemo();
@@ -434,12 +446,13 @@ export default class BafangCanSystem implements IConnection {
             CanReadCommandsList.SerialNumber,
             CanReadCommandsList.CustomerNumber,
             CanReadCommandsList.Manufacturer,
+            CanReadCommandsList.ErrorCode,
             CanReadCommandsList.BootloaderVersion,
             CanReadCommandsList.DisplayDataBlock1,
             CanReadCommandsList.DisplayDataBlock2,
             CanReadCommandsList.MotorSpeedParameters,
         ];
-        const summ = 4 * 3 + 2 * 2 + 4;
+        const summ = 4 * 3 + 2 * 2 + 5;
         let readedSuccessfully = 0,
             readedUnsuccessfully = 0,
             readedDisplay = 0,
@@ -801,6 +814,10 @@ export default class BafangCanSystem implements IConnection {
 
     public get displayRealtimeData(): types.BafangCanDisplayState {
         return deepCopy(this._displayState);
+    }
+
+    public get displayErrorCodes(): number[] {
+        return deepCopy(this._displayErrorCodes);
     }
 
     public get displayCodes(): types.BafangCanDisplayCodes {

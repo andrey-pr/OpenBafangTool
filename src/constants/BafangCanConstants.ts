@@ -61,6 +61,11 @@ export const CanReadCommandsList: {
             DeviceNetworkId.DISPLAY,
         ],
     },
+    ErrorCode: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x07,
+        applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
     BootloaderVersion: {
         canCommandCode: 0x60,
         canCommandSubCode: 0x08,
@@ -139,3 +144,26 @@ export const CanWriteCommandsList: {
         applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
     },
 };
+
+const ErrorCodes: {
+    [key: number]: { description: string; recommendations: string };
+} = {
+    14: {
+        description: 'Motor communication error',
+        recommendations:
+            'Check connection with motor. If its overheated, let it cool down. Check if motor has supply. Check contacts in connectors for dirt and damage.',
+    },
+    21: {
+        description: 'Hall sensor error',
+        recommendations:
+            'Check magnet on wheel. Check connection with of hall sensor. Check hall sensor with multimeter. Try to connect spare sensor if available.',
+    },
+};
+
+export function getErrorCodeText(code: number): {
+    description: string;
+    recommendations: string;
+} {
+    if(ErrorCodes[code]) return ErrorCodes[code];
+    return {description: 'Description for this code is not available', recommendations: '-'};
+}

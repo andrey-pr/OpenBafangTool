@@ -7,6 +7,7 @@ import {
     Button,
     TimePicker,
     Popconfirm,
+    Table,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
@@ -26,6 +27,7 @@ import {
     BafangCanDisplayData,
     BafangCanDisplayState,
 } from '../../../../../types/BafangCanSystemTypes';
+import { getErrorCodeText } from '../../../../../constants/BafangCanConstants';
 
 dayjs.extend(customParseFormat);
 
@@ -36,8 +38,27 @@ type SettingsProps = {
 type SettingsState = BafangCanDisplayData &
     BafangCanDisplayState &
     BafangCanDisplayCodes & {
+        display_error_codes: number[];
         currentTimeToSet: dayjs.Dayjs | null;
     };
+
+const errorCodesTableLayout = [
+    {
+        title: 'Code',
+        dataIndex: 'code',
+        key: 'code',
+    },
+    {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+    },
+    {
+        title: 'Recommendations',
+        dataIndex: 'recommendations',
+        key: 'recommendations',
+    },
+];
 
 // TODO add redux
 /* eslint-disable camelcase */
@@ -52,14 +73,19 @@ class BafangCanDisplaySettingsView extends React.Component<
             ...connection.displayData,
             ...connection.displayRealtimeData,
             ...connection.displayCodes,
+            display_error_codes: connection.displayErrorCodes,
             currentTimeToSet: null,
         };
         this.getRecordsItems = this.getRecordsItems.bind(this);
         this.getStateItems = this.getStateItems.bind(this);
+        this.getErrorCodeTableItems = this.getErrorCodeTableItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         connection.emitter.on('display-general-data', this.updateData);
+        connection.emitter.on('display-error-codes', (errors: number[]) =>
+            this.setState({ display_error_codes: errors }),
+        );
         connection.emitter.on('display-codes-data', this.updateData);
         connection.emitter.on('broadcast-data-display', this.updateData);
     }
@@ -265,6 +291,22 @@ class BafangCanDisplaySettingsView extends React.Component<
         ];
     }
 
+    getErrorCodeTableItems(): {
+        key: string;
+        code: number;
+        description: string;
+        recommendations: string;
+    }[] {
+        let i: number = 0;
+        return this.state.display_error_codes.map((code: number) => {
+            return {
+                key: `${i++}`,
+                code,
+                ...getErrorCodeText(code),
+            };
+        });
+    }
+
     getOtherItems(): DescriptionsProps['items'] {
         const {
             display_serial_number,
@@ -355,6 +397,17 @@ class BafangCanDisplaySettingsView extends React.Component<
                     title="State"
                     items={this.getStateItems()}
                     column={1}
+                />
+                <br />
+                <Typography.Title level={5} style={{ margin: 0 }}>
+                    Error codes
+                </Typography.Title>
+                <br />
+                <Table
+                    dataSource={this.getErrorCodeTableItems()}
+                    columns={errorCodesTableLayout}
+                    pagination={false}
+                    bordered
                 />
                 <br />
                 <Descriptions
