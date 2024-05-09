@@ -33,6 +33,8 @@ class ParameterInputComponent extends React.Component<
         disabled: false,
         unit: undefined,
         decimalPlaces: 0,
+        min: undefined,
+        max: undefined,
     };
 
     constructor(props: any) {

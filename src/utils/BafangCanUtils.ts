@@ -23,7 +23,6 @@ import {
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
     BafangCanWheelDiameterTable,
-    BafangCanWheel,
 } from '../types/BafangCanSystemTypes';
 import { NoData, NotAvailable, NotLoadedYet } from '../types/no_data';
 
@@ -135,7 +134,6 @@ export function getEmptyControllerCodes(): BafangCanControllerCodes {
         controller_serial_number: NotLoadedYet,
         controller_customer_number: NotLoadedYet,
         controller_manufacturer: NotLoadedYet,
-        controller_bootload_version: NotLoadedYet,
     };
 }
 
@@ -158,8 +156,6 @@ export function getEmptySensorCodes(): BafangCanSensorCodes {
         sensor_model_number: NotLoadedYet,
         sensor_serial_number: NotLoadedYet,
         sensor_customer_number: NotLoadedYet,
-        sensor_manufacturer: NotLoadedYet,
-        sensor_bootload_version: NotLoadedYet,
     };
 }
 
@@ -208,7 +204,7 @@ export function getSensorRealtimeDemoData(): BafangCanSensorRealtime {
 
 export function getControllerParameters1Demo(): BafangCanControllerParameters1 {
     return {
-        controller_system_voltage: 36, //TODO fill with data
+        controller_system_voltage: 36, // TODO fill with data
         controller_current_limit: 1,
         controller_overvoltage: 1,
         controller_undervoltage: 1,
@@ -279,7 +275,6 @@ export function getControllerCodesEmpty(): BafangCanControllerCodes {
         controller_serial_number: 'CRX10V.350.FC2.1A42F5TB045999',
         controller_customer_number: '',
         controller_manufacturer: 'BAFANG',
-        controller_bootload_version: NotAvailable,
     };
 }
 
@@ -302,8 +297,6 @@ export function getSensorCodesDemo(): BafangCanSensorCodes {
         sensor_model_number: 'SR PA212.32.ST.C',
         sensor_serial_number: '0000000000',
         sensor_customer_number: NotAvailable,
-        sensor_manufacturer: NotAvailable,
-        sensor_bootload_version: NotAvailable,
     };
 }
 
@@ -352,12 +345,6 @@ export function processCodeAnswerFromController(
             break;
         case 0x05:
             dto.controller_manufacturer = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
-            break;
-        case 0x08:
-            dto.controller_bootload_version = String.fromCharCode.apply(
                 null,
                 answer.data,
             );
@@ -454,21 +441,57 @@ export function processCodeAnswerFromSensor(
                 answer.data,
             );
             break;
-        case 0x05:
-            dto.sensor_manufacturer = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
-            break;
-        case 0x08:
-            dto.sensor_bootload_version = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
-            break;
         default:
             break;
     }
+}
+
+export function decodeCurrentAssistLevel(
+    currentAssistLevelCode: number,
+    totalAssistLevels: number,
+): BafangCanAssistLevel {
+    const assistLevelTable: {
+        [key: number]: { [key: number]: BafangCanAssistLevel };
+    } = {
+        3: { 0: 0, 12: 1, 2: 2, 3: 3, 6: 'walk' },
+        4: { 0: 0, 1: 1, 12: 2, 21: 3, 3: 4, 6: 'walk' },
+        5: { 0: 0, 11: 1, 13: 2, 21: 3, 23: 4, 3: 5, 6: 'walk' },
+        9: {
+            0: 0,
+            1: 1,
+            11: 2,
+            12: 3,
+            13: 4,
+            2: 5,
+            21: 6,
+            22: 7,
+            23: 8,
+            3: 9,
+            6: 'walk',
+        },
+    };
+    if (
+        (totalAssistLevels <= 3 || totalAssistLevels >= 5) &&
+        totalAssistLevels !== 9
+    ) {
+        totalAssistLevels = 5;
+    }
+    return assistLevelTable[totalAssistLevels][currentAssistLevelCode];
+}
+
+export function validateTime(
+    hours: number,
+    minutes: number,
+    seconds: number,
+): boolean {
+    return (
+        hours <= 0 &&
+        hours >= 23 &&
+        minutes <= 0 &&
+        minutes >= 59 &&
+        seconds <= 0 &&
+        seconds >= 59
+    );
 }
 
 export function parseDisplayPackage0(
@@ -513,7 +536,7 @@ export function parseControllerPackage0(
     packet: BesstReadedCanFrame,
     dto: BafangCanControllerRealtime,
 ): void {
-    let tem = (packet.data[7] << 8) + packet.data[6];
+    const tem = (packet.data[7] << 8) + packet.data[6];
     dto.controller_remaining_capacity = packet.data[0];
     dto.controller_single_trip = ((packet.data[2] << 8) + packet.data[1]) / 100;
     dto.controller_cadence = packet.data[3];
@@ -537,7 +560,7 @@ export function parseControllerPackage3(
     packet: BesstReadedCanFrame,
     dto: BafangCanControllerSpeedParameters,
 ): void {
-    let diameter = BafangCanWheelDiameterTable.find(
+    const diameter = BafangCanWheelDiameterTable.find(
         (item) =>
             item.code[0] === packet.data[2] && item.code[1] === packet.data[3],
     );
@@ -611,7 +634,7 @@ export function prepareSpeedPackageWritePromise(
         // || !(value.controller_wheel_diameter instanceof BafangCanWheel)
     )
         return;
-    let limit = value.controller_speed_limit * 100;
+    const limit = value.controller_speed_limit * 100;
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
             write_function(
@@ -657,52 +680,4 @@ export function prepareMileageWritePromise(
             );
         }),
     );
-}
-
-export function validateTime(
-    hours: number,
-    minutes: number,
-    seconds: number,
-): boolean {
-    return (
-        hours <= 0 &&
-        hours >= 23 &&
-        minutes <= 0 &&
-        minutes >= 59 &&
-        seconds <= 0 &&
-        seconds >= 59
-    );
-}
-
-export function decodeCurrentAssistLevel(
-    currentAssistLevelCode: number,
-    totalAssistLevels: number,
-): BafangCanAssistLevel {
-    let assistLevelTable: {
-        [key: number]: { [key: number]: BafangCanAssistLevel };
-    } = {
-        3: { 0: 0, 12: 1, 2: 2, 3: 3, 6: 'walk' },
-        4: { 0: 0, 1: 1, 12: 2, 21: 3, 3: 4, 6: 'walk' },
-        5: { 0: 0, 11: 1, 13: 2, 21: 3, 23: 4, 3: 5, 6: 'walk' },
-        9: {
-            0: 0,
-            1: 1,
-            11: 2,
-            12: 3,
-            13: 4,
-            2: 5,
-            21: 6,
-            22: 7,
-            23: 8,
-            3: 9,
-            6: 'walk',
-        },
-    };
-    if (
-        (totalAssistLevels <= 3 || totalAssistLevels >= 5) &&
-        totalAssistLevels !== 9
-    ) {
-        totalAssistLevels = 5;
-    }
-    return assistLevelTable[totalAssistLevels][currentAssistLevelCode];
 }

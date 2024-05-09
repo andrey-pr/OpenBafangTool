@@ -11,23 +11,18 @@ class NumberValueComponent extends React.Component<NumberValueProps> {
         unit: undefined,
     };
 
-    constructor(props: any) {
-        super(props);
-    }
-
     render() {
         const { unit, value } = this.props;
         if (value === NotLoadedYet) {
-            return <>Isn't readed yet</>;
+            return <>Isn&apos;t readed yet</>;
         } else if (value === NotAvailable) {
             return <>Not available on this hardware</>;
-        } else {
-            return (
-                <>
-                    {value as number} {unit !== undefined ? unit : ''}
-                </>
-            );
         }
+        return (
+            <>
+                {value as number} {unit !== undefined ? unit : ''}
+            </>
+        );
     }
 }
 

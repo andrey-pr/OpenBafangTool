@@ -254,7 +254,6 @@ export type BafangCanControllerCodes = {
     controller_serial_number: string | NoData;
     controller_customer_number: string | NoData;
     controller_manufacturer: string | NoData;
-    controller_bootload_version: string | NoData;
 };
 
 export type BafangCanDisplayCodes = {
@@ -314,8 +313,6 @@ export type BafangCanSensorCodes = {
     sensor_model_number: string | NoData;
     sensor_serial_number: string | NoData;
     sensor_customer_number: string | NoData;
-    sensor_manufacturer: string | NoData;
-    sensor_bootload_version: string | NoData;
 };
 
 export type BafangBesstCodes = {

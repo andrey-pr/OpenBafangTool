@@ -1,5 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
+import { deepCopy } from 'deep-copy-ts';
 import IConnection from './Connection';
 import { DeviceName } from '../../types/DeviceType';
 import * as types from '../../types/BafangCanSystemTypes';
@@ -15,7 +16,6 @@ import {
     CanOperation,
     DeviceNetworkId,
 } from '../besst/besst-types';
-import { deepCopy } from 'deep-copy-ts';
 
 type SentRequest = {
     resolve: (...args: any[]) => void;
@@ -439,7 +439,7 @@ export default class BafangCanSystem implements IConnection {
             CanReadCommandsList.DisplayDataBlock2,
             CanReadCommandsList.MotorSpeedParameters,
         ];
-        let summ = 20;
+        const summ = 4 * 3 + 2 * 2 + 4;
         let readedSuccessfully = 0,
             readedUnsuccessfully = 0,
             readedDisplay = 0,
@@ -763,6 +763,10 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._controllerCodes);
     }
 
+    public set controllerCodes(data: types.BafangCanControllerCodes) {
+        this._controllerCodes = deepCopy(data);
+    }
+
     public get controllerRealtimeData(): types.BafangCanControllerRealtime {
         return deepCopy(this._controllerRealtimeData);
     }
@@ -771,12 +775,28 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._controllerParameters1);
     }
 
+    public set controllerParameters1(
+        data: types.BafangCanControllerParameters1,
+    ) {
+        this._controllerParameters1 = deepCopy(data);
+    }
+
     public get controllerSpeedParameters(): types.BafangCanControllerSpeedParameters {
         return deepCopy(this._controllerSpeedParameters);
     }
 
+    public set controllerSpeedParameters(
+        data: types.BafangCanControllerSpeedParameters,
+    ) {
+        this._controllerSpeedParameters = deepCopy(data);
+    }
+
     public get displayData(): types.BafangCanDisplayData {
         return deepCopy(this._displayData);
+    }
+
+    public set displayData(data: types.BafangCanDisplayData) {
+        this._displayData = deepCopy(data);
     }
 
     public get displayRealtimeData(): types.BafangCanDisplayState {
@@ -787,6 +807,10 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._displayCodes);
     }
 
+    public set displayCodes(data: types.BafangCanDisplayCodes) {
+        this._displayCodes = deepCopy(data);
+    }
+
     public get sensorRealtimeData(): types.BafangCanSensorRealtime {
         return deepCopy(this._sensorRealtimeData);
     }
@@ -795,8 +819,16 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._sensorCodes);
     }
 
+    public set sensorCodes(data: types.BafangCanSensorCodes) {
+        this._sensorCodes = deepCopy(data);
+    }
+
     public get besstCodes(): types.BafangBesstCodes {
         return deepCopy(this._besstCodes);
+    }
+
+    public set besstCodes(data: types.BafangBesstCodes) {
+        this._besstCodes = deepCopy(data);
     }
 
     public get isDisplayAvailable(): boolean {
@@ -809,37 +841,5 @@ export default class BafangCanSystem implements IConnection {
 
     public get isSensorAvailable(): boolean {
         return this._sensorAvailable;
-    }
-
-    public set controllerParameters1(
-        data: types.BafangCanControllerParameters1,
-    ) {
-        this._controllerParameters1 = deepCopy(data);
-    }
-
-    public set controllerSpeedParameters(
-        data: types.BafangCanControllerSpeedParameters,
-    ) {
-        this._controllerSpeedParameters = deepCopy(data);
-    }
-
-    public set displayData(data: types.BafangCanDisplayData) {
-        this._displayData = deepCopy(data);
-    }
-
-    public set controllerCodes(data: types.BafangCanControllerCodes) {
-        this._controllerCodes = deepCopy(data);
-    }
-
-    public set displayCodes(data: types.BafangCanDisplayCodes) {
-        this._displayCodes = deepCopy(data);
-    }
-
-    public set sensorCodes(data: types.BafangCanSensorCodes) {
-        this._sensorCodes = deepCopy(data);
-    }
-
-    public set besstCodes(data: types.BafangBesstCodes) {
-        this._besstCodes = deepCopy(data);
     }
 }

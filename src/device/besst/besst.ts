@@ -1,4 +1,5 @@
 import HID from 'node-hid';
+import { EventEmitter } from 'stream';
 import {
     buildBesstCanCommandPacket,
     generateBesstWritePacket,
@@ -13,7 +14,6 @@ import {
     CanOperation,
     BesstReadedCanFrame,
 } from './besst-types';
-import { EventEmitter } from 'stream';
 
 export function listBesstDevices(): HID.Device[] {
     return HID.devices().filter((device) => device.product === 'BaFang Besst');
@@ -21,16 +21,19 @@ export function listBesstDevices(): HID.Device[] {
 
 class BesstDevice {
     private device?: HID.HID;
+
     public readonly emitter: EventEmitter;
 
     private serialNumberPromise?: {
         resolve: (...args: any[]) => void;
         reject: (...args: any[]) => void;
     } = undefined;
+
     private softwareVersionPromise?: {
         resolve: (...args: any[]) => void;
         reject: (...args: any[]) => void;
     } = undefined;
+
     private hardwareVersionPromise?: {
         resolve: (...args: any[]) => void;
         reject: (...args: any[]) => void;
@@ -70,7 +73,7 @@ class BesstDevice {
             setTimeout(this.processWriteQueue, 100);
             return;
         }
-        let packet = this.packetQueue.shift() as BesstWritePacket;
+        const packet = this.packetQueue.shift() as BesstWritePacket;
         if (
             packet.type === BesstPacketType.CAN_REQUEST ||
             packet.type === BesstPacketType.BESST_ACTIVATE
@@ -98,7 +101,7 @@ class BesstDevice {
 
     private processReadedData(data: Uint8Array): void {
         if (data.length === 0) return;
-        let array: number[] = [...data];
+        const array: number[] = [...data];
         switch (array[0]) {
             case 0x10:
             case 0x11:
@@ -251,8 +254,8 @@ class BesstDevice {
     }
 
     public reset(): Promise<void> {
-        let vid = this.device?.getDeviceInfo().vendorId; //its okay. There is mistake in node-hid's class type file, actually this function exists
-        let pid = this.device?.getDeviceInfo().productId;
+        const vid = this.device?.getDeviceInfo().vendorId; // its okay. There is mistake in node-hid's class type file, actually this function exists
+        const pid = this.device?.getDeviceInfo().productId;
         this.device?.removeAllListeners();
         this.packetQueue = [];
         this.packetQueue.push(

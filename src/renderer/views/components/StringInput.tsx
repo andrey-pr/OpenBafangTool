@@ -59,31 +59,30 @@ class StringInputComponent extends React.Component<
                     disabled
                 />
             );
-        } else {
-            return (
-                <Tooltip
-                    title="This field should not be empty"
-                    trigger="click"
-                    open={error}
-                >
-                    <Input
-                        value={value as string}
-                        style={{ minWidth: '150px' }}
-                        maxLength={maxLength}
-                        onChange={(e) => {
-                            const tmp = (errorOnEmpty &&
-                                e.target.value === '') as boolean;
-                            this.setState({
-                                value: e.target.value,
-                                error: tmp,
-                            });
-                            onNewValue(e.target.value);
-                        }}
-                        status={error ? 'error' : ''}
-                    />
-                </Tooltip>
-            );
         }
+        return (
+            <Tooltip
+                title="This field should not be empty"
+                trigger="click"
+                open={error}
+            >
+                <Input
+                    value={value as string}
+                    style={{ minWidth: '150px' }}
+                    maxLength={maxLength}
+                    onChange={(e) => {
+                        const tmp = (errorOnEmpty &&
+                            e.target.value === '') as boolean;
+                        this.setState({
+                            value: e.target.value,
+                            error: tmp,
+                        });
+                        onNewValue(e.target.value);
+                    }}
+                    status={error ? 'error' : ''}
+                />
+            </Tooltip>
+        );
     }
 }
 

@@ -2,7 +2,6 @@ import React from 'react';
 import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
-import StringInputComponent from '../../../components/StringInput';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
@@ -27,10 +26,10 @@ type SettingsState = BafangCanControllerRealtime &
     BafangCanControllerSpeedParameters &
     BafangCanControllerCodes;
 
-//TODO add redux
+// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
-    //TODO add param1
+    // TODO add param1 and calibration buttons
     SettingsProps,
     SettingsState
 > {
@@ -51,7 +50,7 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     updateData(values: any) {
-        //TODO add property check
+        // TODO add property check
         this.setState(values);
     }
 
@@ -150,8 +149,8 @@ class BafangCanMotorSettingsView extends React.Component<
                             (item) => item.text,
                         )}
                         onNewValue={(value) => {
-                            let wheel = BafangCanWheelDiameterTable.find(
-                                (wheel) => wheel.text === value,
+                            const wheel = BafangCanWheelDiameterTable.find(
+                                (item) => item.text === value,
                             );
                             this.setState({
                                 controller_wheel_diameter: wheel
@@ -181,11 +180,8 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const {
-            controller_serial_number,
-            controller_customer_number,
-            controller_manufacturer,
-        } = this.state;
+        const { controller_serial_number, controller_manufacturer } =
+            this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',

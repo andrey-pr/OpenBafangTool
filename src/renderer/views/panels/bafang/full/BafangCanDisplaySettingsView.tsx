@@ -39,7 +39,7 @@ type SettingsState = BafangCanDisplayData &
         currentTimeToSet: dayjs.Dayjs | null;
     };
 
-//TODO add redux
+// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanDisplaySettingsView extends React.Component<
     SettingsProps,
@@ -65,7 +65,7 @@ class BafangCanDisplaySettingsView extends React.Component<
     }
 
     updateData(values: any) {
-        //TODO add property check
+        // TODO add property check
         this.setState(values);
     }
 
@@ -148,7 +148,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                                             });
                                         }
                                     })
-                                    .catch((error) => {
+                                    .catch(() => {
                                         message.open({
                                             key: 'cleaning_service_mileage',
                                             type: 'error',

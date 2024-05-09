@@ -68,11 +68,11 @@ class ParameterSelectComponent extends React.Component<
         }
         return (
             <Select
-                onChange={(value) => {
+                onChange={(new_value) => {
                     this.setState({
-                        value: value,
+                        value: new_value,
                     });
-                    onNewValue(value as string);
+                    onNewValue(new_value as string);
                 }}
                 allowClear
                 style={{ minWidth: '150px' }}

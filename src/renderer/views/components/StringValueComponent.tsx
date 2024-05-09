@@ -6,19 +6,14 @@ type StringValueProps = {
 };
 
 class StringValueComponent extends React.Component<StringValueProps> {
-    constructor(props: any) {
-        super(props);
-    }
-
     render() {
         const { value } = this.props;
         if (value === NotLoadedYet) {
-            return <>Isn't readed yet</>;
+            return <>Isn&apos;t readed yet</>;
         } else if (value === NotAvailable) {
             return <>Not available on this hardware</>;
-        } else {
-            return <>{value as string}</>;
         }
+        return <>{value as string}</>;
     }
 }
 

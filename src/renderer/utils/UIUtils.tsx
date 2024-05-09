@@ -1,12 +1,12 @@
+import { ReactNode } from 'react';
+import { Typography } from 'antd';
 import { DescriptionsItemType } from 'antd/es/descriptions';
 import StringValueComponent from '../views/components/StringValueComponent';
 import { NoData } from '../../types/no_data';
 import NumberValueComponent from '../views/components/NumberValueComponent';
-import { ReactNode } from 'react';
 import BooleanValueComponent from '../views/components/BooleanValueComponent';
 import StringInputComponent from '../views/components/StringInput';
 import ParameterInputComponent from '../views/components/ParameterInput';
-import { Typography } from 'antd';
 
 const { Text } = Typography;
 

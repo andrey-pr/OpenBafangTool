@@ -2,7 +2,6 @@ import React from 'react';
 import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
-import StringInputComponent from '../../../components/StringInput';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanSensorCodes,
@@ -20,7 +19,7 @@ type SettingsProps = {
 
 type SettingsState = BafangCanSensorRealtime & BafangCanSensorCodes;
 
-//TODO add redux
+// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
     SettingsProps,
@@ -41,7 +40,7 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     updateData(values: any) {
-        //TODO add property check
+        // TODO add property check
         this.setState(values);
     }
 
@@ -61,11 +60,7 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const {
-            sensor_serial_number,
-            sensor_customer_number,
-            sensor_manufacturer,
-        } = this.state;
+        const { sensor_serial_number, sensor_customer_number } = this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',

@@ -82,7 +82,7 @@ export function buildBesstCanCommandPacket(
 export function parseCanResponseFromBesst(
     array: number[],
 ): BesstReadedCanFrame[] {
-    let packets: BesstReadedCanFrame[] = [];
+    const packets: BesstReadedCanFrame[] = [];
     array = array.slice(3);
     while (array.length > 0) {
         if (array.slice(0, 13).filter((value) => value !== 0).length !== 0) {

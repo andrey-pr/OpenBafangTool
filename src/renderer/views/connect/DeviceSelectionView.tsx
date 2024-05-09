@@ -9,6 +9,8 @@ import {
     Space,
     message,
 } from 'antd';
+import { SerialPort } from 'serialport';
+import HID from 'node-hid';
 import IConnection from '../../../device/high-level/Connection';
 import BafangUartMotor from '../../../device/high-level/BafangUartMotor';
 import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
@@ -19,9 +21,7 @@ import {
 } from '../../../types/DeviceType';
 import InterfaceType from '../../models/InterfaceType';
 import filterPorts from '../../../device/serial/serial-patcher';
-import { SerialPort } from 'serialport';
 import { listBesstDevices } from '../../../device/besst/besst';
-import HID from 'node-hid';
 
 const { Option } = Select;
 
