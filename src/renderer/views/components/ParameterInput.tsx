@@ -94,7 +94,7 @@ class ParameterInputComponent extends React.Component<
                         addonAfter={unit}
                         style={{ minWidth: '150px' }}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 let tmp = false;
                                 tmp ||=
                                     warningBelow !== undefined &&

@@ -70,7 +70,7 @@ class BafangCanSensorSettingsView extends React.Component<
             generateSimpleStringListItem(
                 'Serial number',
                 sensor_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',
@@ -84,14 +84,6 @@ class BafangCanSensorSettingsView extends React.Component<
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            // generateEditableStringListItem(
-            //     'Manufacturer',
-            //     sensor_manufacturer,
-            //     (e) =>
-            //         this.setState({
-            //             sensor_manufacturer: e,
-            //         }),
-            // ),
             generateEditableStringListItem(
                 'Customer number',
                 sensor_customer_number,
@@ -100,10 +92,6 @@ class BafangCanSensorSettingsView extends React.Component<
                         sensor_customer_number: e,
                     }),
             ),
-            // generateSimpleStringListItem(
-            //     'Bootloader version',
-            //     this.state.sensor_bootload_version,
-            // ),
         ];
     }
 

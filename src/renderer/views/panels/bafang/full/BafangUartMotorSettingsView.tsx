@@ -309,7 +309,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ speedmeter_type: e });
                             }
                         }}
@@ -346,7 +346,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_type: e });
                             }
                         }}
@@ -393,7 +393,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}
@@ -454,7 +454,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_assist_level: e });
                             }
                         }}
@@ -515,7 +515,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_assist_level: e });
                             }
                         }}
@@ -900,7 +900,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ speedmeter_type: e });
                             }
                         }}
@@ -948,7 +948,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_type: e });
                             }
                         }}
@@ -1009,7 +1009,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_assist_level: e });
                             }
                         }}
@@ -1273,7 +1273,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}
@@ -1334,7 +1334,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_assist_level: e });
                             }
                         }}

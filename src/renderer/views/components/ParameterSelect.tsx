@@ -48,7 +48,7 @@ class ParameterSelectComponent extends React.Component<
                     disabled
                 >
                     <Option value="error" key="error">
-                        Isn't readed yet
+                        Isn&apos;t readed yet
                     </Option>
                 </Select>
             );
@@ -65,29 +65,28 @@ class ParameterSelectComponent extends React.Component<
                     </Option>
                 </Select>
             );
-        } else {
-            return (
-                <Select
-                    onChange={(value) => {
-                        this.setState({
-                            value: value,
-                        });
-                        onNewValue(value as string);
-                    }}
-                    allowClear
-                    style={{ minWidth: '150px' }}
-                    value={value}
-                >
-                    {options.map((item: string) => {
-                        return (
-                            <Option value={item} key={item}>
-                                {item}
-                            </Option>
-                        );
-                    })}
-                </Select>
-            );
         }
+        return (
+            <Select
+                onChange={(value) => {
+                    this.setState({
+                        value: value,
+                    });
+                    onNewValue(value as string);
+                }}
+                allowClear
+                style={{ minWidth: '150px' }}
+                value={value}
+            >
+                {options.map((item: string) => {
+                    return (
+                        <Option value={item} key={item}>
+                            {item}
+                        </Option>
+                    );
+                })}
+            </Select>
+        );
     }
 }
 

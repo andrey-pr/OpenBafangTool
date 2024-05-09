@@ -30,7 +30,7 @@ class App extends React.Component<AppProps, AppState> {
         interfaceType: InterfaceType,
     ): void {
         const { connection } = this.state;
-        if (connection != null) {
+        if (connection) {
             connection.disconnect();
         }
         newConnection
@@ -53,7 +53,7 @@ class App extends React.Component<AppProps, AppState> {
 
     toDeviceSelector() {
         const { connection } = this.state;
-        if (connection != null) {
+        if (connection) {
             connection.disconnect();
         }
         this.setState({ view: 'device_selector' });

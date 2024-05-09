@@ -1,4 +1,4 @@
-import { DeviceNetworkId } from "../device/besst/besst-types";
+import { DeviceNetworkId } from '../device/besst/besst-types';
 
 export type CanCommand = {
     canCommandCode: number;
@@ -64,9 +64,7 @@ export const CanReadCommandsList: {
     BootloaderVersion: {
         canCommandCode: 0x60,
         canCommandSubCode: 0x08,
-        applicableDevices: [
-            DeviceNetworkId.DISPLAY,
-        ],
+        applicableDevices: [DeviceNetworkId.DISPLAY],
     },
     MotorSpeedParameters: {
         canCommandCode: 0x32,

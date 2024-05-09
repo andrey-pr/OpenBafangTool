@@ -212,18 +212,6 @@ class BafangCanMotorSettingsView extends React.Component<
                         controller_manufacturer: e,
                     }),
             ),
-            // generateEditableStringListItem(
-            //     'Customer number',
-            //     controller_customer_number,
-            //     (e) =>
-            //         this.setState({
-            //             controller_customer_number: e,
-            //         }),
-            // ),
-            // generateSimpleStringListItem(
-            //     'Bootloader version',
-            //     this.state.controller_bootload_version,
-            // ),
         ];
     }
 

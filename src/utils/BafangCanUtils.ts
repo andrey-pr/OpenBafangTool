@@ -1,4 +1,11 @@
-import { BesstReadedCanFrame } from '../device/besst/besst-types';
+import {
+    CanCommand,
+    CanWriteCommandsList,
+} from '../constants/BafangCanConstants';
+import {
+    BesstReadedCanFrame,
+    DeviceNetworkId,
+} from '../device/besst/besst-types';
 import {
     BafangBesstCodes,
     BafangCanAssistLevel,
@@ -16,8 +23,9 @@ import {
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
     BafangCanWheelDiameterTable,
+    BafangCanWheel,
 } from '../types/BafangCanSystemTypes';
-import { NotAvailable, NotLoadedYet } from '../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../types/no_data';
 
 export function getEmptyControllerRealtimeData(): BafangCanControllerRealtime {
     return {
@@ -531,7 +539,7 @@ export function parseControllerPackage3(
 ): void {
     let diameter = BafangCanWheelDiameterTable.find(
         (item) =>
-            item.code[0] == packet.data[2] && item.code[1] == packet.data[3],
+            item.code[0] === packet.data[2] && item.code[1] === packet.data[3],
     );
     dto.controller_speed_limit = ((packet.data[1] << 8) + packet.data[0]) / 100;
     if (diameter) dto.controller_wheel_diameter = diameter;
@@ -556,6 +564,99 @@ export function serializeMileage(mileage: number): number[] {
 
 export function serializeString(value: string): number[] {
     return [...Buffer.from(value), 0];
+}
+
+export function prepareStringWritePromise(
+    value: string | NoData,
+    device: DeviceNetworkId,
+    can_command: CanCommand,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (typeof value !== 'string') return;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                device,
+                can_command,
+                serializeString(value),
+                resolve,
+                reject,
+            );
+        }),
+    );
+}
+
+export function prepareSpeedPackageWritePromise(
+    value: BafangCanControllerSpeedParameters,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (
+        !value.controller_circumference ||
+        typeof value.controller_speed_limit !== 'number' ||
+        typeof value.controller_circumference !== 'number'
+        // || !(value.controller_wheel_diameter instanceof BafangCanWheel)
+    )
+        return;
+    let limit = value.controller_speed_limit * 100;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                DeviceNetworkId.DRIVE_UNIT,
+                CanWriteCommandsList.MotorSpeedParameters,
+                [
+                    limit & 0b11111111,
+                    (limit & 0b1111111100000000) >> 8,
+                    value.controller_wheel_diameter.code[0],
+                    value.controller_wheel_diameter.code[1],
+                    value.controller_circumference as number & 0b11111111,
+                    (value.controller_circumference as number &
+                        0b1111111100000000) >> 8,
+                ],
+                resolve,
+                reject,
+            );
+        }),
+    );
+}
+
+export function prepareMileageWritePromise(
+    value: number | NoData,
+    can_command: CanCommand,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (typeof value !== 'number') return;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                DeviceNetworkId.DISPLAY,
+                can_command,
+                serializeMileage(value),
+                resolve,
+                reject,
+            );
+        }),
+    );
 }
 
 export function validateTime(
@@ -599,7 +700,7 @@ export function decodeCurrentAssistLevel(
     };
     if (
         (totalAssistLevels <= 3 || totalAssistLevels >= 5) &&
-        totalAssistLevels != 9
+        totalAssistLevels !== 9
     ) {
         totalAssistLevels = 5;
     }

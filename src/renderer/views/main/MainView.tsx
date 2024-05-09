@@ -226,7 +226,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !this.props.connection.isControllerAvailable,
+                            !(this.props.connection as BafangCanSystem)
+                                .isControllerAvailable,
                     },
                     {
                         key: 'bafang_can_display_settings',
@@ -235,7 +236,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !this.props.connection.isDisplayAvailable,
+                            !(this.props.connection as BafangCanSystem)
+                                .isDisplayAvailable,
                     },
                     {
                         key: 'bafang_can_sensor_settings',
@@ -244,7 +246,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !this.props.connection.isSensorAvailable,
+                            !(this.props.connection as BafangCanSystem)
+                                .isSensorAvailable,
                     },
                     {
                         key: 'bafang_can_motor_manual',

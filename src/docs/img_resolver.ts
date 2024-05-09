@@ -15,7 +15,6 @@ import SimplifiedMenu from '../../docs/assets/general_manual/simplified_menu.png
 import SimplifiedParameters from '../../docs/assets/general_manual/simplified_parameters.png';
 import SimplifiedWarning from '../../docs/assets/general_manual/simplified_warning.png';
 
-
 // TODO this file is a very big kludge, made as temporal solution for assets import problem
 
 interface Image {

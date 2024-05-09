@@ -275,7 +275,7 @@ class BafangCanDisplaySettingsView extends React.Component<
             generateSimpleStringListItem(
                 'Serial number',
                 display_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',

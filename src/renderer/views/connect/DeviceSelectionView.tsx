@@ -20,7 +20,7 @@ import {
 import InterfaceType from '../../models/InterfaceType';
 import filterPorts from '../../../device/serial/serial-patcher';
 import { SerialPort } from 'serialport';
-import BesstDevice, { listBesstDevices } from '../../../device/besst/besst';
+import { listBesstDevices } from '../../../device/besst/besst';
 import HID from 'node-hid';
 
 const { Option } = Select;
@@ -296,7 +296,7 @@ class DeviceSelectionView extends React.Component<
                             </Form.Item>
                         )}
                     <Form.Item
-                        name="localLawsAgreement"
+                        name="local_laws_agreement"
                         label=""
                         initialValue={false}
                         valuePropName="checked"

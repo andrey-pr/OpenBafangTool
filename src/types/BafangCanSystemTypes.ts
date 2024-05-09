@@ -93,152 +93,152 @@ export const BafangCanWheelDiameterTable: BafangCanWheel[] = [
         text: '6″',
         minimalCircumference: 400,
         maximalCircumference: 880,
-        code: [0x60, 0x00]
+        code: [0x60, 0x00],
     },
     {
         text: '7″',
         minimalCircumference: 520,
         maximalCircumference: 880,
-        code: [0x70, 0x00]
+        code: [0x70, 0x00],
     },
     {
         text: '8″',
         minimalCircumference: 520,
         maximalCircumference: 880,
-        code: [0x80, 0x00]
+        code: [0x80, 0x00],
     },
     {
         text: '10″',
         minimalCircumference: 520,
         maximalCircumference: 880,
-        code: [0xA0, 0x00]
+        code: [0xa0, 0x00],
     },
     {
         text: '12″',
         minimalCircumference: 910,
         maximalCircumference: 1300,
-        code: [0xC0, 0x00]
+        code: [0xc0, 0x00],
     },
     {
         text: '14″',
         minimalCircumference: 910,
         maximalCircumference: 1300,
-        code: [0xE0, 0x00]
+        code: [0xe0, 0x00],
     },
     {
         text: '16″',
         minimalCircumference: 1208,
         maximalCircumference: 1600,
-        code: [0x00, 0x01]
+        code: [0x00, 0x01],
     },
     {
         text: '17″',
         minimalCircumference: 1208,
         maximalCircumference: 1600,
-        code: [0x10, 0x01]
+        code: [0x10, 0x01],
     },
     {
         text: '18″',
         minimalCircumference: 1208,
         maximalCircumference: 1600,
-        code: [0x10, 0x01]
+        code: [0x10, 0x01],
     },
     {
         text: '20″',
         minimalCircumference: 1290,
         maximalCircumference: 1880,
-        code: [0x40, 0x01]
+        code: [0x40, 0x01],
     },
     {
         text: '22″',
         minimalCircumference: 1290,
         maximalCircumference: 1880,
-        code: [0x60, 0x01]
+        code: [0x60, 0x01],
     },
     {
         text: '23″',
         minimalCircumference: 1290,
         maximalCircumference: 1880,
-        code: [0x70, 0x01]
+        code: [0x70, 0x01],
     },
     {
         text: '24″',
         minimalCircumference: 1290,
         maximalCircumference: 2200,
-        code: [0x80, 0x01]
+        code: [0x80, 0x01],
     },
     {
         text: '25″',
         minimalCircumference: 1880,
         maximalCircumference: 2200,
-        code: [0x90, 0x01]
+        code: [0x90, 0x01],
     },
     {
         text: '26″',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xA0, 0x01]
+        code: [0xa0, 0x01],
     },
     {
         text: '27″',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xB0, 0x01]
+        code: [0xb0, 0x01],
     },
     {
         text: '27.5″',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xB5, 0x01]
+        code: [0xb5, 0x01],
     },
     {
         text: '28″',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xC0, 0x01]
+        code: [0xc0, 0x01],
     },
     {
         text: '29″',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xD0, 0x01]
+        code: [0xd0, 0x01],
     },
     {
         text: '32″',
         minimalCircumference: 2200,
         maximalCircumference: 2652,
-        code: [0x00, 0x02]
+        code: [0x00, 0x02],
     },
     {
         text: '400 mm',
         minimalCircumference: 1208,
         maximalCircumference: 1600,
-        code: [0x00, 0x19]
+        code: [0x00, 0x19],
     },
     {
         text: '450 mm',
         minimalCircumference: 1208,
         maximalCircumference: 1600,
-        code: [0x10, 0x2C]
+        code: [0x10, 0x2c],
     },
     {
         text: '600 mm',
         minimalCircumference: 1600,
         maximalCircumference: 2200,
-        code: [0x80, 0x25]
+        code: [0x80, 0x25],
     },
     {
         text: '650 mm',
         minimalCircumference: 1600,
         maximalCircumference: 2200,
-        code: [0xA0, 0x28]
+        code: [0xa0, 0x28],
     },
     {
         text: '700 mm',
         minimalCircumference: 1880,
         maximalCircumference: 2510,
-        code: [0xC0, 0x2B]
-    }
+        code: [0xc0, 0x2b],
+    },
 ];
 
 export type BafangCanControllerSpeedParameters = {

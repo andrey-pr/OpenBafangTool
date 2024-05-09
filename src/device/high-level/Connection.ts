@@ -8,5 +8,4 @@ export default interface IConnection {
     deviceName: DeviceName;
     emitter: EventEmitter;
     loadData(): void;
-    saveData(): boolean;
 }

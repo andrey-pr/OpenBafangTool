@@ -131,10 +131,6 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Hardware version',
                 this.state.controller_hardware_version,
             ),
-            // generateSimpleStringListItem(
-            //     'Bootloader version',
-            //     this.state.controller_bootload_version,
-            // ),
             generateSimpleStringListItem(
                 'Model number',
                 this.state.controller_model_number,
@@ -142,12 +138,8 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.controller_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
-            // generateSimpleStringListItem(
-            //     'Customer number',
-            //     this.state.controller_customer_number,
-            // ),
         ];
     }
 
@@ -233,7 +225,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.display_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Customer number',
@@ -262,23 +254,15 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            // generateSimpleStringListItem(
-            //     'Bootloader version',
-            //     this.state.sensor_bootload_version,
-            // ),
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.sensor_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Customer number',
                 this.state.sensor_customer_number,
             ),
-            // generateSimpleStringListItem(
-            //     'Manufacturer',
-            //     this.state.sensor_manufacturer,
-            // ),
             generateSimpleStringListItem(
                 'Software version',
                 this.state.sensor_software_version,
@@ -299,7 +283,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             generateSimpleStringListItem(
                 'Serial number',
                 this.state.besst_serial_number,
-                "Please note, that serial number could be easily changed, so it should never be used for security",
+                'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
         ];
     }

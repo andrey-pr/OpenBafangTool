@@ -22,9 +22,7 @@ import {
     SpeedLimitByDisplay,
     ThrottleMode,
 } from '../../../../../types/BafangUartMotorTypes';
-import {
-    lowVoltageLimits,
-} from '../../../../../constants/parameter_limits';
+import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 
 const { Title } = Typography;
@@ -180,22 +178,23 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Increase it if you system shuts down unexpectedly by BMS inside of battery
+                            Increase it if you system shuts down unexpectedly by
+                            BMS inside of battery
                         </Typography.Text>
                     </>
                 ),
                 children: (
                     <ParameterInputComponent
-                    value={low_battery_protection}
-                    unit="V"
-                    min={lowVoltageLimits[voltage].min}
-                    max={lowVoltageLimits[voltage].max}
-                    onNewValue={(e) => {
-                        this.setState({
-                            low_battery_protection: e,
-                        });
-                    }}
-                />
+                        value={low_battery_protection}
+                        unit="V"
+                        min={lowVoltageLimits[voltage].min}
+                        max={lowVoltageLimits[voltage].max}
+                        onNewValue={(e) => {
+                            this.setState({
+                                low_battery_protection: e,
+                            });
+                        }}
+                    />
                 ),
             },
         ];
@@ -469,7 +468,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}

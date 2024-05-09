@@ -528,7 +528,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     setSerialNumber(sn: string): void {
-        if (this.info != null) {
+        if (this.info) {
             this.info.serial_number = sn;
         }
     }

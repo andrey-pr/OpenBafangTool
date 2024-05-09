@@ -17,9 +17,9 @@ deleteSourceMaps();
 
 const configuration: webpack.Configuration = {
     externals: {
-        "node-hid": 'commonjs node-hid',
-        "serialport": 'serialport'
-      },
+        'node-hid': 'commonjs node-hid',
+        serialport: 'serialport',
+    },
 
     devtool: 'source-map',
 

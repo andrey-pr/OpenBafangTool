@@ -18,8 +18,8 @@ import {
 import { deepCopy } from 'deep-copy-ts';
 
 type SentRequest = {
-    resolve;
-    reject;
+    resolve: (...args: any[]) => void;
+    reject: (...args: any[]) => void;
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -78,7 +78,6 @@ export default class BafangCanSystem implements IConnection {
         this._sensorCodes = utils.getEmptySensorCodes();
         this._besstCodes = utils.getEmptyBesstCodes();
         this.loadData = this.loadData.bind(this);
-        this.saveData = this.saveData.bind(this);
         this.saveControllerData = this.saveControllerData.bind(this);
         this.saveDisplayData = this.saveDisplayData.bind(this);
         this.saveSensorData = this.saveSensorData.bind(this);
@@ -129,14 +128,14 @@ export default class BafangCanSystem implements IConnection {
         can_operation: CanOperation,
         code: number,
         subcode: number,
-        resolve?,
-        reject?,
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
         attempt = 0,
     ): void {
         if (resolve && reject) {
-            if (this.sentRequests[target] == undefined)
+            if (this.sentRequests[target] === undefined)
                 this.sentRequests[target] = [];
-            if (this.sentRequests[target][code] == undefined)
+            if (this.sentRequests[target][code] === undefined)
                 this.sentRequests[target][code] = [];
             this.sentRequests[target][code][subcode] = { resolve, reject };
             setTimeout(() => {
@@ -194,13 +193,13 @@ export default class BafangCanSystem implements IConnection {
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
         this.resolveRequest(response);
-        if (response.canCommandCode == 0x60) {
-            if (response.data.length == 0) {
+        if (response.canCommandCode === 0x60) {
+            if (response.data.length === 0) {
                 this.resolveRequest(response);
                 this.rereadParameter(response);
                 return;
             }
-            if (response.sourceDeviceCode == DeviceNetworkId.DISPLAY) {
+            if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 utils.processCodeAnswerFromDisplay(
                     response,
                     this._displayCodes,
@@ -210,7 +209,7 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._displayCodes),
                 );
             } else if (
-                response.sourceDeviceCode == DeviceNetworkId.DRIVE_UNIT
+                response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
             ) {
                 utils.processCodeAnswerFromController(
                     response,
@@ -221,7 +220,7 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._controllerCodes),
                 );
             } else if (
-                response.sourceDeviceCode == DeviceNetworkId.TORQUE_SENSOR
+                response.sourceDeviceCode === DeviceNetworkId.TORQUE_SENSOR
             ) {
                 utils.processCodeAnswerFromSensor(response, this._sensorCodes);
                 this.emitter.emit(
@@ -229,7 +228,7 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._sensorCodes),
                 );
             }
-        } else if (response.canCommandCode == 0x63) {
+        } else if (response.canCommandCode === 0x63) {
             //code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
@@ -240,7 +239,7 @@ export default class BafangCanSystem implements IConnection {
                     );
                     break;
                 case 0x01:
-                    if (response.data.length == 0) {
+                    if (response.data.length === 0) {
                         this.resolveRequest(response);
                         this.rereadParameter(response);
                         break;
@@ -252,7 +251,7 @@ export default class BafangCanSystem implements IConnection {
                     );
                     break;
                 case 0x02:
-                    if (response.data.length == 0) {
+                    if (response.data.length === 0) {
                         this.resolveRequest(response);
                         this.rereadParameter(response);
                         break;
@@ -267,15 +266,15 @@ export default class BafangCanSystem implements IConnection {
                     break;
             }
         } else if (
-            response.canCommandCode == 0x31 &&
-            response.canCommandSubCode == 0x00
+            response.canCommandCode === 0x31 &&
+            response.canCommandSubCode === 0x00
         ) {
             utils.parseSensorPackage(response, this._sensorRealtimeData);
             this.emitter.emit(
                 'broadcast-data-sensor',
                 deepCopy(this._sensorRealtimeData),
             );
-        } else if (response.canCommandCode == 0x32) {
+        } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
                     utils.parseControllerPackage0(
@@ -414,17 +413,17 @@ export default class BafangCanSystem implements IConnection {
             return;
         }
         this.device?.getSerialNumber().then((serial_number: string) => {
-            if (serial_number == undefined) return;
+            if (serial_number === undefined) return;
             this._besstCodes.besst_serial_number = serial_number;
             this.emitter.emit('besst-data', deepCopy(this._besstCodes));
         });
         this.device?.getSoftwareVersion().then((software_version: string) => {
-            if (software_version == undefined) return;
+            if (software_version === undefined) return;
             this._besstCodes.besst_software_version = software_version;
             this.emitter.emit('besst-data', deepCopy(this._besstCodes));
         });
         this.device?.getHardwareVersion().then((hardware_version: string) => {
-            if (hardware_version == undefined) return;
+            if (hardware_version === undefined) return;
             this._besstCodes.besst_hardware_version = hardware_version;
             this.emitter.emit('besst-data', deepCopy(this._besstCodes));
         });
@@ -454,11 +453,14 @@ export default class BafangCanSystem implements IConnection {
                 }).then((success) => {
                     if (success) readedSuccessfully++;
                     else readedUnsuccessfully++;
-                    if (success && device == DeviceNetworkId.DISPLAY)
+                    if (success && device === DeviceNetworkId.DISPLAY)
                         readedDisplay++;
-                    else if (success && device == DeviceNetworkId.DRIVE_UNIT)
+                    else if (success && device === DeviceNetworkId.DRIVE_UNIT)
                         readedController++;
-                    else if (success && device == DeviceNetworkId.TORQUE_SENSOR)
+                    else if (
+                        success &&
+                        device === DeviceNetworkId.TORQUE_SENSOR
+                    )
                         readedSensor++;
                     if (readedSuccessfully + readedUnsuccessfully >= summ) {
                         this._displayAvailable = readedDisplay > 0;
@@ -488,8 +490,8 @@ export default class BafangCanSystem implements IConnection {
     private readParameter(
         target: DeviceNetworkId,
         can_command: CanCommand,
-        resolve?,
-        reject?,
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
     ): void {
         this.device
             ?.sendCanFrame(
@@ -516,8 +518,8 @@ export default class BafangCanSystem implements IConnection {
         target: DeviceNetworkId,
         can_command: CanCommand,
         value: number[],
-        resolve?,
-        reject?,
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
     ): void {
         this.device
             ?.sendCanFrame(
@@ -545,8 +547,8 @@ export default class BafangCanSystem implements IConnection {
         target: DeviceNetworkId,
         can_command: CanCommand,
         value: number[],
-        resolve?,
-        reject?,
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
     ): void {
         let arrayClone = [...value];
         this.device?.sendCanFrame(
@@ -600,276 +602,40 @@ export default class BafangCanSystem implements IConnection {
             );
     }
 
-    public saveData(): boolean {
+    public saveControllerData(): void {
         if (this.devicePath === 'simulator') {
-            return true;
+            return;
         }
-        let summ = 0,
-            wroteSuccessfully = 0,
+        let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
-        if (typeof this._displayData.display_total_mileage == 'number') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.DisplayTotalMileage,
-                    utils.serializeMileage(
-                        this._displayData.display_total_mileage as number,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
+        let writePromises: Promise<boolean>[] = [];
+        utils.prepareStringWritePromise(
+            this._controllerCodes.controller_manufacturer,
+            DeviceNetworkId.DRIVE_UNIT,
+            CanWriteCommandsList.Manufacturer,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareStringWritePromise(
+            this._controllerCodes.controller_customer_number,
+            DeviceNetworkId.DRIVE_UNIT,
+            CanWriteCommandsList.CustomerNumber,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareSpeedPackageWritePromise(
+            this._controllerSpeedParameters,
+            writePromises,
+            this.writeLongParameter,
+        );
+        for (let i = 0; i < writePromises.length; i++) {
+            writePromises[i].then((success) => {
                 if (success) wroteSuccessfully++;
                 else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._displayData.display_single_mileage == 'number') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.DisplaySingleMileage,
-                    utils.serializeMileage(
-                        this._displayData.display_single_mileage as number,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._displayCodes.display_manufacturer == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.Manufacturer,
-                    utils.serializeString(
-                        this._displayCodes.display_manufacturer as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._displayCodes.display_customer_number == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._displayCodes.display_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._controllerCodes.controller_manufacturer == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.Manufacturer,
-                    utils.serializeString(
-                        this._controllerCodes.controller_manufacturer as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (
-            typeof this._controllerCodes.controller_customer_number == 'string'
-        ) {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._controllerCodes
-                            .controller_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._sensorCodes.sensor_manufacturer == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.TORQUE_SENSOR,
-                    CanWriteCommandsList.Manufacturer,
-                    utils.serializeString(
-                        this._sensorCodes.sensor_manufacturer as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._sensorCodes.sensor_customer_number == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.TORQUE_SENSOR,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._sensorCodes.sensor_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (
-            typeof this._controllerSpeedParameters.controller_circumference ==
-                'number' &&
-            typeof this._controllerSpeedParameters.controller_speed_limit ==
-                'number'
-        ) {
-            summ++;
-            let limit =
-                this._controllerSpeedParameters.controller_speed_limit * 100;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.MotorSpeedParameters,
-                    [
-                        limit & 0b11111111,
-                        (limit & 0b1111111100000000) >> 8,
-                        this._controllerSpeedParameters
-                            .controller_wheel_diameter.code[0],
-                        this._controllerSpeedParameters
-                            .controller_wheel_diameter.code[1],
-                        this._controllerSpeedParameters
-                            .controller_circumference & 0b11111111,
-                        (this._controllerSpeedParameters
-                            .controller_circumference &
-                            0b1111111100000000) >>
-                            8,
-                    ],
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        return true;
-    }
-
-    public saveControllerData(): boolean {
-        if (this.devicePath === 'simulator') {
-            return true;
-        }
-        let summ = 0,
-            wroteSuccessfully = 0,
-            wroteUnsuccessfully = 0;
-        if (typeof this._controllerCodes.controller_manufacturer == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.Manufacturer,
-                    utils.serializeString(
-                        this._controllerCodes.controller_manufacturer as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
+                if (
+                    wroteSuccessfully + wroteUnsuccessfully >=
+                    writePromises.length
+                ) {
                     this.emitter.emit(
                         'controller-writing-finish',
                         wroteSuccessfully,
@@ -878,101 +644,49 @@ export default class BafangCanSystem implements IConnection {
                 }
             });
         }
-        if (
-            typeof this._controllerCodes.controller_customer_number == 'string'
-        ) {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._controllerCodes
-                            .controller_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'controller-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (
-            typeof this._controllerSpeedParameters.controller_circumference ==
-                'number' &&
-            typeof this._controllerSpeedParameters.controller_speed_limit ==
-                'number'
-        ) {
-            summ++;
-            let limit =
-                this._controllerSpeedParameters.controller_speed_limit * 100;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DRIVE_UNIT,
-                    CanWriteCommandsList.MotorSpeedParameters,
-                    [
-                        limit & 0b11111111,
-                        (limit & 0b1111111100000000) >> 8,
-                        this._controllerSpeedParameters
-                            .controller_wheel_diameter.code[0],
-                        this._controllerSpeedParameters
-                            .controller_wheel_diameter.code[1],
-                        this._controllerSpeedParameters
-                            .controller_circumference & 0b11111111,
-                        (this._controllerSpeedParameters
-                            .controller_circumference &
-                            0b1111111100000000) >>
-                            8,
-                    ],
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'controller-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        return true;
     }
 
-    public saveDisplayData(): boolean {
+    public saveDisplayData(): void {
         if (this.devicePath === 'simulator') {
-            return true;
+            return;
         }
-        let summ = 0,
-            wroteSuccessfully = 0,
+        let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
-        if (typeof this._displayData.display_total_mileage == 'number') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.DisplayTotalMileage,
-                    utils.serializeMileage(
-                        this._displayData.display_total_mileage as number,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
+        let writePromises: Promise<boolean>[] = [];
+        utils.prepareStringWritePromise(
+            this._displayCodes.display_manufacturer,
+            DeviceNetworkId.DISPLAY,
+            CanWriteCommandsList.Manufacturer,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareStringWritePromise(
+            this._displayCodes.display_customer_number,
+            DeviceNetworkId.DISPLAY,
+            CanWriteCommandsList.CustomerNumber,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareMileageWritePromise(
+            this._displayData.display_total_mileage,
+            CanWriteCommandsList.DisplayTotalMileage,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareMileageWritePromise(
+            this._displayData.display_single_mileage,
+            CanWriteCommandsList.DisplaySingleMileage,
+            writePromises,
+            this.writeLongParameter,
+        );
+        for (let i = 0; i < writePromises.length; i++) {
+            writePromises[i].then((success) => {
                 if (success) wroteSuccessfully++;
                 else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
+                if (
+                    wroteSuccessfully + wroteUnsuccessfully >=
+                    writePromises.length
+                ) {
                     this.emitter.emit(
                         'display-writing-finish',
                         wroteSuccessfully,
@@ -981,113 +695,29 @@ export default class BafangCanSystem implements IConnection {
                 }
             });
         }
-        if (typeof this._displayData.display_single_mileage == 'number') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeShortParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.DisplaySingleMileage,
-                    utils.serializeMileage(
-                        this._displayData.display_single_mileage as number,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'display-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._displayCodes.display_manufacturer == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.Manufacturer,
-                    utils.serializeString(
-                        this._displayCodes.display_manufacturer as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'display-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        if (typeof this._displayCodes.display_customer_number == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.DISPLAY,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._displayCodes.display_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
-                );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'display-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-        return true;
     }
 
-    public saveSensorData(): boolean {
+    public saveSensorData(): void {
         if (this.devicePath === 'simulator') {
-            return true;
+            return;
         }
-        let summ = 0,
-            wroteSuccessfully = 0,
-            wroteUnsuccessfully = 0;
-        if (typeof this._sensorCodes.sensor_customer_number == 'string') {
-            summ++;
-            new Promise<boolean>((resolve, reject) => {
-                this.writeLongParameter(
-                    DeviceNetworkId.TORQUE_SENSOR,
-                    CanWriteCommandsList.CustomerNumber,
-                    utils.serializeString(
-                        this._sensorCodes.sensor_customer_number as string,
-                    ),
-                    resolve,
-                    reject,
+        let writePromises: Promise<boolean>[] = [];
+        utils.prepareStringWritePromise(
+            this._sensorCodes.sensor_customer_number,
+            DeviceNetworkId.TORQUE_SENSOR,
+            CanWriteCommandsList.CustomerNumber,
+            writePromises,
+            this.writeLongParameter,
+        );
+        if (writePromises.length) {
+            writePromises[0].then((success) => {
+                this.emitter.emit(
+                    'sensor-writing-finish',
+                    success ? 1 : 0,
+                    success ? 0 : 1,
                 );
-            }).then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (wroteSuccessfully + wroteUnsuccessfully >= summ) {
-                    this.emitter.emit(
-                        'sensor-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
             });
         }
-        return true;
     }
 
     public setDisplayTime(

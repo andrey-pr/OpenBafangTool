@@ -23,9 +23,18 @@ class BesstDevice {
     private device?: HID.HID;
     public readonly emitter: EventEmitter;
 
-    private serialNumberPromise?: { resolve: any; reject: any } = undefined;
-    private softwareVersionPromise?: { resolve: any; reject: any } = undefined;
-    private hardwareVersionPromise?: { resolve: any; reject: any } = undefined;
+    private serialNumberPromise?: {
+        resolve: (...args: any[]) => void;
+        reject: (...args: any[]) => void;
+    } = undefined;
+    private softwareVersionPromise?: {
+        resolve: (...args: any[]) => void;
+        reject: (...args: any[]) => void;
+    } = undefined;
+    private hardwareVersionPromise?: {
+        resolve: (...args: any[]) => void;
+        reject: (...args: any[]) => void;
+    } = undefined;
 
     private packetQueue: BesstWritePacket[] = [];
 
@@ -242,7 +251,7 @@ class BesstDevice {
     }
 
     public reset(): Promise<void> {
-        let vid = this.device?.getDeviceInfo().vendorId;
+        let vid = this.device?.getDeviceInfo().vendorId; //its okay. There is mistake in node-hid's class type file, actually this function exists
         let pid = this.device?.getDeviceInfo().productId;
         this.device?.removeAllListeners();
         this.packetQueue = [];
@@ -277,7 +286,7 @@ class BesstDevice {
         canOperationCode: CanOperation,
         canCommandCode: number,
         canCommandSubCode: number,
-        data = [0]
+        data = [0],
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.push(
@@ -289,7 +298,7 @@ class BesstDevice {
                     canCommandSubCode,
                     resolve,
                     reject,
-                    data
+                    data,
                 ),
             );
         });
@@ -301,7 +310,7 @@ class BesstDevice {
         canOperationCode: CanOperation,
         canCommandCode: number,
         canCommandSubCode: number,
-        data = [0]
+        data = [0],
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.unshift(
@@ -313,7 +322,7 @@ class BesstDevice {
                     canCommandSubCode,
                     resolve,
                     reject,
-                    data
+                    data,
                 ),
             );
         });

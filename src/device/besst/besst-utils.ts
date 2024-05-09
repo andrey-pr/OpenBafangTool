@@ -1,17 +1,21 @@
-import { BesstReadedCanFrame, BesstPacketType, DeviceNetworkId } from './besst-types';
+import {
+    BesstReadedCanFrame,
+    BesstPacketType,
+    DeviceNetworkId,
+} from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
     return String.fromCharCode.apply(
         null,
-        msg.slice(4, 4 + msg[3]).filter((value) => value != 0),
+        msg.slice(4, 4 + msg[3]).filter((value) => value !== 0),
     );
 }
 
 export function generateBesstWritePacket(
     actionCode: number,
     cmd: number[],
-    resolve?: any,
-    reject?: any,
+    resolve?: (...args: any[]) => void,
+    reject?: (...args: any[]) => void,
     data: number[] = [0],
 ) {
     let msg = [0, actionCode || 0x15, 0, 0, ...cmd, data.length || 0, ...data];
@@ -57,8 +61,8 @@ export function buildBesstCanCommandPacket(
     canOperationCode: number,
     canCommandCode: number,
     canCommandSubCode: number,
-    resolve?: any,
-    reject?: any,
+    resolve?: (...args: any[]) => void,
+    reject?: (...args: any[]) => void,
     data: number[] = [0],
 ) {
     return generateBesstWritePacket(
@@ -81,7 +85,7 @@ export function parseCanResponseFromBesst(
     let packets: BesstReadedCanFrame[] = [];
     array = array.slice(3);
     while (array.length > 0) {
-        if (array.slice(0, 13).filter((value) => value != 0).length !== 0) {
+        if (array.slice(0, 13).filter((value) => value !== 0).length !== 0) {
             packets.push({
                 canCommandCode: array[1],
                 canCommandSubCode: array[0],
