@@ -639,7 +639,7 @@ export default class BafangCanSystem implements IConnection {
         utils.prepareSpeedPackageWritePromise(
             this._controllerSpeedParameters,
             writePromises,
-            this.writeLongParameter,
+            this.writeShortParameter,
         );
         for (let i = 0; i < writePromises.length; i++) {
             writePromises[i].then((success) => {
@@ -684,13 +684,13 @@ export default class BafangCanSystem implements IConnection {
             this._displayData.display_total_mileage,
             CanWriteCommandsList.DisplayTotalMileage,
             writePromises,
-            this.writeLongParameter,
+            this.writeShortParameter,
         );
         utils.prepareMileageWritePromise(
             this._displayData.display_single_mileage,
             CanWriteCommandsList.DisplaySingleMileage,
             writePromises,
-            this.writeLongParameter,
+            this.writeShortParameter,
         );
         for (let i = 0; i < writePromises.length; i++) {
             writePromises[i].then((success) => {
