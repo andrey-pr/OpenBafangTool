@@ -739,6 +739,7 @@ export default class BafangCanSystem implements IConnection {
         seconds: number,
     ): Promise<boolean> {
         if (!utils.validateTime(hours, minutes, seconds)) {
+            console.log('time is invalid')
             return new Promise<boolean>((resolve) => resolve(false));
         }
         if (this.devicePath === 'simulator') {
