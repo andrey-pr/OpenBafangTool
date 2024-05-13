@@ -18,6 +18,8 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 
+const { Text } = Typography;
+
 type SettingsProps = {
     connection: BafangCanSystem;
 };
@@ -118,25 +120,46 @@ class BafangCanMotorSettingsView extends React.Component<
         return [
             {
                 key: 'speed_limit',
-                label: 'Speed limit',
+                label: (
+                    <>
+                        {'Speed limit'}
+                        <br />
+                        <Text italic>
+                            {
+                                'Its illegal to set speed limit bigger than 25km/h'
+                            }
+                        </Text>
+                    </>
+                ),
                 children: (
                     <ParameterInputComponent
                         value={controller_speed_limit}
                         unit="km/h"
                         min={1}
-                        max={60}
+                        max={25}
+                        disabled={
+                            typeof controller_speed_limit == 'number' &&
+                            controller_speed_limit > 25
+                        }
                         onNewValue={(e) => {
                             this.setState({ controller_speed_limit: e });
                         }}
-                        warningText="Its illegal in most countries to set speed limit bigger than 25km/h"
-                        warningBelow={0}
-                        warningAbove={25}
                     />
                 ),
             },
             {
                 key: 'wheel_diameter',
-                label: 'Wheel diameter',
+                label: (
+                    <>
+                        {'Wheel diameter'}
+                        <br />
+                        <Text italic>
+                            {
+                                'NEVER try to set wrong wheel diameter - its illegal, because it can lead to incorrect speed measurement'
+                            }
+                        </Text>
+                    </>
+                ),
                 children: (
                     <ParameterSelectComponent
                         value={
