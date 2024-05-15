@@ -24,6 +24,7 @@ import {
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
+import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 const { Title } = Typography;
 
@@ -114,55 +115,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            {
-                key: 'serial_number',
-                label: (
-                    <>
-                        Serial number
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            Note, that serial number is changeable, so its not a
-                            secure anti-theft feature
-                        </Typography.Text>
-                    </>
-                ),
-                children: info.serial_number,
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: info.voltage,
-            },
-            {
-                key: 'max_current',
-                label: (
-                    <>
-                        Max current
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            Note, that Voltage*Max Current is a maximal
-                            <br />
-                            power, but not nominal. If you have legal motor
-                            <br />
-                            certified as 250W, and Voltage*Max Current is twice
-                            <br />
-                            or even triple bigger its normal - 250W is a nominal
-                            <br />
-                            (continuous) power, and its legal to use device that
-                            <br />
-                            can have bigger maximal power. For example, some of
-                            <br />
-                            Shimano STEPS motors that certified for 250W
-                            pedelecs have
-                            <br />
-                            600W of max power.
-                        </Typography.Text>
-                    </>
-                ),
-                children: info.max_current,
-            },
+            generateSimpleStringListItem(
+                'Serial number',
+                info.serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
+            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem(
+                'Max current',
+                info.max_current,
+                'Note, that Voltage*Max Current is a maximal power, but not nominal. If you have legal motor certified as 250W, and Voltage*Max Current is twice or even triple bigger its normal - 250W is a nominal (continuous) power, and its legal to use device that can have bigger maximal power. For example, some of Shimano STEPS motors that certified for 250W pedelecs have 600W of max power.',
+            ),
         ];
     }
 

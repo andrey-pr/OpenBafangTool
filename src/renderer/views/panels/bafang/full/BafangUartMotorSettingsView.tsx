@@ -25,7 +25,7 @@ import {
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
-import StringInputComponent from '../../../components/StringInput';
+import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 const { Title } = Typography;
 
@@ -746,22 +746,11 @@ class BafangUartMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         const { serial_number } = this.state;
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringInputComponent
-                        value={serial_number}
-                        maxLength={40}
-                        onNewValue={(e) => {
-                            this.setState({
-                                serial_number: e,
-                            });
-                        }}
-                        errorOnEmpty
-                    />
-                ),
-            },
+            generateSimpleStringListItem(
+                'Serial number',
+                serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
         ];
     }
 
@@ -775,36 +764,12 @@ class BafangUartMotorSettingsView extends React.Component<
             max_current,
         } = this.state;
         return [
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: manufacturer,
-            },
-            {
-                key: 'model',
-                label: 'Model',
-                children: model,
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: hardware_version,
-            },
-            {
-                key: 'firmware_version',
-                label: 'Firmware version',
-                children: firmware_version,
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: voltage,
-            },
-            {
-                key: 'max_current',
-                label: 'Max current',
-                children: max_current,
-            },
+            generateSimpleStringListItem('Manufacturer', manufacturer),
+            generateSimpleStringListItem('Model', model),
+            generateSimpleStringListItem('Hardware version', hardware_version),
+            generateSimpleStringListItem('Firmware version', firmware_version),
+            generateSimpleStringListItem('Voltage', voltage),
+            generateSimpleStringListItem('Max current', max_current),
         ];
     }
 
