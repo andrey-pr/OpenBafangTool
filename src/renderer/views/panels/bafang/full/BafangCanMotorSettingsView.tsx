@@ -295,37 +295,15 @@ class BafangCanMotorSettingsView extends React.Component<
                             key: 'position_sensor_calibration',
                             type: 'loading',
                             content: 'Calibrating...',
+                            duration: 2,
                         });
                         this.setState({
                             position_sensor_calibration_dialog: false,
                         });
                         this.props.connection
                             .calibratePositionSensor()
-                            .then((success) => {
-                                if (success) {
-                                    message.open({
-                                        key: 'position_sensor_calibration',
-                                        type: 'success',
-                                        content: 'Calibrated sucessfully!',
-                                        duration: 2,
-                                    });
-                                } else {
-                                    message.open({
-                                        key: 'position_sensor_calibration',
-                                        type: 'error',
-                                        content: 'Error during calibration!',
-                                        duration: 2,
-                                    });
-                                }
-                            })
-                            .catch(() => {
-                                message.open({
-                                    key: 'position_sensor_calibration',
-                                    type: 'error',
-                                    content: 'Error during calibration!',
-                                    duration: 2,
-                                });
-                            });
+                            .then((success) => {})
+                            .catch(() => {});
                     }}
                     onCancel={() =>
                         this.setState({
