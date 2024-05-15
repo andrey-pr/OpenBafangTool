@@ -222,7 +222,7 @@ class BesstDevice {
         } else if (packet.canOperationCode === CanOperation.WRITE_CMD) {
             this.emitter.emit('can', packet);
         } else {
-            console.log('unknown command');
+            console.log('unknown command', packet);
         }
     }
 

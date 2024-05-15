@@ -395,9 +395,6 @@ export function processCodeAnswerFromDisplay(
                 answer.data,
             );
             break;
-        case 0x07:
-            console.log('Errors:', answer.data);
-            break;
         case 0x08:
             dto.display_bootload_version = String.fromCharCode.apply(
                 null,

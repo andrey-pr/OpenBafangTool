@@ -143,6 +143,11 @@ export const CanWriteCommandsList: {
         canCommandSubCode: 0x03,
         applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
     },
+    CalibratePositionSensor: {
+        canCommandCode: 0x62,
+        canCommandSubCode: 0x00,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
 };
 
 const ErrorCodes: {

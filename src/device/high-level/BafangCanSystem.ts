@@ -739,7 +739,7 @@ export default class BafangCanSystem implements IConnection {
         seconds: number,
     ): Promise<boolean> {
         if (!utils.validateTime(hours, minutes, seconds)) {
-            console.log('time is invalid')
+            console.log('time is invalid');
             return new Promise<boolean>((resolve) => resolve(false));
         }
         if (this.devicePath === 'simulator') {
@@ -766,6 +766,22 @@ export default class BafangCanSystem implements IConnection {
             this.writeShortParameter(
                 DeviceNetworkId.DISPLAY,
                 CanWriteCommandsList.CleanServiceMileage,
+                [0x00, 0x00, 0x00, 0x00, 0x00],
+                resolve,
+                reject,
+            );
+        });
+    }
+
+    public calibratePositionSensor(): Promise<boolean> {
+        if (this.devicePath === 'simulator') {
+            console.log('Calibrated position sensor');
+            return new Promise<boolean>((resolve) => resolve(true));
+        }
+        return new Promise<boolean>((resolve, reject) => {
+            this.writeShortParameter(
+                DeviceNetworkId.DRIVE_UNIT,
+                CanWriteCommandsList.CalibratePositionSensor,
                 [0x00, 0x00, 0x00, 0x00, 0x00],
                 resolve,
                 reject,
