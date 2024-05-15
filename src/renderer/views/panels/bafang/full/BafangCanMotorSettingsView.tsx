@@ -1,7 +1,19 @@
 import React from 'react';
-import { Typography, Descriptions, FloatButton, message } from 'antd';
+import {
+    Typography,
+    Descriptions,
+    FloatButton,
+    message,
+    Popconfirm,
+    Button,
+    Modal,
+} from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
+import {
+    SyncOutlined,
+    DeliveredProcedureOutlined,
+    WarningTwoTone,
+} from '@ant-design/icons';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
@@ -24,7 +36,7 @@ type SettingsProps = {
 
 type SettingsState = BafangCanControllerRealtime &
     BafangCanControllerSpeedParameters &
-    BafangCanControllerCodes;
+    BafangCanControllerCodes & { position_sensor_calibration_dialog: boolean };
 
 // TODO add redux
 /* eslint-disable camelcase */
@@ -40,6 +52,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ...connection.controllerSpeedParameters,
             ...connection.controllerCodes,
             ...connection.controllerRealtimeData,
+            position_sensor_calibration_dialog: false,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
@@ -179,6 +192,30 @@ class BafangCanMotorSettingsView extends React.Component<
         ];
     }
 
+    getCalibrationItems(): DescriptionsProps['items'] {
+        return [
+            {
+                key: 'position_sensor_calibration',
+                label: 'Position sensor',
+                children: (
+                    <Popconfirm
+                        title="Position sensor calibration"
+                        description={`Are you sure to calibrate position sensor?`}
+                        onConfirm={() =>
+                            this.setState({
+                                position_sensor_calibration_dialog: true,
+                            })
+                        }
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button type="primary">Calibrate</Button>
+                    </Popconfirm>
+                ),
+            },
+        ];
+    }
+
     getOtherItems(): DescriptionsProps['items'] {
         const { controller_serial_number, controller_manufacturer } =
             this.state;
@@ -242,6 +279,67 @@ class BafangCanMotorSettingsView extends React.Component<
                 <Typography.Title level={2} style={{ margin: 0 }}>
                     Motor settings
                 </Typography.Title>
+                <Modal
+                    title={
+                        <>
+                            <WarningTwoTone twoToneColor="red" />
+                            {'   WARNING   '}
+                            <WarningTwoTone twoToneColor="red" />
+                        </>
+                    }
+                    okText="Continue"
+                    cancelText="Cancel"
+                    open={this.state.position_sensor_calibration_dialog}
+                    onOk={() => {
+                        message.open({
+                            key: 'position_sensor_calibration',
+                            type: 'loading',
+                            content: 'Calibrating...',
+                        });
+                        this.setState({
+                            position_sensor_calibration_dialog: false,
+                        });
+                        this.props.connection
+                            .calibratePositionSensor()
+                            .then((success) => {
+                                if (success) {
+                                    message.open({
+                                        key: 'position_sensor_calibration',
+                                        type: 'success',
+                                        content: 'Calibrated sucessfully!',
+                                        duration: 2,
+                                    });
+                                } else {
+                                    message.open({
+                                        key: 'position_sensor_calibration',
+                                        type: 'error',
+                                        content: 'Error during calibration!',
+                                        duration: 2,
+                                    });
+                                }
+                            })
+                            .catch(() => {
+                                message.open({
+                                    key: 'position_sensor_calibration',
+                                    type: 'error',
+                                    content: 'Error during calibration!',
+                                    duration: 2,
+                                });
+                            });
+                    }}
+                    onCancel={() =>
+                        this.setState({
+                            position_sensor_calibration_dialog: false,
+                        })
+                    }
+                >
+                    <p>During calibration motor will rotate very fast!</p>
+                    <p>
+                        Remove the chain from the front gear and ensure that
+                        bike installed safely and cranks nor gear will not hit
+                        anything when rotating!
+                    </p>
+                </Modal>
                 <br />
                 <Descriptions
                     bordered
@@ -254,6 +352,13 @@ class BafangCanMotorSettingsView extends React.Component<
                     bordered
                     title="Speed settings"
                     items={this.getSpeedItems()}
+                    column={1}
+                />
+                <br />
+                <Descriptions
+                    bordered
+                    title="Calibration"
+                    items={this.getCalibrationItems()}
                     column={1}
                 />
                 <br />
