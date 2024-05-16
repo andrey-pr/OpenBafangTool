@@ -90,6 +90,20 @@ Also better to have USB isolator, that will protect your computer in case when m
 
 Current build of program are portable, so just download executable and launch it. Also, if you use Linux, you may need to unblock your serial ports or hid device in way, dependent on your distributive.
 
+#### HID troubleshooting on Linux
+
+Many Linux distros, such as Ubuntu, blocks direct access to HID device. To fix it, do next things:
+
+1. Create file `/etc/udev/rules.d/51-bessttool.rules` (name may be different, but compatible with udev).
+2. Write following content in file (if pid or vid if different on your device, change it in file):
+   ```
+   SUBSYSTEM=="input", GROUP="input", MODE="---rw-rw-rw-"
+   SUBSYSTEM=="usb", ATTRS{idVendor}=="0323", ATTRS{idProduct}=="0627", MODE:="rw-rw-rw-", GROUP="plugdev"
+   KERNEL=="hidraw*", ATTRS{idVendor}=="0323", ATTRS{idProduct}=="0627", MODE="---rw-rw-rw-", GROUP="plugdev"
+   ```
+3. Execute folowing command: `sudo udevadm control --reload-rules`
+4. Replug your device
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
