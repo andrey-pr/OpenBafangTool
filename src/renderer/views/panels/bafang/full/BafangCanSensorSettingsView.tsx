@@ -25,6 +25,8 @@ class BafangCanSensorSettingsView extends React.Component<
     SettingsProps,
     SettingsState
 > {
+    private writingInProgress: boolean = false;
+
     constructor(props: SettingsProps) {
         super(props);
         const { connection } = this.props;
@@ -91,6 +93,8 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     saveParameters(): void {
+        if (this.writingInProgress) return;
+        this.writingInProgress = true;
         const { connection } = this.props;
         connection.sensorCodes = this.state as BafangCanSensorCodes;
         connection.saveSensorData();
@@ -102,13 +106,15 @@ class BafangCanSensorSettingsView extends React.Component<
         });
         connection.emitter.once(
             'sensor-writing-finish',
-            (readedSuccessfully, readededUnsuccessfully) =>
+            (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'writing',
                     type: 'info',
                     content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
                     duration: 5,
-                }),
+                });
+                this.writingInProgress = false;
+            },
         );
     }
 

@@ -65,6 +65,8 @@ export default class BafangCanSystem implements IConnection {
 
     private _sensorAvailable: boolean = false;
 
+    private readingInProgress: boolean = false;
+
     constructor(devicePath: string) {
         this.devicePath = devicePath;
         this.emitter = new EventEmitter();
@@ -431,6 +433,8 @@ export default class BafangCanSystem implements IConnection {
             console.log('Simulator: blank data loaded');
             return;
         }
+        if(this.readingInProgress) return;
+        this.readingInProgress = true;
         this.device
             ?.getSerialNumber()
             .then((serial_number: string) => {
@@ -500,6 +504,7 @@ export default class BafangCanSystem implements IConnection {
                             readedSuccessfully,
                             readedUnsuccessfully,
                         );
+                        this.readingInProgress = false;
                     }
                 });
             });
@@ -696,13 +701,13 @@ export default class BafangCanSystem implements IConnection {
             writePromises,
             this.writeLongParameter,
         );
-        utils.prepareMileageWritePromise(
+        utils.prepareTotalMileageWritePromise(
             this._displayData.display_total_mileage,
             CanWriteCommandsList.DisplayTotalMileage,
             writePromises,
             this.writeShortParameter,
         );
-        utils.prepareMileageWritePromise(
+        utils.prepareSingleMileageWritePromise(
             this._displayData.display_single_mileage,
             CanWriteCommandsList.DisplaySingleMileage,
             writePromises,

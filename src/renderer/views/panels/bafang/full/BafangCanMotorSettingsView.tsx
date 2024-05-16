@@ -47,6 +47,8 @@ class BafangCanMotorSettingsView extends React.Component<
     SettingsProps,
     SettingsState
 > {
+    private writingInProgress: boolean = false;
+
     constructor(props: SettingsProps) {
         super(props);
         const { connection } = this.props;
@@ -272,6 +274,8 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     saveParameters(): void {
+        if (this.writingInProgress) return;
+        this.writingInProgress = true;
         const { connection } = this.props;
         connection.controllerSpeedParameters = this
             .state as BafangCanControllerSpeedParameters;
@@ -285,13 +289,15 @@ class BafangCanMotorSettingsView extends React.Component<
         });
         connection.emitter.once(
             'controller-writing-finish',
-            (readedSuccessfully, readededUnsuccessfully) =>
+            (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'writing',
                     type: 'info',
                     content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
                     duration: 5,
-                }),
+                });
+                this.writingInProgress = false;
+            },
         );
     }
 

@@ -668,7 +668,7 @@ export function prepareSpeedPackageWritePromise(
     );
 }
 
-export function prepareMileageWritePromise(
+export function prepareTotalMileageWritePromise(
     value: number | NoData,
     can_command: CanCommand,
     promise_array: Promise<boolean>[],
@@ -687,6 +687,32 @@ export function prepareMileageWritePromise(
                 DeviceNetworkId.DISPLAY,
                 can_command,
                 serializeMileage(value),
+                resolve,
+                reject,
+            );
+        }),
+    );
+}
+
+export function prepareSingleMileageWritePromise(
+    value: number | NoData,
+    can_command: CanCommand,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (typeof value !== 'number') return;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                DeviceNetworkId.DISPLAY,
+                can_command,
+                serializeMileage(value*10),
                 resolve,
                 reject,
             );
