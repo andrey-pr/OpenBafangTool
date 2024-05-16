@@ -62,10 +62,16 @@ class BesstDevice {
         this.getHardwareVersion = this.getHardwareVersion.bind(this);
         this.sendCanFrame = this.sendCanFrame.bind(this);
         this.sendCanFrameImmediately = this.sendCanFrameImmediately.bind(this);
+        this.onDisconnect = this.onDisconnect.bind(this);
         this.reset = this.reset.bind(this);
         this.emitter = new EventEmitter();
         this.device?.addListener('data', this.processReadedData);
+        this.device?.addListener('error', this.onDisconnect);
         setTimeout(this.processWriteQueue, 100);
+    }
+
+    onDisconnect() {
+        this.emitter.emit('disconnection');
     }
 
     private processWriteQueue(): void {
@@ -95,7 +101,11 @@ class BesstDevice {
                 this.serialNumberPromise = undefined;
             }, packet.timeout);
         }
-        this.device?.write(packet.data);
+        try {
+            this.device?.write(packet.data);
+        } catch (e) {
+            this.onDisconnect();
+        }
         setTimeout(this.processWriteQueue, packet.interval + 10);
     }
 
@@ -254,17 +264,29 @@ class BesstDevice {
     }
 
     public reset(): Promise<void> {
-        const vid = this.device?.getDeviceInfo().vendorId; // its okay. There is mistake in node-hid's class type file, actually this function exists
-        const pid = this.device?.getDeviceInfo().productId;
-        this.device?.removeAllListeners();
+        let pid = 0,
+            vid = 0;
+        try {
+            vid = this.device?.getDeviceInfo().vendorId; // its okay. There is mistake in node-hid's class type file, actually this function exists
+            pid = this.device?.getDeviceInfo().productId;
+            this.device?.removeAllListeners();
+        } catch (e) {
+            this.onDisconnect();
+            return new Promise<void>(() => {});
+        }
         this.packetQueue = [];
         this.packetQueue.push(
             generateBesstWritePacket(BesstPacketType.BESST_RESET, [0, 0, 0, 0]),
         );
-        return new Promise<void>(async (resolve) => {
+        return new Promise<void>((resolve) => {
             setTimeout(() => {
-                this.device = new HID.HID(vid, pid);
-                this.device.addListener('data', this.processReadedData);
+                try {
+                    this.device = new HID.HID(vid, pid);
+                    this.device.addListener('data', this.processReadedData);
+                    this.device.addListener('error', this.onDisconnect);
+                } catch (e) {
+                    this.onDisconnect();
+                }
                 resolve();
             }, 4500);
         });

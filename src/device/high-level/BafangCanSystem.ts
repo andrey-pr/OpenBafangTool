@@ -94,6 +94,12 @@ export default class BafangCanSystem implements IConnection {
         this.writeLongParameter = this.writeLongParameter.bind(this);
         this.registerRequest = this.registerRequest.bind(this);
         this.resolveRequest = this.resolveRequest.bind(this);
+        this.onDisconnect = this.onDisconnect.bind(this);
+    }
+
+    onDisconnect() {
+        this.device = undefined;
+        this.emitter.emit('disconnection');
     }
 
     private simulationDataPublisher(): void {
@@ -340,6 +346,7 @@ export default class BafangCanSystem implements IConnection {
         }
         this.device = new BesstDevice(this.devicePath);
         this.device?.emitter.on('can', this.processParsedCanResponse);
+        this.device?.emitter.on('disconnection', this.onDisconnect);
 
         return new Promise<boolean>(async (resolve) => {
             this.device?.reset().then(() => {
@@ -424,21 +431,30 @@ export default class BafangCanSystem implements IConnection {
             console.log('Simulator: blank data loaded');
             return;
         }
-        this.device?.getSerialNumber().then((serial_number: string) => {
-            if (serial_number === undefined) return;
-            this._besstCodes.besst_serial_number = serial_number;
-            this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        });
-        this.device?.getSoftwareVersion().then((software_version: string) => {
-            if (software_version === undefined) return;
-            this._besstCodes.besst_software_version = software_version;
-            this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        });
-        this.device?.getHardwareVersion().then((hardware_version: string) => {
-            if (hardware_version === undefined) return;
-            this._besstCodes.besst_hardware_version = hardware_version;
-            this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        });
+        this.device
+            ?.getSerialNumber()
+            .then((serial_number: string) => {
+                if (serial_number === undefined) return;
+                this._besstCodes.besst_serial_number = serial_number;
+                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+            })
+            .catch(() => {});
+        this.device
+            ?.getSoftwareVersion()
+            .then((software_version: string) => {
+                if (software_version === undefined) return;
+                this._besstCodes.besst_software_version = software_version;
+                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+            })
+            .catch(() => {});
+        this.device
+            ?.getHardwareVersion()
+            .then((hardware_version: string) => {
+                if (hardware_version === undefined) return;
+                this._besstCodes.besst_hardware_version = hardware_version;
+                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+            })
+            .catch(() => {});
         const commands = [
             CanReadCommandsList.HardwareVersion,
             CanReadCommandsList.SoftwareVersion,

@@ -8,7 +8,7 @@ import {
     DesktopOutlined,
     RotateRightOutlined,
 } from '@ant-design/icons';
-import { Layout, Menu, Spin, message } from 'antd';
+import { Button, Layout, Menu, Modal, Spin, message } from 'antd';
 import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
 import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
 import IConnection from '../../../device/high-level/Connection';
@@ -64,6 +64,13 @@ class MainView extends React.Component<MainProps, MainState> {
         this.switchTab = this.switchTab.bind(this);
         this.menuItems = this.menuItems.bind(this);
         const { connection } = this.props;
+        connection.emitter.once('disconnection', () => {
+            Modal.error({
+                title: 'Connection error',
+                content: 'Device has been disconnected',
+                onOk: this.props.backHook,
+            });
+        });
         setTimeout(() => this.setState({ loading: false }), 60000);
         connection.emitter.once(
             'reading-finish',
