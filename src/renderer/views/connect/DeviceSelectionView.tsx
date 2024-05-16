@@ -125,11 +125,11 @@ class DeviceSelectionView extends React.Component<
                     <Typography.Title level={3}>Select device</Typography.Title>
                     <Form.Item
                         name="device_interface"
-                        label="Device interface"
+                        label="Device protocol"
                         rules={[
                             {
                                 required: true,
-                                message: 'Device interface is required',
+                                message: 'Device protocol is required',
                             },
                         ]}
                     >

@@ -52,7 +52,7 @@ class BesstDevice {
         if (path) {
             this.device = new HID.HID(path);
         } else {
-            this.device = new HID.HID(pid as number, vid as number);
+            this.device = new HID.HID(vid as number, pid as number);
         }
         this.processReadedData = this.processReadedData.bind(this);
         this.processWriteQueue = this.processWriteQueue.bind(this);
@@ -63,6 +63,7 @@ class BesstDevice {
         this.sendCanFrame = this.sendCanFrame.bind(this);
         this.sendCanFrameImmediately = this.sendCanFrameImmediately.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
+        this.disconnect = this.disconnect.bind(this);
         this.reset = this.reset.bind(this);
         this.emitter = new EventEmitter();
         this.device?.addListener('data', this.processReadedData);
@@ -71,6 +72,7 @@ class BesstDevice {
     }
 
     onDisconnect() {
+        this.disconnect();
         this.emitter.emit('disconnection');
     }
 

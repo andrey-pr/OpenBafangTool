@@ -44,11 +44,11 @@ class App extends React.Component<AppProps, AppState> {
             .catch(() => {
                 this.setState({ view: 'connection_error' });
             });
-        this.setState({
-            view: 'main_view',
-            connection: newConnection,
-            interfaceType: interfaceType,
-        });
+            this.setState({
+                view: 'main_view',
+                connection: newConnection,
+                interfaceType: interfaceType,
+            });
     }
 
     toDeviceSelector() {

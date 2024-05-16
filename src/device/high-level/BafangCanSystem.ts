@@ -96,6 +96,7 @@ export default class BafangCanSystem implements IConnection {
         this.writeLongParameter = this.writeLongParameter.bind(this);
         this.registerRequest = this.registerRequest.bind(this);
         this.resolveRequest = this.resolveRequest.bind(this);
+        this.disconnect = this.disconnect.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
     }
 
@@ -433,7 +434,7 @@ export default class BafangCanSystem implements IConnection {
             console.log('Simulator: blank data loaded');
             return;
         }
-        if(this.readingInProgress) return;
+        if (this.readingInProgress) return;
         this.readingInProgress = true;
         this.device
             ?.getSerialNumber()
