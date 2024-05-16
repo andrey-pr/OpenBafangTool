@@ -25,6 +25,10 @@
 <!-- RELEASE NOTES -->
 ## Release Notes
 
+### 2.0.0
+
+- Added support of new systems with CAN bus
+
 ### 1.0.1
 
 - Published project in Beta
@@ -91,12 +95,12 @@ Current build of program are portable, so just download executable and launch it
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-There are docs on each parameter in program or you can use any manual from internet. Here is some examples what you can do with this parameters:
+There are docs on each parameter in program or you can use any manual from internet. Here is some examples what you can do with this parameters (some of examples related not to all kind of hardware):
 
 1. You can set wheel size when you want to install motor kit on your bike, to show correct speed on display.
-2. You can adjust speed limit or current limit to comply with local rules, if they are different from default value. **Its strongly not recommended to set limit higher than its allowed in your region!**
+2. You can change value on odometer on display if you want to replace display on existing bike or install used display on new bike.
 3. According user reports, some motor modifications starts only after one full pedal rotation - in that case, you can lower parameter "Signal No." to start motor after quarter of rotation or less.
-4. You can use diagnostic data from program to physically repair your motor.
+4. You can use error codes and diagnostic data from onboard sensors to physically repair your motor.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -109,10 +113,11 @@ There are docs on each parameter in program or you can use any manual from inter
   - [x] Beta
   - [ ] Stable
 - [ ] Add support of Bafang systems with CAN
-  - [*] Find hardware
-  - [ ] Alpha
+  - [x] Find hardware
+  - [x] Alpha
   - [ ] Beta
   - [ ] Stable
+  - [ ] Add more channgeable parameters
 - [ ] Add support of Bafang displays with UART
 - [ ] Add more kinds of executables
   - [x] .dmg - MacOS, on Apple Silicon and x86_64

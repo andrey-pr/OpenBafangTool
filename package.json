@@ -1,6 +1,6 @@
 {
   "description": "Open source tool to configurate Bafang devices",
-  "version": "1.0.1",
+  "version": "2.0.0-rc",
   "keywords": [
     "electron",
     "react",
