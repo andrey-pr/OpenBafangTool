@@ -34,8 +34,8 @@ export async function writeToPort(
 }
 
 export function closePort(path: string): void {
-    if (ports[path].isOpen) {
-        ports[path].close();
+    if (ports[path]?.isOpen) {
+        ports[path]?.close();
         delete ports[path];
     }
 }

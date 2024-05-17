@@ -6,11 +6,11 @@
 
 This is the first view of program, that appears aften launch. Here you can choose what device do you want to interact and interface type (simplified or full).
 
-![Device type selector](assets/general_manual/device_protocol.png)
+![Device protocol selector](assets/general_manual/device_protocol.png)
 
 At first, select type of your electric system. Old bafangs such as BBS01/02/HD have UART protocol (you can also recognize them by round green connector), new have CAN protocol (you can recognize then by "house-shaped" green connnector).
 
-![Device type selector](assets/general_manual/interface_type_selector.png)
+![Interface type selector](assets/general_manual/interface_type_selector.png)
 
 For systems with UART available two kinds of UI - full and simplified. If you are newbie, better to select simplified mode.
 

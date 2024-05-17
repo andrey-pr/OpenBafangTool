@@ -14,6 +14,7 @@ import {
     CanOperation,
     BesstReadedCanFrame,
 } from './besst-types';
+import log from 'electron-log/renderer';
 
 export function listBesstDevices(): HID.Device[] {
     return HID.devices().filter((device) => device.product === 'BaFang Besst');
@@ -104,6 +105,7 @@ class BesstDevice {
             }, packet.timeout);
         }
         try {
+            log.info('sent besst package:', packet.data);
             this.device?.write(packet.data);
         } catch (e) {
             this.onDisconnect();
@@ -114,6 +116,7 @@ class BesstDevice {
     private processReadedData(data: Uint8Array): void {
         if (data.length === 0) return;
         const array: number[] = [...data];
+        log.info('received besst package:', array);
         switch (array[0]) {
             case 0x10:
             case 0x11:

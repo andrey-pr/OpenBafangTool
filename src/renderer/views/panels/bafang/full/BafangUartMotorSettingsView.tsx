@@ -7,6 +7,7 @@ import {
     FloatButton,
     message,
     Switch,
+    Popconfirm,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
@@ -1693,12 +1694,19 @@ class BafangUartMotorSettingsView extends React.Component<
                         }, 3000);
                     }}
                 />
-                <FloatButton
-                    icon={<DeliveredProcedureOutlined />}
-                    type="primary"
-                    style={{ right: 24 }}
-                    onClick={this.saveParameters}
-                />
+                <Popconfirm
+                    title="Parameter writing"
+                    description={`Are you sure that you want to write all parameters on device?`}
+                    onConfirm={this.saveParameters}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <FloatButton
+                        icon={<DeliveredProcedureOutlined />}
+                        type="primary"
+                        style={{ right: 24 }}
+                    />
+                </Popconfirm>
             </div>
         );
     }
