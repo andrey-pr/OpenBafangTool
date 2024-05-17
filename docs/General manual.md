@@ -50,7 +50,7 @@ When you enter unusual value to parameter field, you will get warning about it. 
 
 ![Control buttons](assets/general_manual/control_buttons.png)
 
-Button with arrows means "read all data from device again". Button with rocket means "write all data to device".
+Button with two spinning arrows means "read all data from device again". Button with floppy disk and arrow means "write all data to device".
 
 ![Write success](assets/general_manual/write_success.png)
 
@@ -73,7 +73,7 @@ When you entered unusual value to field on "Settings" page, you will get warning
 
 ![Control buttons](assets/general_manual/control_buttons.png)
 
-Button with arrows means "read all data from device again". Button with rocket means "write all data to device".
+Button with two spinning arrows means "read all data from device again". Button with floppy disk and arrow means "write all data to device".
 
 ![Write success](assets/general_manual/write_success.png)
 

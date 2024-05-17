@@ -14,6 +14,8 @@ type ParameterInputProps = {
     checkValue?: (value: number) => boolean;
     disabled?: boolean;
     decimalPlaces?: number;
+    direct?: boolean;
+    noDataType?: boolean;
 };
 
 type ParameterInputState = {
@@ -35,6 +37,7 @@ class ParameterInputComponent extends React.Component<
         decimalPlaces: 0,
         min: undefined,
         max: undefined,
+        noDataType: true,
     };
 
     constructor(props: any) {
@@ -68,8 +71,9 @@ class ParameterInputComponent extends React.Component<
             checkValue,
             disabled,
             decimalPlaces,
+            noDataType,
         } = this.props;
-        if (value === NotLoadedYet) {
+        if (noDataType && value === NotLoadedYet) {
             return (
                 <Input
                     value="Isn't readed yet"
@@ -78,7 +82,7 @@ class ParameterInputComponent extends React.Component<
                     disabled
                 />
             );
-        } else if (value === NotAvailable) {
+        } else if (noDataType && value === NotAvailable) {
             return (
                 <Input
                     value="Not available on this hardware"

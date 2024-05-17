@@ -378,6 +378,7 @@ export default class BafangUartMotor implements IConnection {
         const request = [
             [0x11, 0x51, 0x04, 0xb0, 0x05],
             [0x11, 0x52],
+            [0x11, 0x52],
             [0x11, 0x53],
             [0x11, 0x54],
             [0x11, 0x50],
@@ -504,6 +505,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     getBasicParameters(): BafangUartMotorBasicParameters {
+        console.log(this.basic_parameters);
         return JSON.parse(JSON.stringify(this.basic_parameters)); // method of object clonning, that is stupid but works
     }
 

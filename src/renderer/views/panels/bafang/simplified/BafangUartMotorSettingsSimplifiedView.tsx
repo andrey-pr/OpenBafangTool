@@ -500,6 +500,13 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             ...this.initial_throttle_parameters,
             lastUpdateTime: Date.now(),
         });
+        console.log(
+            'updated',
+            this.initial_info,
+            this.initial_basic_parameters,
+            this.initial_pedal_parameters,
+            this.initial_throttle_parameters,
+        );
     }
 
     saveParameters(): void {
