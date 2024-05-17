@@ -6,13 +6,21 @@
 
 This is the first view of program, that appears aften launch. Here you can choose what device do you want to interact and interface type (simplified or full).
 
-![Device type selector](assets/general_manual/interface_type_selector.png)
+![Device protocol selector](assets/general_manual/device_protocol.png)
 
-At first, select simplified or full interface. If you are newbie, better to select simplified mode. Then select type of your device. Currently, the only supported type is Bafang motor with UART interface. Bafang systems with CAN will be available soon. Later I'll add more device types and manufacturers.
+At first, select type of your electric system. Old bafangs such as BBS01/02/HD have UART protocol (you can also recognize them by round green connector), new have CAN protocol (you can recognize then by "house-shaped" green connnector).
+
+![Interface type selector](assets/general_manual/interface_type_selector.png)
+
+For systems with UART available two kinds of UI - full and simplified. If you are newbie, better to select simplified mode.
 
 ![Serial port selector](assets/general_manual/port_selector.png)
 
-Select port where you device connected to. Check usual name of USB-Serial ports for you operational system in internet. Also, there is a item `Simulator` that connects program to virtual device for test purposes and virtual `/dev/tnt` ports if you have them in your system (available only for Linux). Non-USB serial ports usually removed from list on Linux due to high ammount of "dead" ports in standard list.
+If you have motor with UART, select port where you device connected to. Check usual name of USB-Serial ports for you operational system in internet. Also, there is a item `Simulator` that connects program to virtual device for test purposes and virtual `/dev/tnt` ports if you have them in your system (available only for Linux). Non-USB serial ports usually removed from list on Linux due to high ammount of "dead" ports in standard list.
+
+![HID device selector](assets/general_manual/besst_selector.png)
+
+If you have motor with CAN, select your BESST Tool USB device. Also, there is a item `Simulator` that connects program to virtual device for test purposes.
 
 ![Disclaimers](assets/general_manual/disclaimers.png)
 
@@ -22,7 +30,11 @@ There are disclaimer checkbox, you should select them.
 
 Then press button "Check Connection". If connection is successful, press "Select". In not, check device type, port, cable and device.
 
-#### Main view (Simplified mode)
+#### Main view (CAN)
+
+TODO
+
+#### Main view (UART, UI Simplified mode)
 
 ![Main view](assets/general_manual/simplified_parameters.png)
 
@@ -38,14 +50,14 @@ When you enter unusual value to parameter field, you will get warning about it. 
 
 ![Control buttons](assets/general_manual/control_buttons.png)
 
-Button with arrows means "read all data from device again". Button with rocket means "write all data to device".
+Button with two spinning arrows means "read all data from device again". Button with floppy disk and arrow means "write all data to device".
 
 ![Write success](assets/general_manual/write_success.png)
 
 After reading or writing you will get notifications with result (success or error).\
 ⚠️ If you got a write error of some parameter, it means that its too low or too big even if you got no warning from field. Also its possibble that you will get a new error after fixing previous - motor returns error answer only for first error value in package.
 
-#### Main view (Full mode)
+#### Main view (UART, UI Full mode)
 
 ![Main view](assets/general_manual/main_view.png)
 
@@ -61,7 +73,7 @@ When you entered unusual value to field on "Settings" page, you will get warning
 
 ![Control buttons](assets/general_manual/control_buttons.png)
 
-Button with arrows means "read all data from device again". Button with rocket means "write all data to device".
+Button with two spinning arrows means "read all data from device again". Button with floppy disk and arrow means "write all data to device".
 
 ![Write success](assets/general_manual/write_success.png)
 

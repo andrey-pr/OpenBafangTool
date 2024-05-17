@@ -8,10 +8,11 @@ import {
     message,
     Radio,
     Switch,
+    Popconfirm,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../../../device/BafangUartMotor';
+import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
+import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import {
     BafangUartMotorBasicParameters,
     BafangUartMotorInfo,
@@ -21,13 +22,10 @@ import {
     PedalSensorSignals,
     SpeedLimitByDisplay,
     ThrottleMode,
-} from '../../../../device/BafangUartMotorTypes';
-import {
-    BatteryTypes,
-    LowVoltageLimitsByBatteryType,
-    lowVoltageLimits,
-} from '../../../../constants/parameter_limits';
+} from '../../../../../types/BafangUartMotorTypes';
+import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
+import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 const { Title } = Typography;
 
@@ -118,55 +116,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            {
-                key: 'serial_number',
-                label: (
-                    <>
-                        Serial number
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            Note, that serial number is changeable, so its not a
-                            secure anti-theft feature
-                        </Typography.Text>
-                    </>
-                ),
-                children: info.serial_number,
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: info.voltage,
-            },
-            {
-                key: 'max_current',
-                label: (
-                    <>
-                        Max current
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            Note, that Voltage*Max Current is a maximal
-                            <br />
-                            power, but not nominal. If you have legal motor
-                            <br />
-                            certified as 250W, and Voltage*Max Current is twice
-                            <br />
-                            or even triple bigger its normal - 250W is a nominal
-                            <br />
-                            (continuous) power, and its legal to use device that
-                            <br />
-                            can have bigger maximal power. For example, some of
-                            <br />
-                            Shimano STEPS motors that certified for 250W
-                            pedelecs have
-                            <br />
-                            600W of max power.
-                        </Typography.Text>
-                    </>
-                ),
-                children: info.max_current,
-            },
+            generateSimpleStringListItem(
+                'Serial number',
+                info.serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
+            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem(
+                'Max current',
+                info.max_current,
+                'Note, that Voltage*Max Current is a maximal power, but not nominal. If you have legal motor certified as 250W, and Voltage*Max Current is twice or even triple bigger its normal - 250W is a nominal (continuous) power, and its legal to use device that can have bigger maximal power. For example, some of Shimano STEPS motors that certified for 250W pedelecs have 600W of max power.',
+            ),
         ];
     }
 
@@ -182,22 +142,23 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Increase it if you system shuts down unexpectedly by BMS inside of battery
+                            Increase it if you system shuts down unexpectedly by
+                            BMS inside of battery
                         </Typography.Text>
                     </>
                 ),
                 children: (
                     <ParameterInputComponent
-                    value={low_battery_protection}
-                    unit="V"
-                    min={lowVoltageLimits[voltage].min}
-                    max={lowVoltageLimits[voltage].max}
-                    onNewValue={(e) => {
-                        this.setState({
-                            low_battery_protection: e,
-                        });
-                    }}
-                />
+                        value={low_battery_protection}
+                        unit="V"
+                        min={lowVoltageLimits[voltage].min}
+                        max={lowVoltageLimits[voltage].max}
+                        onNewValue={(e) => {
+                            this.setState({
+                                low_battery_protection: e,
+                            });
+                        }}
+                    />
                 ),
             },
         ];
@@ -471,7 +432,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}
@@ -539,6 +500,13 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             ...this.initial_throttle_parameters,
             lastUpdateTime: Date.now(),
         });
+        console.log(
+            'updated',
+            this.initial_info,
+            this.initial_basic_parameters,
+            this.initial_pedal_parameters,
+            this.initial_throttle_parameters,
+        );
     }
 
     saveParameters(): void {
@@ -732,12 +700,19 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         }, 3000);
                     }}
                 />
-                <FloatButton
-                    icon={<RocketOutlined />}
-                    type="primary"
-                    style={{ right: 24 }}
-                    onClick={this.saveParameters}
-                />
+                <Popconfirm
+                    title="Parameter writing"
+                    description={`Are you sure that you want to write all parameters on device?`}
+                    onConfirm={this.saveParameters}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <FloatButton
+                        icon={<DeliveredProcedureOutlined />}
+                        type="primary"
+                        style={{ right: 24 }}
+                    />
+                </Popconfirm>
             </div>
         );
     }

@@ -2,8 +2,9 @@ import React from 'react';
 import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../../../device/BafangUartMotor';
-import { BafangUartMotorInfo } from '../../../../device/BafangUartMotorTypes';
+import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
+import { BafangUartMotorInfo } from '../../../../../types/BafangUartMotorTypes';
+import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 type InfoProps = {
     connection: BafangUartMotor;
@@ -31,26 +32,10 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: info.serial_number,
-            },
-            {
-                key: 'model',
-                label: 'Model',
-                children: info.model,
-            },
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: info.manufacturer,
-            },
-            {
-                key: 'system_code',
-                label: 'System code',
-                children: info.system_code,
-            },
+            generateSimpleStringListItem('Serial number', info.serial_number),
+            generateSimpleStringListItem('Model', info.model),
+            generateSimpleStringListItem('Manufacturer', info.manufacturer),
+            generateSimpleStringListItem('System code', info.system_code),
         ];
     }
 
@@ -58,16 +43,14 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            {
-                key: 'firmware_version',
-                label: 'Firmware version',
-                children: info.firmware_version,
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: info.hardware_version,
-            },
+            generateSimpleStringListItem(
+                'Firmware version',
+                info.firmware_version,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                info.hardware_version,
+            ),
         ];
     }
 
@@ -75,16 +58,8 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: info.voltage,
-            },
-            {
-                key: 'max_current',
-                label: 'Max current',
-                children: info.max_current,
-            },
+            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem('Max current', info.max_current),
         ];
     }
 

@@ -16,7 +16,10 @@ checkNodeEnv('production');
 deleteSourceMaps();
 
 const configuration: webpack.Configuration = {
-    externals: ['serialport'],
+    externals: {
+        'node-hid': 'commonjs node-hid',
+        serialport: 'serialport',
+    },
 
     devtool: 'source-map',
 
@@ -26,7 +29,6 @@ const configuration: webpack.Configuration = {
 
     entry: {
         main: path.join(webpackPaths.srcMainPath, 'main.ts'),
-        preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
     },
 
     output: {

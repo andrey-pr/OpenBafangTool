@@ -9,14 +9,19 @@ import {
     Space,
     message,
 } from 'antd';
-import IConnection from '../../device/Connection';
-import BafangUartMotor from '../../device/BafangUartMotor';
+import { SerialPort } from 'serialport';
+import HID from 'node-hid';
+import IConnection from '../../../device/high-level/Connection';
+import BafangUartMotor from '../../../device/high-level/BafangUartMotor';
+import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
 import {
     DeviceBrand,
     DeviceInterface,
     DeviceType,
-} from '../../models/DeviceType';
+} from '../../../types/DeviceType';
 import InterfaceType from '../../models/InterfaceType';
+import filterPorts from '../../../device/serial/serial-patcher';
+import { listBesstDevices } from '../../../device/besst/besst';
 
 const { Option } = Select;
 
@@ -29,6 +34,7 @@ type DeviceSelectionProps = {
 
 type DeviceSelectionState = {
     portList: string[];
+    besstDeviceList: HID.Device[];
     connectionChecked: boolean;
     connection: IConnection | null;
     interfaceType: InterfaceType | null;
@@ -41,6 +47,7 @@ type DeviceSelectionState = {
 };
 
 class DeviceSelectionView extends React.Component<
+    //TODO fix dropdown logic
     DeviceSelectionProps,
     DeviceSelectionState
 > {
@@ -48,23 +55,29 @@ class DeviceSelectionView extends React.Component<
         super(props);
         this.state = {
             portList: [],
+            besstDeviceList: [],
             connectionChecked: false,
             connection: null,
             interfaceType: null,
             deviceBrand: DeviceBrand.Bafang,
-            deviceInterface: DeviceInterface.UART,
-            deviceType: DeviceType.Motor,
+            deviceInterface: null,
+            deviceType: null,
             devicePort: null,
             localLawsAgreement: false,
             disclaimerAgreement: false,
         };
 
         setInterval(() => {
-            window.electron.ipcRenderer.sendMessage('list-serial-ports', []);
-
-            window.electron.ipcRenderer.once('list-serial-ports', (arg) => {
-                this.setState({ portList: arg as string[] });
+            SerialPort.list().then((ports) => {
+                this.setState({
+                    portList: filterPorts(
+                        ports.map((port) => port.path),
+                        true,
+                    ),
+                });
             });
+
+            this.setState({ besstDeviceList: listBesstDevices() });
         }, 1000);
     }
 
@@ -72,6 +85,7 @@ class DeviceSelectionView extends React.Component<
         const { deviceSelectionHook } = this.props;
         const {
             portList,
+            besstDeviceList,
             connectionChecked,
             connection,
             interfaceType,
@@ -110,147 +124,128 @@ class DeviceSelectionView extends React.Component<
                 >
                     <Typography.Title level={3}>Select device</Typography.Title>
                     <Form.Item
-                        name="interface_type"
-                        label="Interface type"
+                        name="device_interface"
+                        label="Device protocol"
                         rules={[
                             {
                                 required: true,
-                                message: 'Interface type is required',
+                                message: 'Device protocol is required',
                             },
                         ]}
                     >
                         <Select
-                            onChange={(value: InterfaceType) => {
+                            onChange={(value: DeviceInterface) => {
+                                if (value === DeviceInterface.CAN) {
+                                    this.setState({
+                                        deviceInterface: value,
+                                        interfaceType: InterfaceType.Full,
+                                        connectionChecked: false,
+                                    });
+                                }
                                 this.setState({
-                                    interfaceType: value,
+                                    deviceInterface: value,
+                                    deviceType: DeviceType.Motor,
                                     connectionChecked: false,
                                 });
                             }}
                             allowClear
                             style={{ minWidth: '150px' }}
                         >
-                            <Option value={InterfaceType.Simplified}>
-                                Simplified
-                            </Option>
-                            <Option value={InterfaceType.Full}>Full</Option>
+                            <Option value={DeviceInterface.UART}>UART</Option>
+                            <Option value={DeviceInterface.CAN}>CAN</Option>
                         </Select>
                     </Form.Item>
-                    <Form.Item
-                        name="device_brand"
-                        label="Device brand"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Device brand is required',
-                            },
-                        ]}
-                        initialValue={DeviceBrand.Bafang}
-                    >
-                        <Select
-                            onChange={(value: DeviceBrand) => {
-                                this.setState({
-                                    deviceBrand: value,
-                                    connectionChecked: false,
-                                });
-                            }}
-                            allowClear
-                            style={{ minWidth: '150px' }}
-                        >
-                            <Option value={DeviceBrand.Bafang}>Bafang</Option>
-                        </Select>
-                    </Form.Item>
-                    {deviceBrand === DeviceBrand.Bafang && (
+                    {deviceInterface === DeviceInterface.UART && (
                         <Form.Item
-                            name="device_interface"
-                            label="Device interface"
+                            name="interface_type"
+                            label="Interface type"
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Device interface is required',
+                                    message: 'Interface type is required',
                                 },
                             ]}
-                            initialValue={DeviceInterface.UART}
                         >
                             <Select
-                                onChange={(value: DeviceInterface) => {
+                                onChange={(value: InterfaceType) => {
                                     this.setState({
-                                        deviceInterface: value,
+                                        interfaceType: value,
                                         connectionChecked: false,
                                     });
                                 }}
                                 allowClear
                                 style={{ minWidth: '150px' }}
                             >
-                                <Option value={DeviceInterface.UART}>
-                                    UART
+                                <Option value={InterfaceType.Simplified}>
+                                    Simplified
                                 </Option>
-                                <Option value={DeviceInterface.CAN} disabled>
-                                    CAN - not yet supported
-                                </Option>
+                                <Option value={InterfaceType.Full}>Full</Option>
                             </Select>
                         </Form.Item>
                     )}
-                    {deviceBrand === DeviceBrand.Bafang &&
-                        deviceInterface === DeviceInterface.UART && (
-                            <Form.Item
-                                name="device_type"
-                                label="Device type"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Device type is required',
-                                    },
-                                ]}
-                                initialValue={DeviceType.Motor}
+                    {deviceInterface === DeviceInterface.UART && (
+                        <Form.Item
+                            name="port"
+                            label="Serial port"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Serial port is required',
+                                },
+                            ]}
+                        >
+                            <Select
+                                onChange={(value: string) => {
+                                    this.setState({
+                                        devicePort: value,
+                                        connectionChecked: false,
+                                    });
+                                }}
+                                allowClear
+                                style={{ minWidth: '150px' }}
                             >
-                                <Select
-                                    onChange={(value: DeviceType) => {
-                                        this.setState({
-                                            deviceType: value,
-                                            connectionChecked: false,
-                                        });
-                                    }}
-                                    allowClear
-                                    style={{ minWidth: '150px' }}
-                                >
-                                    <Option value={DeviceType.Motor}>
-                                        Motor
-                                    </Option>
-                                    <Option value={DeviceType.Display} disabled>
-                                        Display - not yet supported
-                                    </Option>
-                                </Select>
-                            </Form.Item>
-                        )}
-                    {deviceBrand === DeviceBrand.Bafang &&
-                        deviceInterface === DeviceInterface.UART && (
-                            <Form.Item
-                                name="port"
-                                label="Serial port"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Serial port is required',
-                                    },
-                                ]}
+                                <Option value="simulator">Simulator</Option>
+                                {portComponents}
+                            </Select>
+                        </Form.Item>
+                    )}
+                    {deviceInterface === DeviceInterface.CAN && (
+                        <Form.Item
+                            name="usb_device"
+                            label="USB device"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'USB device is required',
+                                },
+                            ]}
+                        >
+                            <Select
+                                onChange={(value: string) => {
+                                    this.setState({
+                                        devicePort: value,
+                                        connectionChecked: false,
+                                    });
+                                }}
+                                allowClear
+                                style={{ minWidth: '150px' }}
                             >
-                                <Select
-                                    onChange={(value: string) => {
-                                        this.setState({
-                                            devicePort: value,
-                                            connectionChecked: false,
-                                        });
-                                    }}
-                                    allowClear
-                                    style={{ minWidth: '150px' }}
-                                >
-                                    <Option value="simulator">Simulator</Option>
-                                    {portComponents}
-                                </Select>
-                            </Form.Item>
-                        )}
+                                <Option value="simulator">Simulator</Option>
+                                {besstDeviceList.map((item) => {
+                                    return (
+                                        <Option
+                                            value={item.path}
+                                            key={item.path}
+                                        >
+                                            {item.product} ({item.path})
+                                        </Option>
+                                    );
+                                })}
+                            </Select>
+                        </Form.Item>
+                    )}
                     <Form.Item
-                        name="localLawsAgreement"
+                        name="local_laws_agreement"
                         label=""
                         initialValue={false}
                         valuePropName="checked"
@@ -332,6 +327,15 @@ class DeviceSelectionView extends React.Component<
                                         newConnection = new BafangUartMotor(
                                             devicePort,
                                         );
+                                    } else if (
+                                        deviceBrand === DeviceBrand.Bafang &&
+                                        deviceInterface ===
+                                            DeviceInterface.CAN &&
+                                        devicePort !== null
+                                    ) {
+                                        newConnection = new BafangCanSystem(
+                                            devicePort,
+                                        );
                                     } else {
                                         message.info(
                                             'This kind of device is not supported yet',
@@ -365,9 +369,11 @@ class DeviceSelectionView extends React.Component<
                                 disabled={
                                     deviceBrand === null ||
                                     devicePort === null ||
+                                    deviceInterface === null ||
                                     (deviceBrand === DeviceBrand.Bafang &&
-                                        (deviceInterface === null ||
-                                            deviceType === null)) ||
+                                        deviceInterface ===
+                                            DeviceInterface.UART &&
+                                        deviceType === null) ||
                                     interfaceType === null
                                 }
                             >

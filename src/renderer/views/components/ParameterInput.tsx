@@ -1,11 +1,12 @@
-import { InputNumber, Tooltip } from 'antd';
+import { Input, InputNumber, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
+import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
 
 type ParameterInputProps = {
-    value: number | null;
+    value: number | NoData | null;
     unit?: ReactNode;
-    min: number;
-    max: number;
+    min?: number;
+    max?: number;
     onNewValue: (value: number) => void;
     warningText?: string;
     warningBelow?: number;
@@ -13,10 +14,12 @@ type ParameterInputProps = {
     checkValue?: (value: number) => boolean;
     disabled?: boolean;
     decimalPlaces?: number;
+    direct?: boolean;
+    noDataType?: boolean;
 };
 
 type ParameterInputState = {
-    value: number | null;
+    value: number | NoData | null;
     warning: boolean;
 };
 
@@ -32,6 +35,9 @@ class ParameterInputComponent extends React.Component<
         disabled: false,
         unit: undefined,
         decimalPlaces: 0,
+        min: undefined,
+        max: undefined,
+        noDataType: true,
     };
 
     constructor(props: any) {
@@ -65,39 +71,62 @@ class ParameterInputComponent extends React.Component<
             checkValue,
             disabled,
             decimalPlaces,
+            noDataType,
         } = this.props;
-        return (
-            <Tooltip title={warningText} trigger="click" open={warning}>
-                <InputNumber
-                    min={min}
-                    max={max}
-                    value={value}
+        if (noDataType && value === NotLoadedYet) {
+            return (
+                <Input
+                    value="Isn't readed yet"
                     addonAfter={unit}
                     style={{ minWidth: '150px' }}
-                    onChange={(e) => {
-                        if (e != null) {
-                            let tmp = false;
-                            tmp ||=
-                                warningBelow !== undefined && e < warningBelow;
-                            tmp ||=
-                                warningAbove !== undefined && e > warningAbove;
-                            tmp ||= checkValue !== undefined && !checkValue(e);
-                            this.setState({
-                                value:
-                                    Math.floor(
-                                        e * 10 ** (decimalPlaces as number),
-                                    ) /
-                                    (e * 10 ** (decimalPlaces as number)),
-                                warning: tmp,
-                            });
-                            onNewValue(e);
-                        }
-                    }}
-                    status={warning ? 'warning' : ''}
-                    disabled={disabled}
+                    disabled
                 />
-            </Tooltip>
-        );
+            );
+        } else if (noDataType && value === NotAvailable) {
+            return (
+                <Input
+                    value="Not available on this hardware"
+                    style={{ minWidth: '150px' }}
+                    disabled
+                />
+            );
+        } else {
+            return (
+                <Tooltip title={warningText} trigger="click" open={warning}>
+                    <InputNumber
+                        min={min}
+                        max={max}
+                        value={value as number}
+                        addonAfter={unit}
+                        style={{ minWidth: '150px' }}
+                        onChange={(e) => {
+                            if (e !== null) {
+                                let tmp = false;
+                                tmp ||=
+                                    warningBelow !== undefined &&
+                                    e < warningBelow;
+                                tmp ||=
+                                    warningAbove !== undefined &&
+                                    e > warningAbove;
+                                tmp ||=
+                                    checkValue !== undefined && !checkValue(e);
+                                this.setState({
+                                    value:
+                                        Math.floor(
+                                            e * 10 ** (decimalPlaces as number),
+                                        ) /
+                                        (e * 10 ** (decimalPlaces as number)),
+                                    warning: tmp,
+                                });
+                                onNewValue(e);
+                            }
+                        }}
+                        status={warning ? 'warning' : ''}
+                        disabled={disabled}
+                    />
+                </Tooltip>
+            );
+        }
     }
 }
 

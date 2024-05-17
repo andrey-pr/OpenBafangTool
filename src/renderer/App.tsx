@@ -2,7 +2,7 @@
 import React from 'react';
 import DeviceSelectionView from './views/connect/DeviceSelectionView';
 import MainView from './views/main/MainView';
-import IConnection from './device/Connection';
+import IConnection from '../device/high-level/Connection';
 import InterfaceType from './models/InterfaceType';
 
 type AppProps = {};
@@ -30,7 +30,7 @@ class App extends React.Component<AppProps, AppState> {
         interfaceType: InterfaceType,
     ): void {
         const { connection } = this.state;
-        if (connection != null) {
+        if (connection) {
             connection.disconnect();
         }
         newConnection
@@ -44,16 +44,16 @@ class App extends React.Component<AppProps, AppState> {
             .catch(() => {
                 this.setState({ view: 'connection_error' });
             });
-        this.setState({
-            view: 'main_view',
-            connection: newConnection,
-            interfaceType: interfaceType,
-        });
+            this.setState({
+                view: 'main_view',
+                connection: newConnection,
+                interfaceType: interfaceType,
+            });
     }
 
     toDeviceSelector() {
         const { connection } = this.state;
-        if (connection != null) {
+        if (connection) {
             connection.disconnect();
         }
         this.setState({ view: 'device_selector' });

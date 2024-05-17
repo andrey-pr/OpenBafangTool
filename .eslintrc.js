@@ -20,6 +20,9 @@ module.exports = {
         'react/static-property-placement': 'off',
         'no-continue': 'off',
         'no-bitwise': 'off',
+        camelcase: 'off',
+        'no-underscore-dangle': 'off',
+        'react/destructuring-assignment': 'off',
     },
     parserOptions: {
         ecmaVersion: 2022,

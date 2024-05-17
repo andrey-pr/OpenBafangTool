@@ -14,7 +14,8 @@ import InterfaceTypeSelector from '../../docs/assets/general_manual/interface_ty
 import SimplifiedMenu from '../../docs/assets/general_manual/simplified_menu.png';
 import SimplifiedParameters from '../../docs/assets/general_manual/simplified_parameters.png';
 import SimplifiedWarning from '../../docs/assets/general_manual/simplified_warning.png';
-
+import BesstSelector from '../../docs/assets/general_manual/besst_selector.png';
+import DeviceProtocol from '../../docs/assets/general_manual/device_protocol.png';
 
 // TODO this file is a very big kludge, made as temporal solution for assets import problem
 
@@ -39,6 +40,9 @@ const images: Image = {
     'assets/general_manual/simplified_menu.png': SimplifiedMenu,
     'assets/general_manual/simplified_parameters.png': SimplifiedParameters,
     'assets/general_manual/simplified_warning.png': SimplifiedWarning,
+    'assets/general_manual/besst_selector.png': BesstSelector,
+    'assets/general_manual/device_protocol.png': DeviceProtocol,
+
 };
 
 export function getImage(name: string) {

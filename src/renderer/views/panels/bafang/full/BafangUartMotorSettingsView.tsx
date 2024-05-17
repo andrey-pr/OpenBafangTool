@@ -7,10 +7,11 @@ import {
     FloatButton,
     message,
     Switch,
+    Popconfirm,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, RocketOutlined } from '@ant-design/icons';
-import BafangUartMotor from '../../../../device/BafangUartMotor';
+import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
+import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import {
     AssistLevel,
     BafangUartMotorBasicParameters,
@@ -22,10 +23,10 @@ import {
     SpeedLimitByDisplay,
     SpeedmeterType,
     ThrottleMode,
-} from '../../../../device/BafangUartMotorTypes';
-import { lowVoltageLimits } from '../../../../constants/parameter_limits';
+} from '../../../../../types/BafangUartMotorTypes';
+import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
-import StringInputComponent from '../../../components/StringInput';
+import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
 
 const { Title } = Typography;
 
@@ -309,7 +310,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ speedmeter_type: e });
                             }
                         }}
@@ -346,7 +347,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_type: e });
                             }
                         }}
@@ -393,7 +394,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}
@@ -454,7 +455,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_assist_level: e });
                             }
                         }}
@@ -515,7 +516,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_assist_level: e });
                             }
                         }}
@@ -569,6 +570,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
+                        noDataType={false}
                     />
                 ),
             },
@@ -620,6 +622,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
+                        noDataType={false}
                     />
                 ),
             },
@@ -746,22 +749,11 @@ class BafangUartMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         const { serial_number } = this.state;
         return [
-            {
-                key: 'serial_number',
-                label: 'Serial number',
-                children: (
-                    <StringInputComponent
-                        value={serial_number}
-                        maxLength={60}
-                        onNewValue={(e) => {
-                            this.setState({
-                                serial_number: e,
-                            });
-                        }}
-                        errorOnEmpty
-                    />
-                ),
-            },
+            generateSimpleStringListItem(
+                'Serial number',
+                serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
         ];
     }
 
@@ -775,36 +767,12 @@ class BafangUartMotorSettingsView extends React.Component<
             max_current,
         } = this.state;
         return [
-            {
-                key: 'manufacturer',
-                label: 'Manufacturer',
-                children: manufacturer,
-            },
-            {
-                key: 'model',
-                label: 'Model',
-                children: model,
-            },
-            {
-                key: 'hardware_version',
-                label: 'Hardware version',
-                children: hardware_version,
-            },
-            {
-                key: 'firmware_version',
-                label: 'Firmware version',
-                children: firmware_version,
-            },
-            {
-                key: 'voltage',
-                label: 'Voltage',
-                children: voltage,
-            },
-            {
-                key: 'max_current',
-                label: 'Max current',
-                children: max_current,
-            },
+            generateSimpleStringListItem('Manufacturer', manufacturer),
+            generateSimpleStringListItem('Model', model),
+            generateSimpleStringListItem('Hardware version', hardware_version),
+            generateSimpleStringListItem('Firmware version', firmware_version),
+            generateSimpleStringListItem('Voltage', voltage),
+            generateSimpleStringListItem('Max current', max_current),
         ];
     }
 
@@ -900,7 +868,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ speedmeter_type: e });
                             }
                         }}
@@ -948,7 +916,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_type: e });
                             }
                         }}
@@ -1009,7 +977,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ pedal_assist_level: e });
                             }
                         }}
@@ -1063,6 +1031,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
+                        noDataType={false}
                     />
                 ),
             },
@@ -1273,7 +1242,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_mode: e });
                             }
                         }}
@@ -1334,7 +1303,7 @@ class BafangUartMotorSettingsView extends React.Component<
                             },
                         ]}
                         onChange={(e) => {
-                            if (e != null) {
+                            if (e !== null) {
                                 this.setState({ throttle_assist_level: e });
                             }
                         }}
@@ -1389,6 +1358,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
+                        noDataType={false}
                     />
                 ),
             },
@@ -1728,12 +1698,19 @@ class BafangUartMotorSettingsView extends React.Component<
                         }, 3000);
                     }}
                 />
-                <FloatButton
-                    icon={<RocketOutlined />}
-                    type="primary"
-                    style={{ right: 24 }}
-                    onClick={this.saveParameters}
-                />
+                <Popconfirm
+                    title="Parameter writing"
+                    description={`Are you sure that you want to write all parameters on device?`}
+                    onConfirm={this.saveParameters}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <FloatButton
+                        icon={<DeliveredProcedureOutlined />}
+                        type="primary"
+                        style={{ right: 24 }}
+                    />
+                </Popconfirm>
             </div>
         );
     }
