@@ -16,6 +16,7 @@ import {
     CanOperation,
     DeviceNetworkId,
 } from '../besst/besst-types';
+import log from 'electron-log/renderer';
 
 type SentRequest = {
     resolve: (...args: any[]) => void;
@@ -206,6 +207,7 @@ export default class BafangCanSystem implements IConnection {
     private processParsedCanResponse(response: BesstReadedCanFrame) {
         this.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
+            log.info('received can package:', response);
             if (response.data.length === 0) {
                 this.resolveRequest(response);
                 this.rereadParameter(response);
@@ -259,6 +261,7 @@ export default class BafangCanSystem implements IConnection {
                     );
                     break;
                 case 0x01:
+                    log.info('received can package:', response);
                     if (response.data.length === 0) {
                         this.resolveRequest(response);
                         this.rereadParameter(response);
@@ -271,6 +274,7 @@ export default class BafangCanSystem implements IConnection {
                     );
                     break;
                 case 0x02:
+                    log.info('received can package:', response);
                     if (response.data.length === 0) {
                         this.resolveRequest(response);
                         this.rereadParameter(response);
@@ -317,6 +321,7 @@ export default class BafangCanSystem implements IConnection {
                     );
                     break;
                 case 0x03:
+                    log.info('received can package:', response);
                     utils.parseControllerPackage3(
                         response,
                         this._controllerSpeedParameters,
