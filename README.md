@@ -167,6 +167,7 @@ Project Link: [https://github.com/andrey-pr/OpenBafangTool](https://github.com/a
 
 * [Stefan Penoff - author of original Bafang Configuration Tool project](https://penoff.me/2016/01/13/e-bike-conversion-software/)
 * [Tomblarom - project consultant and my good friend](https://github.com/Tomblarom)
+* [ Bafang_M500_M600 - project, that made a big research about bafang CAN protocol](https://github.com/OpenSourceEBike/Bafang_M500_M600)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
