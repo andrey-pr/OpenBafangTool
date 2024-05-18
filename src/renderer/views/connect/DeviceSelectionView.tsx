@@ -237,7 +237,7 @@ class DeviceSelectionView extends React.Component<
                                             value={item.path}
                                             key={item.path}
                                         >
-                                            {item.product} ({item.path})
+                                            {item.product}
                                         </Option>
                                     );
                                 })}
