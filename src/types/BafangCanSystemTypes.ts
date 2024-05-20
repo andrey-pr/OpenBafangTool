@@ -51,17 +51,14 @@ export type BafangCanControllerParameters1 = {
     controller_battery_recovery_voltage: number;
     controller_battery_capacity: number;
     controller_max_current_on_low_charge: number;
-    // Battery "Capacity percentage for current begins to decay" - int/percents, read, write
-    // Battery "Capacity percentage for current begins to decay coefficient" - int/percents, read, write
     controller_full_capacity_range: number;
     controller_pedal_sensor_type: BafangCanPedalSensorType;
     controller_coaster_brake: boolean;
-    // Pedal sensor "Speed signal channel number" - its something different, no read, no write
+    controller_pedal_sensor_signals_per_rotation: number;
     controller_speed_sensor_channel_number: BafangCanSpeedSensorChannelNumber;
-    // Pedal sensor "Check teeth for heel torque",
     controller_motor_type: BafangCanMotorType;
     controller_motor_pole_pair_number: number;
-    controller_magnets_on_speed_sensor: number;
+    controller_speedmeter_magnets_number: number;
     controller_temperature_sensor_type: BafangCanTemperatureSensorType;
     controller_deceleration_ratio: number;
     controller_motor_max_rotor_rpm: number;
@@ -71,14 +68,12 @@ export type BafangCanControllerParameters1 = {
     controller_motor_reverse_potential_coefficient: number;
     controller_throttle_start_voltage: number;
     controller_throttle_max_voltage: number;
-    // Throttle "Speed limit switch function" - enum (0=no limit, 1=limit), read, write
-    controller_pas_start_current: number;
-    controller_pas_current_loading_time: number;
-    controller_pas_current_load_shedding_time: number;
+    controller_start_current: number;
+    controller_current_loading_time: number;
+    controller_current_shedding_time: number;
     controller_assist_levels: BafangCanAssistProfile[];
     controller_displayless_mode: boolean;
     controller_lamps_always_on: boolean;
-    // System "Assist speed" (unknown): number;
 };
 
 export type BafangCanWheel = {

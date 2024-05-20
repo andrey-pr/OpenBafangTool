@@ -71,6 +71,16 @@ export const CanReadCommandsList: {
         canCommandSubCode: 0x08,
         applicableDevices: [DeviceNetworkId.DISPLAY],
     },
+    Parameter1: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x11,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
+    Parameter2: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x12,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
     MotorSpeedParameters: {
         canCommandCode: 0x32,
         canCommandSubCode: 0x03,

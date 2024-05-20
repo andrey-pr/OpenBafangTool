@@ -21,6 +21,8 @@ import {
     BafangCanRideMode,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
+    BafangCanSpeedSensorChannelNumber,
+    BafangCanSystemVoltage,
     BafangCanTemperatureSensorType,
     BafangCanWheelDiameterTable,
 } from '../types/BafangCanSystemTypes';
@@ -74,10 +76,11 @@ export function getEmptyControllerParameters1(): BafangCanControllerParameters1 
         controller_full_capacity_range: 0,
         controller_pedal_sensor_type: BafangCanPedalSensorType.TorqueSensor,
         controller_coaster_brake: false,
+        controller_pedal_sensor_signals_per_rotation: 0,
         controller_speed_sensor_channel_number: 1,
         controller_motor_type: BafangCanMotorType.HubMotor,
         controller_motor_pole_pair_number: 0,
-        controller_magnets_on_speed_sensor: 0,
+        controller_speedmeter_magnets_number: 0,
         controller_temperature_sensor_type:
             BafangCanTemperatureSensorType.NoSensor,
         controller_deceleration_ratio: 0,
@@ -88,9 +91,9 @@ export function getEmptyControllerParameters1(): BafangCanControllerParameters1 
         controller_motor_reverse_potential_coefficient: 0,
         controller_throttle_start_voltage: 0,
         controller_throttle_max_voltage: 0,
-        controller_pas_start_current: 0,
-        controller_pas_current_loading_time: 0,
-        controller_pas_current_load_shedding_time: 0,
+        controller_start_current: 0,
+        controller_current_loading_time: 0,
+        controller_current_shedding_time: 0,
         controller_assist_levels: [
             { current_limit: 0, speed_limit: 0 },
             { current_limit: 0, speed_limit: 0 },
@@ -205,43 +208,44 @@ export function getSensorRealtimeDemoData(): BafangCanSensorRealtime {
 export function getControllerParameters1Demo(): BafangCanControllerParameters1 {
     return {
         controller_system_voltage: 36, // TODO fill with data
-        controller_current_limit: 1,
-        controller_overvoltage: 1,
-        controller_undervoltage: 1,
-        controller_undervoltage_under_load: 1,
-        controller_battery_recovery_voltage: 1,
-        controller_battery_capacity: 1,
-        controller_max_current_on_low_charge: 1,
-        controller_full_capacity_range: 1,
+        controller_current_limit: 18,
+        controller_overvoltage: 47,
+        controller_undervoltage: 128,
+        controller_undervoltage_under_load: 12,
+        controller_battery_recovery_voltage: 172,
+        controller_battery_capacity: 10000,
+        controller_max_current_on_low_charge: 3,
+        controller_full_capacity_range: 45,
         controller_pedal_sensor_type: BafangCanPedalSensorType.TorqueSensor,
         controller_coaster_brake: false,
-        controller_speed_sensor_channel_number: 1,
-        controller_motor_type: BafangCanMotorType.HubMotor,
-        controller_motor_pole_pair_number: 1,
-        controller_magnets_on_speed_sensor: 1,
+        controller_pedal_sensor_signals_per_rotation: 24,
+        controller_speed_sensor_channel_number: 2,
+        controller_motor_type: BafangCanMotorType.MidDriveMotor,
+        controller_motor_pole_pair_number: 4,
+        controller_speedmeter_magnets_number: 1,
         controller_temperature_sensor_type:
-            BafangCanTemperatureSensorType.NoSensor,
-        controller_deceleration_ratio: 1,
-        controller_motor_max_rotor_rpm: 1,
-        controller_motor_d_axis_inductance: 1,
-        controller_motor_q_axis_inductance: 1,
-        controller_motor_phase_resistance: 1,
-        controller_motor_reverse_potential_coefficient: 1,
-        controller_throttle_start_voltage: 1,
-        controller_throttle_max_voltage: 1,
-        controller_pas_start_current: 1,
-        controller_pas_current_loading_time: 1,
-        controller_pas_current_load_shedding_time: 1,
+            BafangCanTemperatureSensorType.K10,
+        controller_deceleration_ratio: 3650,
+        controller_motor_max_rotor_rpm: 4300,
+        controller_motor_d_axis_inductance: 0,
+        controller_motor_q_axis_inductance: 0,
+        controller_motor_phase_resistance: 0,
+        controller_motor_reverse_potential_coefficient: 0,
+        controller_throttle_start_voltage: 1.2,
+        controller_throttle_max_voltage: 3.6,
+        controller_start_current: 25,
+        controller_current_loading_time: 0.2,
+        controller_current_shedding_time: 0.5,
         controller_assist_levels: [
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
-            { current_limit: 1, speed_limit: 1 },
+            { current_limit: 25, speed_limit: 100 },
+            { current_limit: 30, speed_limit: 100 },
+            { current_limit: 37, speed_limit: 100 },
+            { current_limit: 45, speed_limit: 100 },
+            { current_limit: 52, speed_limit: 100 },
+            { current_limit: 60, speed_limit: 100 },
+            { current_limit: 70, speed_limit: 100 },
+            { current_limit: 80, speed_limit: 100 },
+            { current_limit: 100, speed_limit: 100 },
         ],
         controller_displayless_mode: false,
         controller_lamps_always_on: false,
@@ -581,6 +585,58 @@ export function parseControllerPackage3(
     dto.controller_circumference = (packet.data[5] << 8) + packet.data[4];
 }
 
+export function parseControllerParameter1(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanControllerParameters1,
+): void {
+    dto.controller_system_voltage = packet.data[0] as BafangCanSystemVoltage;
+    dto.controller_current_limit = packet.data[1];
+    dto.controller_overvoltage = packet.data[2];
+    dto.controller_undervoltage = packet.data[3];
+    dto.controller_undervoltage_under_load = packet.data[4];
+    dto.controller_battery_recovery_voltage = packet.data[5];
+    dto.controller_battery_capacity = (packet.data[8] << 8) + packet.data[7];
+    dto.controller_max_current_on_low_charge = packet.data[9];
+    dto.controller_full_capacity_range = packet.data[12];
+    dto.controller_pedal_sensor_type = packet.data[13];
+    dto.controller_coaster_brake = packet.data[14] == 1;
+    dto.controller_pedal_sensor_signals_per_rotation = packet.data[15];
+    dto.controller_speed_sensor_channel_number = packet
+        .data[16] as BafangCanSpeedSensorChannelNumber;
+    dto.controller_motor_type = packet.data[18];
+    dto.controller_motor_pole_pair_number = packet.data[19];
+    dto.controller_speedmeter_magnets_number = packet.data[20];
+    dto.controller_temperature_sensor_type = packet.data[21];
+    dto.controller_motor_max_rotor_rpm =
+        (packet.data[25] << 8) + packet.data[24];
+    dto.controller_motor_d_axis_inductance =
+        (packet.data[27] << 8) + packet.data[26];
+    dto.controller_motor_q_axis_inductance =
+        (packet.data[29] << 8) + packet.data[28];
+    dto.controller_motor_phase_resistance =
+        (packet.data[31] << 8) + packet.data[30];
+    dto.controller_motor_reverse_potential_coefficient =
+        (packet.data[33] << 8) + packet.data[32];
+    dto.controller_throttle_start_voltage = packet.data[34] / 10;
+    dto.controller_throttle_max_voltage = packet.data[35] / 10;
+    dto.controller_start_current = packet.data[37];
+    dto.controller_current_loading_time = packet.data[38] / 10;
+    dto.controller_current_shedding_time = packet.data[39] / 10;
+    dto.controller_assist_levels = [
+        { current_limit: packet.data[40], speed_limit: packet.data[49] },
+        { current_limit: packet.data[41], speed_limit: packet.data[50] },
+        { current_limit: packet.data[42], speed_limit: packet.data[51] },
+        { current_limit: packet.data[43], speed_limit: packet.data[52] },
+        { current_limit: packet.data[44], speed_limit: packet.data[53] },
+        { current_limit: packet.data[45], speed_limit: packet.data[54] },
+        { current_limit: packet.data[46], speed_limit: packet.data[55] },
+        { current_limit: packet.data[47], speed_limit: packet.data[56] },
+        { current_limit: packet.data[48], speed_limit: packet.data[57] },
+    ];
+    dto.controller_displayless_mode = packet.data[58] == 1;
+    dto.controller_lamps_always_on = packet.data[59] == 1;
+}
+
 export function parseSensorPackage(
     packet: BesstReadedCanFrame,
     dto: BafangCanSensorRealtime,
@@ -712,7 +768,7 @@ export function prepareSingleMileageWritePromise(
             write_function(
                 DeviceNetworkId.DISPLAY,
                 can_command,
-                serializeMileage(value*10),
+                serializeMileage(value * 10),
                 resolve,
                 reject,
             );

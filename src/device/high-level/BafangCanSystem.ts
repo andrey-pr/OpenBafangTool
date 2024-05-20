@@ -233,14 +233,27 @@ export default class BafangCanSystem implements IConnection {
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
             ) {
-                utils.processCodeAnswerFromController(
-                    response,
-                    this._controllerCodes,
-                );
-                this.emitter.emit(
-                    'controller-codes-data',
-                    deepCopy(this._controllerCodes),
-                );
+                if (response.canCommandSubCode == 0x11) {
+                    utils.parseControllerParameter1(
+                        response,
+                        this._controllerParameters1,
+                    );
+                    this.emitter.emit(
+                        'controller-parameter1',
+                        deepCopy(this._controllerParameters1),
+                    );
+                } else if (response.canCommandSubCode == 0x12) {
+                    console.log('parameter2:', response);
+                } else {
+                    utils.processCodeAnswerFromController(
+                        response,
+                        this._controllerCodes,
+                    );
+                    this.emitter.emit(
+                        'controller-codes-data',
+                        deepCopy(this._controllerCodes),
+                    );
+                }
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.TORQUE_SENSOR
             ) {
@@ -416,6 +429,10 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._controllerSpeedParameters),
                 );
                 this.emitter.emit(
+                    'controller-parameter1',
+                    deepCopy(this._controllerParameters1),
+                );
+                this.emitter.emit(
                     'display-general-data',
                     deepCopy(this._displayData),
                 );
@@ -477,8 +494,10 @@ export default class BafangCanSystem implements IConnection {
             CanReadCommandsList.DisplayDataBlock1,
             CanReadCommandsList.DisplayDataBlock2,
             CanReadCommandsList.MotorSpeedParameters,
+            CanReadCommandsList.Parameter1,
+            CanReadCommandsList.Parameter2,
         ];
-        const summ = 4 * 3 + 2 * 2 + 5;
+        const summ = 4 * 3 + 2 * 2 + 7;
         let readedSuccessfully = 0,
             readedUnsuccessfully = 0,
             readedDisplay = 0,
