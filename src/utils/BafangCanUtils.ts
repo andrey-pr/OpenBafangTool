@@ -223,9 +223,8 @@ export function getControllerParameters1Demo(): BafangCanControllerParameters1 {
         controller_motor_type: BafangCanMotorType.MidDriveMotor,
         controller_motor_pole_pair_number: 4,
         controller_speedmeter_magnets_number: 1,
-        controller_temperature_sensor_type:
-            BafangCanTemperatureSensorType.K10,
-        controller_deceleration_ratio: 3650,
+        controller_temperature_sensor_type: BafangCanTemperatureSensorType.K10,
+        controller_deceleration_ratio: 36.5,
         controller_motor_max_rotor_rpm: 4300,
         controller_motor_d_axis_inductance: 0,
         controller_motor_q_axis_inductance: 0,
@@ -607,6 +606,8 @@ export function parseControllerParameter1(
     dto.controller_motor_pole_pair_number = packet.data[19];
     dto.controller_speedmeter_magnets_number = packet.data[20];
     dto.controller_temperature_sensor_type = packet.data[21];
+    dto.controller_deceleration_ratio =
+        (packet.data[23] << 8) + packet.data[22];
     dto.controller_motor_max_rotor_rpm =
         (packet.data[25] << 8) + packet.data[24];
     dto.controller_motor_d_axis_inductance =

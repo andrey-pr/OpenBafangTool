@@ -26,17 +26,9 @@ import {
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
 
 const { Title } = Typography;
-
-const { Column } = Table;
-
-type AssistTableRow = {
-    key: React.Key;
-    assist_level: number;
-    current: number;
-    speed: number;
-};
 
 type SettingsProps = {
     connection: BafangUartMotor;
@@ -90,7 +82,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             this.getPhysicalParameterItems.bind(this);
         this.getDriveParameterItems = this.getDriveParameterItems.bind(this);
         this.getThrottleItems = this.getThrottleItems.bind(this);
-        this.getAssistLevelTableData = this.getAssistLevelTableData.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         this.onWriteSuccess = this.onWriteSuccess.bind(this);
@@ -474,19 +465,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         ];
     }
 
-    getAssistLevelTableData(): AssistTableRow[] {
-        const { assist_profiles } = this.state;
-        let i = 0;
-        return assist_profiles.map((profile) => {
-            return {
-                key: i,
-                assist_level: i++,
-                current: profile.current_limit,
-                speed: profile.speed_limit,
-            };
-        });
-    }
-
     updateData(): void {
         const { connection } = this.props;
         this.initial_info = connection.getInfo();
@@ -565,69 +543,13 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     style={{ marginBottom: '20px' }}
                 />
                 <Title level={5}>Assist levels</Title>
-                <Table
-                    dataSource={this.getAssistLevelTableData()}
-                    pagination={{ position: ['none', 'none'] }}
-                    style={{ marginBottom: '20px' }}
-                >
-                    <Column
-                        title="Assist"
-                        dataIndex="assist_level"
-                        key="assist_level"
-                    />
-                    <Column
-                        title="Current"
-                        dataIndex="current"
-                        key="current"
-                        render={(_: any, record: AssistTableRow) => (
-                            <ParameterInputComponent
-                                value={record.current}
-                                unit="%"
-                                min={0}
-                                max={100}
-                                onNewValue={(e) => {
-                                    const { assist_profiles } = this.state;
-                                    assist_profiles[record.assist_level] = {
-                                        current_limit: e,
-                                        speed_limit:
-                                            assist_profiles[record.assist_level]
-                                                .speed_limit,
-                                    };
-                                    this.setState({
-                                        assist_profiles,
-                                    });
-                                }}
-                                disabled={record.assist_level === 0}
-                            />
-                        )}
-                    />
-                    <Column
-                        title="Speed"
-                        dataIndex="Speed"
-                        key="tags"
-                        render={(_: any, record: AssistTableRow) => (
-                            <ParameterInputComponent
-                                value={record.speed}
-                                unit="%"
-                                min={0}
-                                max={100}
-                                onNewValue={(e) => {
-                                    const { assist_profiles } = this.state;
-                                    assist_profiles[record.assist_level] = {
-                                        current_limit:
-                                            assist_profiles[record.assist_level]
-                                                .current_limit,
-                                        speed_limit: e,
-                                    };
-                                    this.setState({
-                                        assist_profiles,
-                                    });
-                                }}
-                                disabled={record.assist_level === 0}
-                            />
-                        )}
-                    />
-                </Table>
+                <AssistLevelTableComponent
+                    assist_profiles={this.state.assist_profiles}
+                    onChange={(assist_profiles) =>
+                        this.setState({ assist_profiles })
+                    }
+                    zero_level
+                />
                 <Descriptions
                     bordered
                     title="Drive parameters"

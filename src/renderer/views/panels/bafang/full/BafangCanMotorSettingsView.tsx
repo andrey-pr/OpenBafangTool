@@ -7,6 +7,7 @@ import {
     Popconfirm,
     Button,
     Modal,
+    Table,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import {
@@ -17,18 +18,26 @@ import {
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
+    BafangCanControllerParameters1,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
+    BafangCanPedalSensorType,
     BafangCanWheelDiameterTable,
+    TriggerTypeOptions,
 } from '../../../../../types/BafangCanSystemTypes';
 import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
 import {
+    generateEditableNumberListItem,
+    generateEditableSelectListItem,
     generateEditableStringListItem,
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import Column from 'antd/es/table/Column';
+import Title from 'antd/es/typography/Title';
+import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
 
 const { Text } = Typography;
 
@@ -38,6 +47,7 @@ type SettingsProps = {
 
 type SettingsState = BafangCanControllerRealtime &
     BafangCanControllerSpeedParameters &
+    BafangCanControllerParameters1 &
     BafangCanControllerCodes & { position_sensor_calibration_dialog: boolean };
 
 // TODO add redux
@@ -56,8 +66,10 @@ class BafangCanMotorSettingsView extends React.Component<
             ...connection.controllerSpeedParameters,
             ...connection.controllerCodes,
             ...connection.controllerRealtimeData,
+            ...connection.controllerParameters1,
             position_sensor_calibration_dialog: false,
         };
+        this.getUnsortedItems = this.getUnsortedItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
@@ -241,6 +253,166 @@ class BafangCanMotorSettingsView extends React.Component<
         ];
     }
 
+    getUnsortedItems(): DescriptionsProps['items'] {
+        const MotorType: { [key: number]: string } = {
+            0: 'Hub motor with reducer',
+            1: 'Central motor',
+            2: 'Direct-drive motor (hud motor without reducer)',
+        };
+        const TemperatureSensorType: { [key: number]: string } = {
+            0: 'No sensor',
+            1: '10K',
+            2: 'PT1000',
+        };
+        return [
+            generateSimpleNumberListItem(
+                'System voltage',
+                this.state.controller_system_voltage,
+                'V',
+            ),
+            generateSimpleNumberListItem(
+                'Current limit',
+                this.state.controller_current_limit, //TODO make editable???
+                'A',
+            ),
+            generateSimpleNumberListItem(
+                'Max motor rotation speed',
+                this.state.controller_motor_max_rotor_rpm, //TODO make editable???
+                'RPM',
+            ),
+            generateSimpleNumberListItem(
+                'Gear ration',
+                this.state.controller_deceleration_ratio,
+            ),
+            generateEditableNumberListItem(
+                'Programmed battery capacity',
+                this.state.controller_battery_capacity,
+                (controller_battery_capacity: number) =>
+                    this.setState({ controller_battery_capacity }),
+                'mAh',
+                1,
+                65000,
+            ),
+            generateSimpleStringListItem(
+                'Coaster brake supported',
+                this.state.controller_coaster_brake ? 'Yes' : 'No',
+            ),
+            generateSimpleStringListItem(
+                'Displayless mode',
+                this.state.controller_displayless_mode ? 'Yes' : 'No', //TODO make editable
+            ),
+            generateSimpleStringListItem(
+                'Lamps always on',
+                this.state.controller_lamps_always_on ? 'Yes' : 'No', //TODO make editable
+            ),
+            generateSimpleNumberListItem(
+                'Signals per rotation from cadence sensor',
+                this.state.controller_pedal_sensor_signals_per_rotation,
+            ),
+            generateEditableNumberListItem(
+                'Current loading time',
+                this.state.controller_current_loading_time,
+                (controller_current_loading_time: number) =>
+                    this.setState({ controller_current_loading_time }),
+                'S',
+                0.1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItem(
+                'Current shedding time',
+                this.state.controller_current_shedding_time,
+                (controller_current_shedding_time: number) =>
+                    this.setState({ controller_current_shedding_time }),
+                'S',
+                0.1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItem(
+                'Start current',
+                this.state.controller_overvoltage,
+                (controller_overvoltage: number) =>
+                    this.setState({ controller_overvoltage }),
+                '%',
+                1,
+                100,
+            ),
+            generateEditableNumberListItem(
+                'High voltage limit',
+                this.state.controller_overvoltage,
+                (controller_overvoltage: number) =>
+                    this.setState({ controller_overvoltage }),
+                'V',
+                0,
+                100,
+            ),
+            generateEditableNumberListItem(
+                'Low voltage limit under load',
+                this.state.controller_undervoltage_under_load,
+                (controller_undervoltage_under_load: number) =>
+                    this.setState({ controller_undervoltage_under_load }),
+                'V',
+                0,
+                100,
+            ),
+            generateEditableNumberListItem(
+                'Throttle lever start voltage',
+                this.state.controller_throttle_start_voltage,
+                (controller_throttle_start_voltage: number) =>
+                    this.setState({ controller_throttle_start_voltage }),
+                'V',
+                1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItem(
+                'Throttle lever max voltage',
+                this.state.controller_throttle_max_voltage,
+                (controller_throttle_max_voltage: number) =>
+                    this.setState({ controller_throttle_max_voltage }),
+                'V',
+                1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItem(
+                'Number of magnets on speedmeter',
+                this.state.controller_speedmeter_magnets_number,
+                (controller_speedmeter_magnets_number: number) =>
+                    this.setState({ controller_speedmeter_magnets_number }),
+                '',
+                1,
+                10,
+            ),
+            generateEditableNumberListItem(
+                'Expected range on full charge',
+                this.state.controller_full_capacity_range,
+                (controller_full_capacity_range: number) =>
+                    this.setState({ controller_full_capacity_range }),
+                'Km',
+                1,
+                255,
+            ),
+            generateEditableSelectListItem(
+                'Motor trigger',
+                TriggerTypeOptions,
+                this.state.controller_pedal_sensor_type,
+                (e) => this.setState({ controller_pedal_sensor_type: e as BafangCanPedalSensorType }),
+            ),
+            generateSimpleStringListItem(
+                'Motor type',
+                MotorType[this.state.controller_motor_type],
+            ),
+            generateSimpleStringListItem(
+                'Temperature sensor',
+                TemperatureSensorType[
+                    this.state.controller_temperature_sensor_type
+                ],
+            ),
+        ];
+    }
+
     getOtherItems(): DescriptionsProps['items'] {
         const { controller_serial_number, controller_manufacturer } =
             this.state;
@@ -366,6 +538,22 @@ class BafangCanMotorSettingsView extends React.Component<
                     bordered
                     title="Calibration"
                     items={this.getCalibrationItems()}
+                    column={1}
+                />
+                <br />
+                <Title level={5}>Assist levels (Cadence mode)</Title>
+                <br />
+                <AssistLevelTableComponent
+                    assist_profiles={this.state.controller_assist_levels}
+                    onChange={(controller_assist_levels) =>
+                        this.setState({ controller_assist_levels })
+                    }
+                />
+                <br />
+                <Descriptions
+                    bordered
+                    title="Temporary unsorted parameter list"
+                    items={this.getUnsortedItems()}
                     column={1}
                 />
                 <br />

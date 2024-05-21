@@ -2,7 +2,6 @@ import React from 'react';
 import {
     Typography,
     Descriptions,
-    Table,
     Select,
     FloatButton,
     message,
@@ -14,33 +13,31 @@ import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import {
     AssistLevel,
+    AssistLevelOptions,
     BafangUartMotorBasicParameters,
     BafangUartMotorInfo,
     BafangUartMotorPedalParameters,
     BafangUartMotorThrottleParameters,
     ParameterNames,
     PedalType,
+    PedalTypeOptions,
     SpeedLimitByDisplay,
     SpeedmeterType,
+    SpeedmeterTypeOptions,
     ThrottleMode,
+    ThrottleModeOptions,
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
-import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import {
+    generateEditableNumberListItem,
+    generateEditableNumberListItemWithWarning,
+    generateEditableSelectListItem,
+    generateSimpleStringListItem,
+} from '../../../../utils/UIUtils';
+import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
 
 const { Title } = Typography;
-
-const { Column } = Table;
-
-type AssistTableRow = {
-    key: React.Key;
-    assist_level: number;
-    current: number;
-    speed: number;
-    tip: string;
-    recommended_min: number;
-    recommended_max: number;
-};
 
 type SettingsProps = {
     connection: BafangUartMotor;
@@ -103,7 +100,6 @@ class BafangUartMotorSettingsView extends React.Component<
             this.getPhysicalParameterItems.bind(this);
         this.getDriveParameterItems = this.getDriveParameterItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
-        this.getAssistLevelTableData = this.getAssistLevelTableData.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         this.onWriteSuccess = this.onWriteSuccess.bind(this);
@@ -126,403 +122,140 @@ class BafangUartMotorSettingsView extends React.Component<
     }
 
     getElectricalParameterItems(): DescriptionsProps['items'] {
-        const {
-            voltage,
-            low_battery_protection,
-            max_current,
-            current_limit,
-            pedal_start_current,
-            throttle_start_voltage,
-            throttle_end_voltage,
-            throttle_start_current,
-        } = this.state;
         return [
-            {
-                key: 'low_voltage_protection',
-                label: 'Low voltage battery protection',
-                children: (
-                    <ParameterInputComponent
-                        value={low_battery_protection}
-                        unit="V"
-                        min={0}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                low_battery_protection: e,
-                            });
-                        }}
-                        warningText={`Its not recommended to set low voltage battery protection lower than ${lowVoltageLimits[voltage].min}V and higher that ${lowVoltageLimits[voltage].max}V on your system`}
-                        warningBelow={lowVoltageLimits[voltage].min}
-                        warningAbove={lowVoltageLimits[voltage].max}
-                    />
-                ),
-            },
-            {
-                key: 'current_limit',
-                label: 'Current limit',
-                children: (
-                    <ParameterInputComponent
-                        value={current_limit}
-                        unit="A"
-                        min={1}
-                        max={max_current}
-                        onNewValue={(e) => {
-                            this.setState({
-                                current_limit: e,
-                            });
-                        }}
-                        warningText={`Its not recommended to set current limit lower than 1A and higher that ${max_current}A on your system`}
-                        warningBelow={1}
-                        warningAbove={max_current}
-                    />
-                ),
-            },
-            {
-                key: 'pedal_start_current',
-                label: 'Pedal start current',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_start_current}
-                        unit="%"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_start_current: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set high pedal start current"
-                        warningBelow={1}
-                        warningAbove={30}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_start_voltage',
-                label: 'Throttle start voltage',
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_start_voltage}
-                        unit="V"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_start_voltage: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set lower start voltage than 1.1V"
-                        warningBelow={1.1}
-                        decimalPlaces={1}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_end_voltage',
-                label: 'Throttle end voltage',
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_end_voltage}
-                        unit="V"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_end_voltage: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set lower end voltage than 1.1V"
-                        warningBelow={1.1}
-                        decimalPlaces={1}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_start_current',
-                label: 'Throttle start current',
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_start_current}
-                        unit="%"
-                        min={0}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_start_current: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set lower start current than 10% and higher than 20%"
-                        warningBelow={10}
-                        warningAbove={20}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Low voltage battery protection',
+                this.state.low_battery_protection,
+                `Its not recommended to set low voltage battery protection lower than ${
+                    lowVoltageLimits[this.state.voltage].min
+                }V and higher that ${
+                    lowVoltageLimits[this.state.voltage].max
+                }V on your system`,
+                lowVoltageLimits[this.state.voltage].min,
+                lowVoltageLimits[this.state.voltage].max,
+                (low_battery_protection) =>
+                    this.setState({ low_battery_protection }),
+                'V',
+                0,
+                100,
+            ),
+            generateEditableNumberListItem(
+                'Current limit',
+                this.state.current_limit,
+                (current_limit) => this.setState({ current_limit }),
+                'A',
+                1,
+                this.state.max_current,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Pedal start current',
+                this.state.pedal_start_current,
+                'Its not recommended to set high pedal start current',
+                1,
+                30,
+                (pedal_start_current) => this.setState({ pedal_start_current }),
+                '%',
+                1,
+                100,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Throttle start voltage',
+                this.state.throttle_start_voltage,
+                'Its not recommended to set lower start voltage than 1.1V',
+                1.1,
+                20,
+                (throttle_start_voltage) =>
+                    this.setState({ throttle_start_voltage }),
+                'V',
+                1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Throttle end voltage',
+                this.state.throttle_end_voltage,
+                'Its not recommended to set lower end voltage than 1.1V',
+                1.1,
+                20,
+                (throttle_end_voltage) =>
+                    this.setState({ throttle_end_voltage }),
+                'V',
+                1,
+                20,
+                1,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Throttle start current',
+                this.state.throttle_start_current,
+                'Its not recommended to set lower start current than 10% and higher than 20%',
+                10,
+                20,
+                (throttle_start_current) =>
+                    this.setState({ throttle_start_current }),
+                '%',
+                1,
+                100,
+            ),
         ];
     }
 
     getPhysicalParameterItems(): DescriptionsProps['items'] {
-        const { wheel_diameter, speedmeter_type, pedal_type } = this.state;
         return [
-            {
-                key: 'wheel_diameter',
-                label: 'Wheel diameter',
-                children: (
-                    <ParameterInputComponent
-                        value={wheel_diameter}
-                        unit="″"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                wheel_diameter: e,
-                            });
-                        }}
-                        warningText="Usually bike wheels has size in range from 12 to 29 inches"
-                        warningBelow={12}
-                        warningAbove={29}
-                    />
-                ),
-            },
-            {
-                key: 'speedmeter_type',
-                label: 'Speedmeter type',
-                children: (
-                    // <Tooltip
-                    //     title="Are you sure that you installed different type of speed sensor?"
-                    //     trigger="click"
-                    //     defaultOpen
-                    // >
-                    <Select
-                        value={speedmeter_type}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: SpeedmeterType.External,
-                                label: 'External',
-                            },
-                            {
-                                value: SpeedmeterType.Internal,
-                                label: 'Internal',
-                            },
-                            {
-                                value: SpeedmeterType.Motorphase,
-                                label: 'Motorphase',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ speedmeter_type: e });
-                            }
-                        }}
-                        // status="warning"
-                    />
-                    // </Tooltip>
-                ),
-            },
-            {
-                key: 'pedal_sensor_type',
-                label: 'Pedal sensor type',
-                children: (
-                    // <Tooltip
-                    //     title="Are you sure that you installed different type of pedal sensor?"
-                    //     trigger="click"
-                    //     defaultOpen
-                    // >
-                    <Select
-                        value={pedal_type}
-                        style={{ width: '150px' }}
-                        options={[
-                            { value: PedalType.None, label: 'None' },
-                            {
-                                value: PedalType.DHSensor12,
-                                label: 'DH-Sensor-12',
-                            },
-                            {
-                                value: PedalType.BBSensor32,
-                                label: 'BB-Sensor-32',
-                            },
-                            {
-                                value: PedalType.DoubleSignal24,
-                                label: 'DoubleSignal-24',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ pedal_type: e });
-                            }
-                        }}
-                        // status="warning"
-                    />
-                    // </Tooltip>
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Wheel diameter',
+                this.state.wheel_diameter,
+                'Usually bike wheels has size in range from 12 to 29 inches',
+                12,
+                29,
+                (wheel_diameter) => this.setState({ wheel_diameter }),
+                '″',
+                1,
+                100,
+            ),
+            generateEditableSelectListItem(
+                'Speedmeter type',
+                SpeedmeterTypeOptions,
+                this.state.speedmeter_type,
+                (e) => this.setState({ speedmeter_type: e as SpeedmeterType }),
+            ),
+            generateEditableSelectListItem(
+                'Pedal sensor type',
+                PedalTypeOptions,
+                this.state.pedal_type,
+                (e) => this.setState({ pedal_type: e as PedalType }),
+            ),
         ];
     }
 
     getDriveParameterItems(): DescriptionsProps['items'] {
         const {
-            pedal_assist_level,
             pedal_speed_limit,
-            pedal_slow_start_mode,
-            pedal_signals_before_start,
             pedal_time_to_stop,
-            pedal_current_decay,
             pedal_stop_decay,
-            pedal_keep_current,
             pedal_speed_limit_unit,
-            throttle_mode,
-            throttle_assist_level,
             throttle_speed_limit,
             throttle_speed_limit_unit,
         } = this.state;
         return [
-            {
-                key: 'throttle_mode',
-                label: 'Throttle mode',
-                children: (
-                    <Select
-                        value={throttle_mode}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: ThrottleMode.Speed,
-                                label: 'Speed',
-                            },
-                            {
-                                value: ThrottleMode.Current,
-                                label: 'Current',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ throttle_mode: e });
-                            }
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'pedal_assist_level',
-                label: 'Pedal assist level (Designated Assist)',
-                children: (
-                    <Select
-                        value={pedal_assist_level}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: AssistLevel.ByDisplay,
-                                label: 'By display',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel0,
-                                label: 'Level 0',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel1,
-                                label: 'Level 1',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel2,
-                                label: 'Level 2',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel3,
-                                label: 'Level 3',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel4,
-                                label: 'Level 4',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel5,
-                                label: 'Level 5',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel6,
-                                label: 'Level 6',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel7,
-                                label: 'Level 7',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel8,
-                                label: 'Level 8',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel9,
-                                label: 'Level 9',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ pedal_assist_level: e });
-                            }
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_assist_level',
-                label: 'Throttle assist level (Designated Assist)',
-                children: (
-                    <Select
-                        value={throttle_assist_level}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: AssistLevel.ByDisplay,
-                                label: 'By display',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel0,
-                                label: 'Level 0',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel1,
-                                label: 'Level 1',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel2,
-                                label: 'Level 2',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel3,
-                                label: 'Level 3',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel4,
-                                label: 'Level 4',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel5,
-                                label: 'Level 5',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel6,
-                                label: 'Level 6',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel7,
-                                label: 'Level 7',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel8,
-                                label: 'Level 8',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel9,
-                                label: 'Level 9',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ throttle_assist_level: e });
-                            }
-                        }}
-                    />
-                ),
-            },
+            generateEditableSelectListItem(
+                'Throttle mode',
+                ThrottleModeOptions,
+                this.state.throttle_mode,
+                (e) => this.setState({ throttle_mode: e as ThrottleMode }),
+            ),
+            generateEditableSelectListItem(
+                'Pedal assist level (Designated Assist)',
+                AssistLevelOptions,
+                this.state.pedal_assist_level,
+                (e) => this.setState({ pedal_assist_level: e as AssistLevel }),
+            ),
+            generateEditableSelectListItem(
+                'Throttle assist level (Designated Assist)',
+                AssistLevelOptions,
+                this.state.throttle_assist_level,
+                (e) =>
+                    this.setState({ throttle_assist_level: e as AssistLevel }),
+            ),
             {
                 key: 'pedal_speed_limit',
                 label: 'Pedal speed limit',
@@ -626,44 +359,30 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'slow_start_mode',
-                label: 'Slow start mode',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_slow_start_mode}
-                        min={1}
-                        max={8}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_slow_start_mode: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set slow start mode less than 3 (it can damage controller) and bigger than 5 (start will to slow)"
-                        warningBelow={3}
-                        warningAbove={5}
-                    />
-                ),
-            },
-            {
-                key: 'signals_before_assist',
-                label: 'Signals before assist (Start Degree, Signal No.)',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_signals_before_start}
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_signals_before_start: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set this parameter lower than 2 and bigger than number of signals per one rotation for your pedal sensor"
-                        warningBelow={2}
-                        warningAbove={32}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Slow start mode',
+                this.state.pedal_slow_start_mode,
+                'Its not recommended to set slow start mode less than 3 (it can damage controller) and bigger than 5 (start will to slow)',
+                3,
+                5,
+                (pedal_slow_start_mode) =>
+                    this.setState({ pedal_slow_start_mode }),
+                '',
+                1,
+                8,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Signals before assist (Start Degree, Signal No.)',
+                this.state.pedal_signals_before_start,
+                'Its not recommended to set this parameter lower than 2 and bigger than number of signals per one rotation for your pedal sensor',
+                2,
+                32,
+                (pedal_signals_before_start) =>
+                    this.setState({ pedal_signals_before_start }),
+                '',
+                1,
+                100,
+            ),
             {
                 key: 'time_before_end_of_assist',
                 label: 'Time before end of assist (Time Of Stop, Stop Delay)',
@@ -684,25 +403,17 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'current_decay',
-                label: 'Current decay',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_current_decay}
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_current_decay: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set this parameter lower than 4 and bigger than 8"
-                        warningBelow={4}
-                        warningAbove={8}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Current decay',
+                this.state.pedal_current_decay,
+                'Its not recommended to set this parameter lower than 4 and bigger than 8',
+                4,
+                8,
+                (pedal_current_decay) => this.setState({ pedal_current_decay }),
+                '',
+                1,
+                100,
+            ),
             {
                 key: 'stop_decay',
                 label: 'Stop decay',
@@ -723,35 +434,25 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'keep_current',
-                label: 'Keep current',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_keep_current}
-                        unit="%"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_keep_current: e,
-                            });
-                        }}
-                        warningText="Its recommended to keep this parameter in range 30-80"
-                        warningBelow={30}
-                        warningAbove={80}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Keep current',
+                this.state.pedal_keep_current,
+                'Its recommended to keep this parameter in range 30-80',
+                30,
+                80,
+                (pedal_keep_current) => this.setState({ pedal_keep_current }),
+                '%',
+                1,
+                100,
+            ),
         ];
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const { serial_number } = this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                serial_number,
+                this.state.serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
         ];
@@ -777,213 +478,71 @@ class BafangUartMotorSettingsView extends React.Component<
     }
 
     getBasicParameterItems(): DescriptionsProps['items'] {
-        const {
-            voltage,
-            low_battery_protection,
-            max_current,
-            current_limit,
-            wheel_diameter,
-            speedmeter_type,
-        } = this.state;
         return [
-            {
-                key: 'low_voltage_protection',
-                label: 'Low battery protection',
-                children: (
-                    <ParameterInputComponent
-                        value={low_battery_protection}
-                        unit="V"
-                        min={0}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                low_battery_protection: e,
-                            });
-                        }}
-                        warningText={`Its not recommended to set low voltage battery protection lower than ${lowVoltageLimits[voltage].min}V and higher that ${lowVoltageLimits[voltage].max}V on your system`}
-                        warningBelow={lowVoltageLimits[voltage].min}
-                        warningAbove={lowVoltageLimits[voltage].max}
-                    />
-                ),
-            },
-            {
-                key: 'current_limit',
-                label: 'Current limit',
-                children: (
-                    <ParameterInputComponent
-                        value={current_limit}
-                        unit="A"
-                        min={1}
-                        max={max_current}
-                        onNewValue={(e) => {
-                            this.setState({
-                                current_limit: e,
-                            });
-                        }}
-                        warningText={`Its not recommended to set current limit lower than 1A and higher that ${max_current}A on your system`}
-                        warningBelow={1}
-                        warningAbove={max_current}
-                    />
-                ),
-            },
-            {
-                key: 'wheel_diameter',
-                label: 'Wheel diameter',
-                children: (
-                    <ParameterInputComponent
-                        value={wheel_diameter}
-                        unit="″"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                wheel_diameter: e,
-                            });
-                        }}
-                        warningText="Usually bike wheels has size in range from 12 to 29 inches"
-                        warningBelow={12}
-                        warningAbove={29}
-                    />
-                ),
-            },
-            {
-                key: 'speedmeter_type',
-                label: 'Speedmeter type',
-                children: (
-                    <Select
-                        value={speedmeter_type}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: SpeedmeterType.External,
-                                label: 'External',
-                            },
-                            {
-                                value: SpeedmeterType.Internal,
-                                label: 'Internal',
-                            },
-                            {
-                                value: SpeedmeterType.Motorphase,
-                                label: 'Motorphase',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ speedmeter_type: e });
-                            }
-                        }}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Low battery protection',
+                this.state.low_battery_protection,
+                `Its not recommended to set low voltage battery protection lower than ${
+                    lowVoltageLimits[this.state.voltage].min
+                }V and higher that ${
+                    lowVoltageLimits[this.state.voltage].max
+                }V on your system`,
+                lowVoltageLimits[this.state.voltage].min,
+                lowVoltageLimits[this.state.voltage].max,
+                (low_battery_protection) =>
+                    this.setState({ low_battery_protection }),
+                'V',
+                0,
+                100,
+            ),
+            generateEditableNumberListItem(
+                'Current limit',
+                this.state.current_limit,
+                (current_limit) => this.setState({ current_limit }),
+                'A',
+                1,
+                this.state.max_current,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Wheel diameter',
+                this.state.wheel_diameter,
+                'Usually bike wheels has size in range from 12 to 29 inches',
+                12,
+                29,
+                (wheel_diameter) => this.setState({ wheel_diameter }),
+                '″',
+                1,
+                100,
+            ),
+            generateEditableSelectListItem(
+                'Speedmeter type',
+                SpeedmeterTypeOptions,
+                this.state.speedmeter_type,
+                (e) => this.setState({ speedmeter_type: e as SpeedmeterType }),
+            ),
         ];
     }
 
     getPedalParametersItems(): DescriptionsProps['items'] {
         const {
-            pedal_type,
-            pedal_assist_level,
             pedal_speed_limit,
             pedal_speed_limit_unit,
-            pedal_start_current,
-            pedal_slow_start_mode,
-            pedal_signals_before_start,
             pedal_time_to_stop,
-            pedal_current_decay,
             pedal_stop_decay,
-            pedal_keep_current,
         } = this.state;
         return [
-            {
-                key: 'pedal_sensor_type',
-                label: 'Pedal sensor type',
-                children: (
-                    <Select
-                        value={pedal_type}
-                        style={{ width: '150px' }}
-                        options={[
-                            { value: PedalType.None, label: 'None' },
-                            {
-                                value: PedalType.DHSensor12,
-                                label: 'DH-Sensor-12',
-                            },
-                            {
-                                value: PedalType.BBSensor32,
-                                label: 'BB-Sensor-32',
-                            },
-                            {
-                                value: PedalType.DoubleSignal24,
-                                label: 'DoubleSignal-24',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ pedal_type: e });
-                            }
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'pedal_assist_level',
-                label: 'Designated assist level',
-                children: (
-                    <Select
-                        value={pedal_assist_level}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: AssistLevel.ByDisplay,
-                                label: 'By display',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel0,
-                                label: 'Level 0',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel1,
-                                label: 'Level 1',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel2,
-                                label: 'Level 2',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel3,
-                                label: 'Level 3',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel4,
-                                label: 'Level 4',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel5,
-                                label: 'Level 5',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel6,
-                                label: 'Level 6',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel7,
-                                label: 'Level 7',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel8,
-                                label: 'Level 8',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel9,
-                                label: 'Level 9',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ pedal_assist_level: e });
-                            }
-                        }}
-                    />
-                ),
-            },
+            generateEditableSelectListItem(
+                'Pedal sensor type',
+                PedalTypeOptions,
+                this.state.pedal_type,
+                (e) => this.setState({ pedal_type: e as PedalType }),
+            ),
+            generateEditableSelectListItem(
+                'Designated assist level',
+                AssistLevelOptions,
+                this.state.pedal_assist_level,
+                (e) => this.setState({ pedal_assist_level: e as AssistLevel }),
+            ),
             {
                 key: 'pedal_speed_limit',
                 label: 'Speed limit',
@@ -1035,64 +594,41 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'pedal_start_current',
-                label: 'Start current',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_start_current}
-                        unit="%"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_start_current: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set high pedal start current"
-                        warningBelow={1}
-                        warningAbove={30}
-                    />
-                ),
-            },
-            {
-                key: 'slow_start_mode',
-                label: 'Slow start mode',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_slow_start_mode}
-                        min={1}
-                        max={8}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_slow_start_mode: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set slow start mode less than 3 (it can damage controller) and bigger than 5 (start will to slow)"
-                        warningBelow={3}
-                        warningAbove={5}
-                    />
-                ),
-            },
-            {
-                key: 'signals_before_assist',
-                label: 'Start degree (Signal No.)',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_signals_before_start}
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_signals_before_start: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set this parameter lower than 2 and bigger than number of signals per one rotation for your pedal sensor"
-                        warningBelow={2}
-                        warningAbove={32}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Start current',
+                this.state.pedal_start_current,
+                'Its not recommended to set high pedal start current',
+                1,
+                30,
+                (pedal_start_current) => this.setState({ pedal_start_current }),
+                '%',
+                1,
+                100,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Slow start mode',
+                this.state.pedal_slow_start_mode,
+                'Its not recommended to set slow start mode less than 3 (it can damage controller) and bigger than 5 (start will to slow)',
+                3,
+                5,
+                (pedal_slow_start_mode) =>
+                    this.setState({ pedal_slow_start_mode }),
+                '',
+                1,
+                8,
+            ),
+            generateEditableNumberListItemWithWarning(
+                'Start degree (Signal No.)',
+                this.state.pedal_signals_before_start,
+                'Its not recommended to set this parameter lower than 2 and bigger than number of signals per one rotation for your pedal sensor',
+                2,
+                32,
+                (pedal_signals_before_start) =>
+                    this.setState({ pedal_signals_before_start }),
+                '',
+                1,
+                100,
+            ),
             {
                 key: 'time_before_end_of_assist',
                 label: 'Stop Delay',
@@ -1113,25 +649,17 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'current_decay',
-                label: 'Current decay',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_current_decay}
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_current_decay: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set this parameter lower than 4 and bigger than 8"
-                        warningBelow={4}
-                        warningAbove={8}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Current decay',
+                this.state.pedal_current_decay,
+                'Its not recommended to set this parameter lower than 4 and bigger than 8',
+                4,
+                8,
+                (pedal_current_decay) => this.setState({ pedal_current_decay }),
+                '',
+                1,
+                100,
+            ),
             {
                 key: 'stop_decay',
                 label: 'Stop decay',
@@ -1152,26 +680,17 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'keep_current',
-                label: 'Keep current',
-                children: (
-                    <ParameterInputComponent
-                        value={pedal_keep_current}
-                        unit="%"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                pedal_keep_current: e,
-                            });
-                        }}
-                        warningText="Its recommended to keep this parameter in range 30-80"
-                        warningBelow={30}
-                        warningAbove={80}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Keep current',
+                this.state.pedal_keep_current,
+                'Its recommended to keep this parameter in range 30-80',
+                30,
+                80,
+                (pedal_keep_current) => this.setState({ pedal_keep_current }),
+                '%',
+                1,
+                100,
+            ),
         ];
     }
 
@@ -1179,8 +698,6 @@ class BafangUartMotorSettingsView extends React.Component<
         const {
             throttle_start_voltage,
             throttle_end_voltage,
-            throttle_mode,
-            throttle_assist_level,
             throttle_speed_limit,
             throttle_speed_limit_unit,
             throttle_start_current,
@@ -1224,92 +741,19 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'throttle_mode',
-                label: 'Mode',
-                children: (
-                    <Select
-                        value={throttle_mode}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: ThrottleMode.Speed,
-                                label: 'Speed',
-                            },
-                            {
-                                value: ThrottleMode.Current,
-                                label: 'Current',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ throttle_mode: e });
-                            }
-                        }}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_assist_level',
-                label: 'Designated assist level',
-                children: (
-                    <Select
-                        value={throttle_assist_level}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: AssistLevel.ByDisplay,
-                                label: 'By display',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel0,
-                                label: 'Level 0',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel1,
-                                label: 'Level 1',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel2,
-                                label: 'Level 2',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel3,
-                                label: 'Level 3',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel4,
-                                label: 'Level 4',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel5,
-                                label: 'Level 5',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel6,
-                                label: 'Level 6',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel7,
-                                label: 'Level 7',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel8,
-                                label: 'Level 8',
-                            },
-                            {
-                                value: AssistLevel.AssistLevel9,
-                                label: 'Level 9',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ throttle_assist_level: e });
-                            }
-                        }}
-                    />
-                ),
-            },
+            generateEditableSelectListItem(
+                'Mode',
+                ThrottleModeOptions,
+                this.state.throttle_mode,
+                (e) => this.setState({ throttle_mode: e as ThrottleMode }),
+            ),
+            generateEditableSelectListItem(
+                'Designated assist level',
+                AssistLevelOptions,
+                this.state.throttle_assist_level,
+                (e) =>
+                    this.setState({ throttle_assist_level: e as AssistLevel }),
+            ),
             {
                 key: 'throttle_speed_limit',
                 label: 'Speed limit',
@@ -1362,46 +806,19 @@ class BafangUartMotorSettingsView extends React.Component<
                     />
                 ),
             },
-            {
-                key: 'throttle_start_current',
-                label: 'Start current',
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_start_current}
-                        unit="%"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_start_current: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set lower start current than 10% and higher than 20%"
-                        warningBelow={10}
-                        warningAbove={20}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Start current',
+                this.state.throttle_start_current,
+                'Its not recommended to set lower start current than 10% and higher than 20%',
+                10,
+                20,
+                (throttle_start_current) =>
+                    this.setState({ throttle_start_current }),
+                '%',
+                1,
+                100,
+            ),
         ];
-    }
-
-    getAssistLevelTableData(): AssistTableRow[] {
-        const { assist_profiles } = this.state;
-        let i = 0;
-        return assist_profiles.map((profile) => {
-            return {
-                tip:
-                    i === 0
-                        ? 'Its strongly recommended to set current limit on zero level of assist to 0'
-                        : '',
-                recommended_min: 0,
-                recommended_max: i === 0 ? 0 : 100,
-                key: i,
-                assist_level: i++,
-                current: profile.current_limit,
-                speed: profile.speed_limit,
-            };
-        });
     }
 
     updateData(): void {
@@ -1477,78 +894,13 @@ class BafangUartMotorSettingsView extends React.Component<
                             style={{ marginBottom: '20px' }}
                         />
                         <Title level={5}>Assist levels</Title>
-                        <Table
-                            dataSource={this.getAssistLevelTableData()}
-                            pagination={{ position: ['none', 'none'] }}
-                            style={{ marginBottom: '20px' }}
-                        >
-                            <Column
-                                title="Assist"
-                                dataIndex="assist_level"
-                                key="assist_level"
-                            />
-                            <Column
-                                title="Current"
-                                dataIndex="current"
-                                key="current"
-                                render={(_: any, record: AssistTableRow) => (
-                                    <ParameterInputComponent
-                                        value={record.current}
-                                        unit="%"
-                                        min={0}
-                                        max={100}
-                                        onNewValue={(e) => {
-                                            const { assist_profiles } =
-                                                this.state;
-                                            assist_profiles[
-                                                record.assist_level
-                                            ] = {
-                                                current_limit: e,
-                                                speed_limit:
-                                                    assist_profiles[
-                                                        record.assist_level
-                                                    ].speed_limit,
-                                            };
-                                            this.setState({
-                                                assist_profiles,
-                                            });
-                                        }}
-                                        warningText={record.tip}
-                                        warningBelow={record.recommended_min}
-                                        warningAbove={record.recommended_max}
-                                    />
-                                )}
-                            />
-                            <Column
-                                title="Speed"
-                                dataIndex="Speed"
-                                key="tags"
-                                render={(_: any, record: AssistTableRow) => (
-                                    <ParameterInputComponent
-                                        value={record.speed}
-                                        unit="%"
-                                        min={0}
-                                        max={100}
-                                        onNewValue={(e) => {
-                                            const { assist_profiles } =
-                                                this.state;
-                                            assist_profiles[
-                                                record.assist_level
-                                            ] = {
-                                                current_limit:
-                                                    assist_profiles[
-                                                        record.assist_level
-                                                    ].current_limit,
-                                                speed_limit: e,
-                                            };
-                                            this.setState({
-                                                assist_profiles,
-                                            });
-                                        }}
-                                    />
-                                )}
-                            />
-                        </Table>
+                        <AssistLevelTableComponent
+                            assist_profiles={this.state.assist_profiles}
+                            onChange={(assist_profiles) =>
+                                this.setState({ assist_profiles })
+                            }
+                            zero_level
+                        />
                         <Descriptions
                             bordered
                             title="Drive parameters"
@@ -1580,78 +932,13 @@ class BafangUartMotorSettingsView extends React.Component<
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
-                        <Table
-                            dataSource={this.getAssistLevelTableData()}
-                            pagination={{ position: ['none', 'none'] }}
-                            style={{ marginBottom: '20px' }}
-                        >
-                            <Column
-                                title="Assist levels"
-                                dataIndex="assist_level"
-                                key="assist_level"
-                            />
-                            <Column
-                                title="Current limit"
-                                dataIndex="current"
-                                key="current"
-                                render={(_: any, record: AssistTableRow) => (
-                                    <ParameterInputComponent
-                                        value={record.current}
-                                        unit="%"
-                                        min={0}
-                                        max={100}
-                                        onNewValue={(e) => {
-                                            const { assist_profiles } =
-                                                this.state;
-                                            assist_profiles[
-                                                record.assist_level
-                                            ] = {
-                                                current_limit: e,
-                                                speed_limit:
-                                                    assist_profiles[
-                                                        record.assist_level
-                                                    ].speed_limit,
-                                            };
-                                            this.setState({
-                                                assist_profiles,
-                                            });
-                                        }}
-                                        warningText={record.tip}
-                                        warningBelow={record.recommended_min}
-                                        warningAbove={record.recommended_max}
-                                    />
-                                )}
-                            />
-                            <Column
-                                title="Speed limit"
-                                dataIndex="Speed"
-                                key="tags"
-                                render={(_: any, record: AssistTableRow) => (
-                                    <ParameterInputComponent
-                                        value={record.speed}
-                                        unit="%"
-                                        min={0}
-                                        max={100}
-                                        onNewValue={(e) => {
-                                            const { assist_profiles } =
-                                                this.state;
-                                            assist_profiles[
-                                                record.assist_level
-                                            ] = {
-                                                current_limit:
-                                                    assist_profiles[
-                                                        record.assist_level
-                                                    ].current_limit,
-                                                speed_limit: e,
-                                            };
-                                            this.setState({
-                                                assist_profiles,
-                                            });
-                                        }}
-                                    />
-                                )}
-                            />
-                        </Table>
+                        <AssistLevelTableComponent
+                            assist_profiles={this.state.assist_profiles}
+                            onChange={(assist_profiles) =>
+                                this.setState({ assist_profiles })
+                            }
+                            zero_level
+                        />
                         <Descriptions
                             bordered
                             title="Pedal parameters"

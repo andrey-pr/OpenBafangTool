@@ -1,3 +1,4 @@
+import { BafangAssistProfile } from './common';
 import { NoData } from './no_data';
 
 export type BafangCanControllerRealtime = {
@@ -15,11 +16,6 @@ export type BafangCanControllerRealtime = {
     controller_remaining_distance: number | NoData;
 };
 
-export type BafangCanAssistProfile = {
-    current_limit: number;
-    speed_limit: number;
-};
-
 export type BafangCanSystemVoltage = 36 | 43 | 48;
 
 export enum BafangCanPedalSensorType {
@@ -27,6 +23,21 @@ export enum BafangCanPedalSensorType {
     CadenceSensor = 1,
     ThrottleLeverOnly = 2,
 }
+
+export const TriggerTypeOptions = [
+    {
+        value: BafangCanPedalSensorType.TorqueSensor,
+        label: 'Torque sensor and throttle lever',
+    },
+    {
+        value: BafangCanPedalSensorType.CadenceSensor,
+        label: 'Cadence sensor and throttle lever',
+    },
+    {
+        value: BafangCanPedalSensorType.ThrottleLeverOnly,
+        label: 'Throttle lever only',
+    },
+];
 
 export enum BafangCanMotorType {
     HubMotor = 0,
@@ -71,7 +82,7 @@ export type BafangCanControllerParameters1 = {
     controller_start_current: number;
     controller_current_loading_time: number;
     controller_current_shedding_time: number;
-    controller_assist_levels: BafangCanAssistProfile[];
+    controller_assist_levels: BafangAssistProfile[];
     controller_displayless_mode: boolean;
     controller_lamps_always_on: boolean;
 };

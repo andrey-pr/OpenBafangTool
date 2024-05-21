@@ -99,26 +99,27 @@ class ParameterInputComponent extends React.Component<
                         value={value as number}
                         addonAfter={unit}
                         style={{ minWidth: '150px' }}
-                        onChange={(e) => {
-                            if (e !== null) {
+                        onChange={(number) => {
+                            if (number !== null) {
                                 let tmp = false;
                                 tmp ||=
                                     warningBelow !== undefined &&
-                                    e < warningBelow;
+                                    number < warningBelow;
                                 tmp ||=
                                     warningAbove !== undefined &&
-                                    e > warningAbove;
+                                    number > warningAbove;
                                 tmp ||=
-                                    checkValue !== undefined && !checkValue(e);
+                                    checkValue !== undefined &&
+                                    !checkValue(number);
+                                let multiplier =
+                                    10 ** (decimalPlaces as number);
+                                let value =
+                                    Math.floor(number * multiplier) / multiplier;
                                 this.setState({
-                                    value:
-                                        Math.floor(
-                                            e * 10 ** (decimalPlaces as number),
-                                        ) /
-                                        (e * 10 ** (decimalPlaces as number)),
+                                    value,
                                     warning: tmp,
                                 });
-                                onNewValue(e);
+                                onNewValue(value);
                             }
                         }}
                         status={warning ? 'warning' : ''}

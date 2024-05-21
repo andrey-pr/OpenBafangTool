@@ -1,3 +1,5 @@
+import { BafangAssistProfile } from './common';
+
 export const Voltage = [24, 36, 48, 43];
 
 export type BafangUartMotorInfo = {
@@ -18,21 +20,31 @@ export function checkInfo(info: BafangUartMotorInfo): boolean {
     return true;
 }
 
-export type AssistProfile = {
-    current_limit: number;
-    speed_limit: number;
-};
-
 export enum SpeedmeterType {
     External = 0,
     Internal = 1,
     Motorphase = 2,
 }
 
+export const SpeedmeterTypeOptions = [
+    {
+        value: SpeedmeterType.External,
+        label: 'External',
+    },
+    {
+        value: SpeedmeterType.Internal,
+        label: 'Internal',
+    },
+    {
+        value: SpeedmeterType.Motorphase,
+        label: 'Motorphase',
+    },
+];
+
 export type BafangUartMotorBasicParameters = {
     low_battery_protection: number;
     current_limit: number;
-    assist_profiles: AssistProfile[];
+    assist_profiles: BafangAssistProfile[];
     wheel_diameter: number;
     speedmeter_type: SpeedmeterType;
 };
@@ -84,6 +96,22 @@ export enum PedalType {
     DoubleSignal24 = 3,
 }
 
+export const PedalTypeOptions = [
+    { value: PedalType.None, label: 'None' },
+    {
+        value: PedalType.DHSensor12,
+        label: 'DH-Sensor-12',
+    },
+    {
+        value: PedalType.BBSensor32,
+        label: 'BB-Sensor-32',
+    },
+    {
+        value: PedalType.DoubleSignal24,
+        label: 'DoubleSignal-24',
+    },
+];
+
 export const PedalSensorSignals = { 0: 1, 1: 12, 2: 32, 3: 24 };
 
 export enum AssistLevel {
@@ -99,6 +127,53 @@ export enum AssistLevel {
     AssistLevel9 = 9,
     ByDisplay = 255,
 }
+
+export const AssistLevelOptions = [
+    {
+        value: AssistLevel.ByDisplay,
+        label: 'By display',
+    },
+    {
+        value: AssistLevel.AssistLevel0,
+        label: 'Level 0',
+    },
+    {
+        value: AssistLevel.AssistLevel1,
+        label: 'Level 1',
+    },
+    {
+        value: AssistLevel.AssistLevel2,
+        label: 'Level 2',
+    },
+    {
+        value: AssistLevel.AssistLevel3,
+        label: 'Level 3',
+    },
+    {
+        value: AssistLevel.AssistLevel4,
+        label: 'Level 4',
+    },
+    {
+        value: AssistLevel.AssistLevel5,
+        label: 'Level 5',
+    },
+    {
+        value: AssistLevel.AssistLevel6,
+        label: 'Level 6',
+    },
+    {
+        value: AssistLevel.AssistLevel7,
+        label: 'Level 7',
+    },
+    {
+        value: AssistLevel.AssistLevel8,
+        label: 'Level 8',
+    },
+    {
+        value: AssistLevel.AssistLevel9,
+        label: 'Level 9',
+    },
+];
 
 export const SpeedLimitByDisplay: number = 255;
 
@@ -179,6 +254,17 @@ export enum ThrottleMode {
     Speed = 0,
     Current = 1,
 }
+
+export const ThrottleModeOptions = [
+    {
+        value: ThrottleMode.Speed,
+        label: 'Speed',
+    },
+    {
+        value: ThrottleMode.Current,
+        label: 'Current',
+    },
+];
 
 export type BafangUartMotorThrottleParameters = {
     throttle_start_voltage: number;
