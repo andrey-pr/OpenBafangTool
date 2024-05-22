@@ -1,3 +1,4 @@
+import { deepCopy } from 'deep-copy-ts';
 import {
     CanCommand,
     CanWriteCommandsList,
@@ -678,6 +679,72 @@ export function prepareStringWritePromise(
                 device,
                 can_command,
                 serializeString(value),
+                resolve,
+                reject,
+            );
+        }),
+    );
+}
+
+export function prepareParameter1WritePromise(
+    value: BafangCanControllerParameter1,
+    old_pkg: number[] | undefined,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (!old_pkg) return;
+    let new_pkg: number[] = deepCopy(old_pkg);
+    new_pkg[1] = value.controller_current_limit;
+    new_pkg[2] = value.controller_overvoltage;
+    new_pkg[3] = value.controller_undervoltage;
+    new_pkg[4] = value.controller_undervoltage_under_load;
+    new_pkg[5] = value.controller_battery_recovery_voltage;
+    new_pkg[7] = value.controller_battery_capacity & 0b11111111;
+    new_pkg[8] = value.controller_battery_capacity >> 8;
+    new_pkg[9] = value.controller_max_current_on_low_charge;
+    new_pkg[12] = value.controller_full_capacity_range;
+    new_pkg[13] = value.controller_pedal_sensor_type;
+    new_pkg[20] = value.controller_speedmeter_magnets_number;
+    new_pkg[34] = value.controller_throttle_start_voltage * 10;
+    new_pkg[35] = value.controller_throttle_max_voltage * 10;
+    new_pkg[37] = value.controller_start_current;
+    new_pkg[38] = value.controller_current_loading_time * 10;
+    new_pkg[39] = value.controller_current_shedding_time * 10;
+    new_pkg[40] = value.controller_assist_levels[0].current_limit;
+    new_pkg[41] = value.controller_assist_levels[1].current_limit;
+    new_pkg[42] = value.controller_assist_levels[2].current_limit;
+    new_pkg[43] = value.controller_assist_levels[3].current_limit;
+    new_pkg[44] = value.controller_assist_levels[4].current_limit;
+    new_pkg[45] = value.controller_assist_levels[5].current_limit;
+    new_pkg[46] = value.controller_assist_levels[6].current_limit;
+    new_pkg[47] = value.controller_assist_levels[7].current_limit;
+    new_pkg[48] = value.controller_assist_levels[8].current_limit;
+    new_pkg[49] = value.controller_assist_levels[0].speed_limit;
+    new_pkg[50] = value.controller_assist_levels[1].speed_limit;
+    new_pkg[51] = value.controller_assist_levels[2].speed_limit;
+    new_pkg[52] = value.controller_assist_levels[3].speed_limit;
+    new_pkg[53] = value.controller_assist_levels[4].speed_limit;
+    new_pkg[54] = value.controller_assist_levels[5].speed_limit;
+    new_pkg[55] = value.controller_assist_levels[6].speed_limit;
+    new_pkg[56] = value.controller_assist_levels[7].speed_limit;
+    new_pkg[57] = value.controller_assist_levels[8].speed_limit;
+    new_pkg[58] = value.controller_displayless_mode ? 1 : 0;
+    new_pkg[59] = value.controller_lamps_always_on ? 1 : 0;
+    let summ = 0;
+    new_pkg.slice(0, 63).forEach((item) => summ += item);
+    new_pkg[63] = summ & 0b11111111;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                DeviceNetworkId.DRIVE_UNIT,
+                CanWriteCommandsList.Parameter1,
+                new_pkg,
                 resolve,
                 reject,
             );

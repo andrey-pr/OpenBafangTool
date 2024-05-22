@@ -128,6 +128,16 @@ export const CanWriteCommandsList: {
             DeviceNetworkId.TORQUE_SENSOR,
         ],
     },
+    Parameter1: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x11,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
+    Parameter2: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x12,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
     DisplayTotalMileage: {
         canCommandCode: 0x62,
         canCommandSubCode: 0x01,

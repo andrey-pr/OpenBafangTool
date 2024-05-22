@@ -7,12 +7,13 @@ import { deepCopy } from 'deep-copy-ts';
 
 type AssistTableRow = {
     key: React.Key;
+    index: number;
     assist_level: number; //TODO add support of not loaded yet
     current: number;
     speed: number;
-    tip: string;
-    recommended_min: number;
-    recommended_max: number;
+    tip?: string;
+    recommended_min?: number;
+    recommended_max?: number;
 };
 
 type AssistLevelTableProps = {
@@ -44,10 +45,11 @@ class AssistLevelTableComponent extends React.Component<
                 tip:
                     index === 0 && this.props.zero_level
                         ? 'Its strongly recommended to set current limit on zero level of assist to 0'
-                        : '',
+                        : undefined,
                 recommended_min: 0,
-                recommended_max: index === 0 ? 0 : 100,
+                recommended_max: index === 0 && this.props.zero_level ? 0 : 100,
                 key: index,
+                index,
                 assist_level: this.props.zero_level ? index : index + 1,
                 current: profile.current_limit,
                 speed: profile.speed_limit,
@@ -79,10 +81,10 @@ class AssistLevelTableComponent extends React.Component<
                             max={100}
                             onNewValue={(e) => {
                                 const { assist_profiles } = this.state;
-                                assist_profiles[record.assist_level] = {
+                                assist_profiles[record.index] = {
                                     current_limit: e,
                                     speed_limit:
-                                        assist_profiles[record.assist_level]
+                                        assist_profiles[record.index]
                                             .speed_limit,
                                 };
                                 this.setState({
@@ -108,9 +110,9 @@ class AssistLevelTableComponent extends React.Component<
                             max={100}
                             onNewValue={(e) => {
                                 const { assist_profiles } = this.state;
-                                assist_profiles[record.assist_level] = {
+                                assist_profiles[record.index] = {
                                     current_limit:
-                                        assist_profiles[record.assist_level]
+                                        assist_profiles[record.index]
                                             .current_limit,
                                     speed_limit: e,
                                 };

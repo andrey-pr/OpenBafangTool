@@ -42,6 +42,8 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerParameter1: types.BafangCanControllerParameter1;
 
+    private controllerParameter1Array?: number[];
+
     private _controllerSpeedParameters: types.BafangCanControllerSpeedParameters;
 
     private _displayData: types.BafangCanDisplayData;
@@ -234,6 +236,7 @@ export default class BafangCanSystem implements IConnection {
                 response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
             ) {
                 if (response.canCommandSubCode == 0x11) {
+                    this.controllerParameter1Array = response.data;
                     utils.parseControllerParameter1(
                         response,
                         this._controllerParameter1,
@@ -410,6 +413,12 @@ export default class BafangCanSystem implements IConnection {
                 utils.getControllerRealtimeDemoData();
             this._sensorRealtimeData = utils.getSensorRealtimeDemoData();
             this._controllerParameter1 = utils.getControllerParameter1Demo();
+            this.controllerParameter1Array = [
+                36, 18, 47, 128, 12, 172, 13, 16, 39, 3, 25, 15, 45, 0, 0, 24,
+                2, 12, 1, 4, 1, 1, 66, 14, 204, 16, 0, 0, 0, 0, 0, 0, 0, 0, 12,
+                36, 0, 25, 2, 5, 25, 30, 37, 45, 52, 60, 70, 80, 100, 100, 100,
+                100, 100, 100, 100, 100, 100, 100, 0, 0, 94, 1, 255, 183,
+            ];
             this._controllerSpeedParameters =
                 utils.getControllerSpeedParametersDemo();
             this._displayData = utils.getDisplayDemoData();
@@ -663,6 +672,10 @@ export default class BafangCanSystem implements IConnection {
 
     public saveControllerData(): void {
         if (this.devicePath === 'simulator') {
+            setTimeout(
+                () => this.emitter.emit('controller-writing-finish', 10, 0),
+                300,
+            );
             return;
         }
         let wroteSuccessfully = 0,
@@ -679,6 +692,12 @@ export default class BafangCanSystem implements IConnection {
             this._controllerCodes.controller_customer_number,
             DeviceNetworkId.DRIVE_UNIT,
             CanWriteCommandsList.CustomerNumber,
+            writePromises,
+            this.writeLongParameter,
+        );
+        utils.prepareParameter1WritePromise(
+            this._controllerParameter1,
+            this.controllerParameter1Array,
             writePromises,
             this.writeLongParameter,
         );
@@ -707,6 +726,10 @@ export default class BafangCanSystem implements IConnection {
 
     public saveDisplayData(): void {
         if (this.devicePath === 'simulator') {
+            setTimeout(
+                () => this.emitter.emit('display-writing-finish', 10, 0),
+                300,
+            );
             return;
         }
         let wroteSuccessfully = 0,
@@ -758,6 +781,10 @@ export default class BafangCanSystem implements IConnection {
 
     public saveSensorData(): void {
         if (this.devicePath === 'simulator') {
+            setTimeout(
+                () => this.emitter.emit('sensor-writing-finish', 10, 0),
+                300,
+            );
             return;
         }
         let writePromises: Promise<boolean>[] = [];
@@ -851,9 +878,7 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._controllerParameter1);
     }
 
-    public set controllerParameter1(
-        data: types.BafangCanControllerParameter1,
-    ) {
+    public set controllerParameter1(data: types.BafangCanControllerParameter1) {
         this._controllerParameter1 = deepCopy(data);
     }
 

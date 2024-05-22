@@ -35,7 +35,6 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
-import Column from 'antd/es/table/Column';
 import Title from 'antd/es/typography/Title';
 import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
 import { BooleanOptions } from '../../../../../types/common';
@@ -172,7 +171,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 'V',
                 0,
                 100,
-            ), //TODO add low coltage with no load
+            ), //TODO add low voltage with no load
         ];
     }
 
@@ -293,9 +292,9 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateEditableNumberListItem(
                 'Start current',
-                this.state.controller_overvoltage,
-                (controller_overvoltage: number) =>
-                    this.setState({ controller_overvoltage }),
+                this.state.controller_start_current,
+                (controller_start_current: number) =>
+                    this.setState({ controller_start_current }),
                 '%',
                 1,
                 100,
@@ -492,6 +491,8 @@ class BafangCanMotorSettingsView extends React.Component<
         connection.controllerSpeedParameters = this
             .state as BafangCanControllerSpeedParameters;
         connection.controllerCodes = this.state as BafangCanControllerCodes;
+        connection.controllerParameter1 = this
+            .state as BafangCanControllerParameter1;
         connection.saveControllerData();
         message.open({
             key: 'writing',
