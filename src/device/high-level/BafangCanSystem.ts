@@ -40,7 +40,7 @@ export default class BafangCanSystem implements IConnection {
 
     private _sensorRealtimeData: types.BafangCanSensorRealtime;
 
-    private _controllerParameters1: types.BafangCanControllerParameters1;
+    private _controllerParameter1: types.BafangCanControllerParameter1;
 
     private _controllerSpeedParameters: types.BafangCanControllerSpeedParameters;
 
@@ -73,7 +73,7 @@ export default class BafangCanSystem implements IConnection {
         this.emitter = new EventEmitter();
         this._controllerRealtimeData = utils.getEmptyControllerRealtimeData();
         this._sensorRealtimeData = utils.getEmptySensorRealtimeData();
-        this._controllerParameters1 = utils.getEmptyControllerParameters1();
+        this._controllerParameter1 = utils.getEmptyControllerParameter1();
         this._controllerSpeedParameters =
             utils.getEmptyControllerSpeedParameters();
         this._displayData = utils.getEmptyDisplayData();
@@ -236,11 +236,11 @@ export default class BafangCanSystem implements IConnection {
                 if (response.canCommandSubCode == 0x11) {
                     utils.parseControllerParameter1(
                         response,
-                        this._controllerParameters1,
+                        this._controllerParameter1,
                     );
                     this.emitter.emit(
                         'controller-parameter1',
-                        deepCopy(this._controllerParameters1),
+                        deepCopy(this._controllerParameter1),
                     );
                 } else if (response.canCommandSubCode == 0x12) {
                     console.log('parameter2:', response);
@@ -409,7 +409,7 @@ export default class BafangCanSystem implements IConnection {
             this._controllerRealtimeData =
                 utils.getControllerRealtimeDemoData();
             this._sensorRealtimeData = utils.getSensorRealtimeDemoData();
-            this._controllerParameters1 = utils.getControllerParameters1Demo();
+            this._controllerParameter1 = utils.getControllerParameter1Demo();
             this._controllerSpeedParameters =
                 utils.getControllerSpeedParametersDemo();
             this._displayData = utils.getDisplayDemoData();
@@ -430,7 +430,7 @@ export default class BafangCanSystem implements IConnection {
                 );
                 this.emitter.emit(
                     'controller-parameter1',
-                    deepCopy(this._controllerParameters1),
+                    deepCopy(this._controllerParameter1),
                 );
                 this.emitter.emit(
                     'display-general-data',
@@ -847,14 +847,14 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._controllerRealtimeData);
     }
 
-    public get controllerParameters1(): types.BafangCanControllerParameters1 {
-        return deepCopy(this._controllerParameters1);
+    public get controllerParameter1(): types.BafangCanControllerParameter1 {
+        return deepCopy(this._controllerParameter1);
     }
 
-    public set controllerParameters1(
-        data: types.BafangCanControllerParameters1,
+    public set controllerParameter1(
+        data: types.BafangCanControllerParameter1,
     ) {
-        this._controllerParameters1 = deepCopy(data);
+        this._controllerParameter1 = deepCopy(data);
     }
 
     public get controllerSpeedParameters(): types.BafangCanControllerSpeedParameters {

@@ -140,9 +140,9 @@ export function generateSimpleBooleanListItem(
 
 export function generateEditableSelectListItem(
     text: string,
-    options: { value: string | number; label: string }[],
-    value: string | number | NoData,
-    onChange: (e: string | number) => void,
+    options: { value: string | number | boolean; label: string }[],
+    value: string | number | boolean | NoData,
+    onChange: (e: string | number | boolean) => void,
 ): DescriptionsItemType {
     return {
         label: text,

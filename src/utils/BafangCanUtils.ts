@@ -10,7 +10,7 @@ import {
     BafangBesstCodes,
     BafangCanAssistLevel,
     BafangCanControllerCodes,
-    BafangCanControllerParameters1,
+    BafangCanControllerParameter1,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
     BafangCanDisplayCodes,
@@ -63,7 +63,7 @@ export function getEmptySensorRealtimeData(): BafangCanSensorRealtime {
     };
 }
 
-export function getEmptyControllerParameters1(): BafangCanControllerParameters1 {
+export function getEmptyControllerParameter1(): BafangCanControllerParameter1 {
     return {
         controller_system_voltage: 36,
         controller_current_limit: 0,
@@ -205,7 +205,7 @@ export function getSensorRealtimeDemoData(): BafangCanSensorRealtime {
     };
 }
 
-export function getControllerParameters1Demo(): BafangCanControllerParameters1 {
+export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
     return {
         controller_system_voltage: 36, // TODO fill with data
         controller_current_limit: 18,
@@ -586,7 +586,7 @@ export function parseControllerPackage3(
 
 export function parseControllerParameter1(
     packet: BesstReadedCanFrame,
-    dto: BafangCanControllerParameters1,
+    dto: BafangCanControllerParameter1,
 ): void {
     dto.controller_system_voltage = packet.data[0] as BafangCanSystemVoltage;
     dto.controller_current_limit = packet.data[1];

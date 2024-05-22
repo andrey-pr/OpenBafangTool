@@ -53,7 +53,7 @@ export enum BafangCanTemperatureSensorType {
 
 export type BafangCanSpeedSensorChannelNumber = 1 | 2;
 
-export type BafangCanControllerParameters1 = {
+export type BafangCanControllerParameter1 = {
     controller_system_voltage: BafangCanSystemVoltage;
     controller_current_limit: number;
     controller_overvoltage: number;

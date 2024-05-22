@@ -3,13 +3,13 @@ import React from 'react';
 import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
 
 type SelectParameterProps = {
-    value: string | number | NoData;
-    options: { value: string | number; label: string }[];
-    onChange: (e: string | number) => void;
+    value: string | number | boolean | NoData;
+    options: { value: string | number | boolean; label: string }[];
+    onChange: (e: string | number | boolean) => void;
 };
 
 type SelectParameterState = {
-    value: string | number | NoData;
+    value: string | number | boolean | NoData;
 };
 
 class SelectParameterComponent extends React.Component<
@@ -40,7 +40,7 @@ class SelectParameterComponent extends React.Component<
                 onChange={(e) => {
                     if (e !== null) {
                         this.setState({ value: e });
-                        this.props.onChange(e as string | number);
+                        this.props.onChange(e as string | number | boolean);
                     }
                 }}
             />
