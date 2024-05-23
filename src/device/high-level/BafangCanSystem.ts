@@ -58,7 +58,7 @@ export default class BafangCanSystem implements IConnection {
 
     private _besstCodes: types.BafangBesstCodes;
 
-    private sentRequests: SentRequest[][][] = [];
+    private sentRequests: SentRequest[][][][] = [];
 
     private _displayAvailable: boolean = false;
 
@@ -150,10 +150,18 @@ export default class BafangCanSystem implements IConnection {
                 this.sentRequests[target] = [];
             if (this.sentRequests[target][code] === undefined)
                 this.sentRequests[target][code] = [];
-            this.sentRequests[target][code][subcode] = { resolve, reject };
+            if (this.sentRequests[target][code][subcode] === undefined)
+                this.sentRequests[target][code][subcode] = [];
+            this.sentRequests[target][code][subcode][can_operation] = {
+                resolve,
+                reject,
+            };
             setTimeout(() => {
-                if (this.sentRequests[target][code][subcode]) {
-                    if (attempt >= 3) {
+                if (this.sentRequests[target][code][subcode][can_operation]) {
+                    if (
+                        can_operation !== CanOperation.READ_CMD ||
+                        attempt >= 3
+                    ) {
                         resolve(false);
                         return;
                     }
@@ -193,14 +201,19 @@ export default class BafangCanSystem implements IConnection {
             ] &&
             this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode]
+            ][response.canCommandSubCode] &&
+            this.sentRequests[response.sourceDeviceCode][
+                response.canCommandCode
+            ][response.canCommandSubCode][response.canOperationCode]
         ) {
             this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode].resolve(success);
+            ][response.canCommandSubCode][response.canOperationCode].resolve(
+                success,
+            );
             delete this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode];
+            ][response.canCommandSubCode][response.canOperationCode];
         }
     }
 
