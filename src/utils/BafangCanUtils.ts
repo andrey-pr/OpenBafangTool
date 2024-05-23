@@ -712,7 +712,7 @@ export function prepareSingleMileageWritePromise(
             write_function(
                 DeviceNetworkId.DISPLAY,
                 can_command,
-                serializeMileage(value*10),
+                serializeMileage(value * 10),
                 resolve,
                 reject,
             );

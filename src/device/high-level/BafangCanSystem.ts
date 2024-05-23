@@ -21,6 +21,7 @@ import log from 'electron-log/renderer';
 type SentRequest = {
     resolve: (...args: any[]) => void;
     reject: (...args: any[]) => void;
+    can_operation: CanOperation;
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -58,7 +59,7 @@ export default class BafangCanSystem implements IConnection {
 
     private _besstCodes: types.BafangBesstCodes;
 
-    private sentRequests: SentRequest[][][][] = [];
+    private sentRequests: SentRequest[][][] = [];
 
     private _displayAvailable: boolean = false;
 
@@ -150,16 +151,16 @@ export default class BafangCanSystem implements IConnection {
                 this.sentRequests[target] = [];
             if (this.sentRequests[target][code] === undefined)
                 this.sentRequests[target][code] = [];
-            if (this.sentRequests[target][code][subcode] === undefined)
-                this.sentRequests[target][code][subcode] = [];
-            this.sentRequests[target][code][subcode][can_operation] = {
+            this.sentRequests[target][code][subcode] = {
                 resolve,
                 reject,
+                can_operation,
             };
             setTimeout(() => {
-                if (this.sentRequests[target][code][subcode][can_operation]) {
+                if (this.sentRequests[target][code][subcode]) {
                     if (
-                        can_operation !== CanOperation.READ_CMD ||
+                        this.sentRequests[target][code][subcode]
+                            .can_operation !== CanOperation.READ_CMD ||
                         attempt >= 3
                     ) {
                         resolve(false);
@@ -201,19 +202,14 @@ export default class BafangCanSystem implements IConnection {
             ] &&
             this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode] &&
-            this.sentRequests[response.sourceDeviceCode][
-                response.canCommandCode
-            ][response.canCommandSubCode][response.canOperationCode]
+            ][response.canCommandSubCode]
         ) {
             this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode][response.canOperationCode].resolve(
-                success,
-            );
+            ][response.canCommandSubCode].resolve(success);
             delete this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode][response.canOperationCode];
+            ][response.canCommandSubCode];
         }
     }
 
