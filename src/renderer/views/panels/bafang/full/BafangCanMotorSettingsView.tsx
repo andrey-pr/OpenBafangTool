@@ -407,6 +407,7 @@ class BafangCanMotorSettingsView extends React.Component<
                                     : BafangCanWheelDiameterTable[0],
                             });
                         }}
+                        doNotBlock
                     />
                 ),
             },

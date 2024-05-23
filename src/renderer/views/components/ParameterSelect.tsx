@@ -8,6 +8,7 @@ type ParameterSelectProps = {
     value: string | NoData | null;
     options: string[];
     onNewValue: (value: string) => void;
+    doNotBlock?: boolean;
 };
 
 type ParameterSelectState = {
@@ -39,7 +40,7 @@ class ParameterSelectComponent extends React.Component<
     render() {
         const { value } = this.state;
         const { onNewValue, options } = this.props;
-        if (value === NotLoadedYet) {
+        if (!this.props.doNotBlock && value === NotLoadedYet) {
             return (
                 <Select
                     allowClear
@@ -52,7 +53,7 @@ class ParameterSelectComponent extends React.Component<
                     </Option>
                 </Select>
             );
-        } else if (value === NotAvailable) {
+        } else if (!this.props.doNotBlock && value === NotAvailable) {
             return (
                 <Select
                     allowClear
@@ -69,10 +70,12 @@ class ParameterSelectComponent extends React.Component<
         return (
             <Select
                 onChange={(new_value) => {
-                    this.setState({
-                        value: new_value,
-                    });
-                    onNewValue(new_value as string);
+                    if (new_value !== null) {
+                        this.setState({
+                            value: new_value,
+                        });
+                        onNewValue(new_value as string);
+                    }
                 }}
                 allowClear
                 style={{ minWidth: '150px' }}
