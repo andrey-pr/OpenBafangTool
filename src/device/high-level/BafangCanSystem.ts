@@ -144,7 +144,7 @@ export default class BafangCanSystem implements IConnection {
         subcode: number,
         resolve?: (...args: any[]) => void,
         reject?: (...args: any[]) => void,
-        attempt = 0,
+        attempt = 1,
     ): void {
         if (resolve && reject) {
             if (this.sentRequests[target] === undefined)
@@ -367,7 +367,9 @@ export default class BafangCanSystem implements IConnection {
 
         return new Promise<boolean>(async (resolve) => {
             this.device?.reset().then(() => {
+                this.device?.emitter.removeAllListeners();
                 this.device?.emitter.on('can', this.processParsedCanResponse);
+                this.device?.emitter.on('disconnection', this.onDisconnect);
                 this.device?.activateDriveUnit().then(() => {
                     resolve(true);
                 });
