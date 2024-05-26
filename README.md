@@ -25,6 +25,10 @@
 <!-- RELEASE NOTES -->
 ## Release Notes
 
+### 2.0.1
+
+- Fixed bug with writing
+
 ### 2.0.0
 
 - Added support of new systems with CAN bus
