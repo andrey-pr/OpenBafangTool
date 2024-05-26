@@ -608,7 +608,7 @@ export function parseControllerParameter1(
     dto.controller_speedmeter_magnets_number = packet.data[20];
     dto.controller_temperature_sensor_type = packet.data[21];
     dto.controller_deceleration_ratio =
-        (packet.data[23] << 8) + packet.data[22];
+        ((packet.data[23] << 8) + packet.data[22])/100;
     dto.controller_motor_max_rotor_rpm =
         (packet.data[25] << 8) + packet.data[24];
     dto.controller_motor_d_axis_inductance =
