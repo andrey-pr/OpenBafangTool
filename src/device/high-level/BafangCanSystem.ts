@@ -187,7 +187,7 @@ export default class BafangCanSystem implements IConnection {
                             ),
                         );
                 }
-            }, 1000);
+            }, 5000);
         }
     }
 
