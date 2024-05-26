@@ -29,6 +29,7 @@ import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
 import ParameterInputComponent from '../../../components/ParameterInput';
 import ParameterSelectComponent from '../../../components/ParameterSelect';
 import {
+    generateAnnotatedEditableNumberListItem,
     generateEditableNumberListItem,
     generateEditableSelectListItem,
     generateEditableStringListItem,
@@ -149,41 +150,45 @@ class BafangCanMotorSettingsView extends React.Component<
                 this.state.controller_system_voltage,
                 'V',
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Current limit',
                 this.state.controller_current_limit,
                 (controller_current_limit: number) =>
                     this.setState({ controller_current_limit }),
+                'Be very careful with this parameter! Too big value may burn engine!',
                 'A',
                 1,
                 100,
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'High voltage limit',
                 this.state.controller_overvoltage,
                 (controller_overvoltage: number) =>
                     this.setState({ controller_overvoltage }),
+                'Controller will show overvoltage error when this limit is reached',
                 'V',
                 0,
-                100,
+                256,
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Low voltage limit under load',
                 this.state.controller_undervoltage_under_load,
                 (controller_undervoltage_under_load: number) =>
                     this.setState({ controller_undervoltage_under_load }),
+                'Controller will stop motor when this limit is reached under load (during riding) to protect battery from overdischarge',
                 'V',
                 0,
-                100,
+                256,
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Idle low voltage limit',
                 this.state.controller_undervoltage,
                 (controller_undervoltage: number) =>
                     this.setState({ controller_undervoltage }),
+                'Controller will not launch motor motor when this limit is reached without load to protect battery from overdischarge',
                 'V',
                 0,
-                100,
+                256,
             ),
         ];
     }
@@ -191,7 +196,7 @@ class BafangCanMotorSettingsView extends React.Component<
     getBatteryItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItem(
-                'Programmed battery capacity',
+                'Expected battery capacity',
                 this.state.controller_battery_capacity,
                 (controller_battery_capacity: number) =>
                     this.setState({ controller_battery_capacity }),
@@ -208,15 +213,15 @@ class BafangCanMotorSettingsView extends React.Component<
                 1,
                 255,
             ),
-            generateEditableNumberListItem(
-                'Max current on low capacity',
-                this.state.controller_max_current_on_low_charge,
-                (controller_max_current_on_low_charge: number) =>
-                    this.setState({ controller_max_current_on_low_charge }),
-                'A',
-                1,
-                100,
-            ),
+            // generateEditableNumberListItem(
+            //     'Max current on low capacity',
+            //     this.state.controller_max_current_on_low_charge,
+            //     (controller_max_current_on_low_charge: number) =>
+            //         this.setState({ controller_max_current_on_low_charge }),
+            //     'A',
+            //     1,
+            //     100,
+            // ),
             //TODO add three low charge decay parameters, recovery voltage
         ];
     }
@@ -269,15 +274,15 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.state.controller_temperature_sensor_type
                 ],
             ),
-            generateEditableSelectListItem(
-                'Displayless mode',
-                BooleanOptions,
-                this.state.controller_displayless_mode,
-                (e) =>
-                    this.setState({
-                        controller_displayless_mode: e as boolean,
-                    }),
-            ),
+            // generateEditableSelectListItem(
+            //     'Displayless mode',
+            //     BooleanOptions,
+            //     this.state.controller_displayless_mode,
+            //     (e) =>
+            //         this.setState({
+            //             controller_displayless_mode: e as boolean,
+            //         }),
+            // ),
             generateEditableSelectListItem(
                 'Lamps always on',
                 BooleanOptions,
@@ -293,6 +298,17 @@ class BafangCanMotorSettingsView extends React.Component<
     getDrivingItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItem(
+                //TODO
+                'Start current',
+                this.state.controller_start_current,
+                (controller_start_current: number) =>
+                    this.setState({ controller_start_current }),
+                '%',
+                1,
+                100,
+            ),
+            generateEditableNumberListItem(
+                //TODO
                 'Current loading time',
                 this.state.controller_current_loading_time,
                 (controller_current_loading_time: number) =>
@@ -303,6 +319,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 1,
             ),
             generateEditableNumberListItem(
+                //TODO
                 'Current shedding time',
                 this.state.controller_current_shedding_time,
                 (controller_current_shedding_time: number) =>
@@ -311,15 +328,6 @@ class BafangCanMotorSettingsView extends React.Component<
                 0.1,
                 20,
                 1,
-            ),
-            generateEditableNumberListItem(
-                'Start current',
-                this.state.controller_start_current,
-                (controller_start_current: number) =>
-                    this.setState({ controller_start_current }),
-                '%',
-                1,
-                100,
             ),
             generateEditableSelectListItem(
                 'Motor trigger',
@@ -336,21 +344,23 @@ class BafangCanMotorSettingsView extends React.Component<
 
     getThrottleItems(): DescriptionsProps['items'] {
         return [
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Throttle lever start voltage',
                 this.state.controller_throttle_start_voltage,
                 (controller_throttle_start_voltage: number) =>
                     this.setState({ controller_throttle_start_voltage }),
+                'Voltage from throttle lever on minimum power (not on zero power! on this level engine starts to work)',
                 'V',
                 1,
                 20,
                 1,
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Throttle lever max voltage',
                 this.state.controller_throttle_max_voltage,
                 (controller_throttle_max_voltage: number) =>
                     this.setState({ controller_throttle_max_voltage }),
+                'Voltage from throttle lever on maximum power',
                 'V',
                 1,
                 20,

@@ -704,7 +704,6 @@ export function prepareParameter1WritePromise(
     new_pkg[2] = value.controller_overvoltage;
     new_pkg[3] = value.controller_undervoltage;
     new_pkg[4] = value.controller_undervoltage_under_load;
-    new_pkg[5] = value.controller_battery_recovery_voltage;
     new_pkg[7] = value.controller_battery_capacity & 0b11111111;
     new_pkg[8] = value.controller_battery_capacity >> 8;
     new_pkg[9] = value.controller_max_current_on_low_charge;

@@ -37,9 +37,19 @@ export function generateEditableStringListItem(
     content: string | NoData,
     onNewValue: (value: string) => void,
     maxLength = 40,
+    note?: string,
 ): DescriptionsItemType {
     return {
-        label: text,
+        label: (
+            <>
+                {text}
+                {note && (
+                    <>
+                        <br /> <Text italic>{note}</Text>
+                    </>
+                )}
+            </>
+        ),
         children: (
             <StringInputComponent
                 maxLength={maxLength}
@@ -74,6 +84,41 @@ export function generateEditableNumberListItem(
 ): DescriptionsItemType {
     return {
         label: text,
+        children: (
+            <ParameterInputComponent
+                value={content}
+                unit={content_unit}
+                min={min}
+                max={max}
+                decimalPlaces={decimalPlaces}
+                onNewValue={onNewValue}
+            />
+        ),
+        contentStyle: { width: '50%' },
+    };
+}
+
+export function generateAnnotatedEditableNumberListItem(
+    text: string,
+    content: number | NoData,
+    onNewValue: (e: number) => void,
+    note: string,
+    content_unit?: ReactNode,
+    min?: number,
+    max?: number,
+    decimalPlaces?: number,
+): DescriptionsItemType {
+    return {
+        label: (
+            <>
+                {text}
+                {note && (
+                    <>
+                        <br /> <Text italic>{note}</Text>
+                    </>
+                )}
+            </>
+        ),
         children: (
             <ParameterInputComponent
                 value={content}
