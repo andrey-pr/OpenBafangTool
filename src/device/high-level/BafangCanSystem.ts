@@ -21,6 +21,7 @@ import log from 'electron-log/renderer';
 type SentRequest = {
     resolve: (...args: any[]) => void;
     reject: (...args: any[]) => void;
+    can_operation: CanOperation;
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -150,10 +151,18 @@ export default class BafangCanSystem implements IConnection {
                 this.sentRequests[target] = [];
             if (this.sentRequests[target][code] === undefined)
                 this.sentRequests[target][code] = [];
-            this.sentRequests[target][code][subcode] = { resolve, reject };
+            this.sentRequests[target][code][subcode] = {
+                resolve,
+                reject,
+                can_operation,
+            };
             setTimeout(() => {
                 if (this.sentRequests[target][code][subcode]) {
-                    if (attempt >= 3) {
+                    if (
+                        this.sentRequests[target][code][subcode]
+                            .can_operation !== CanOperation.READ_CMD ||
+                        attempt >= 3
+                    ) {
                         resolve(false);
                         return;
                     }
@@ -178,7 +187,7 @@ export default class BafangCanSystem implements IConnection {
                             ),
                         );
                 }
-            }, 1000);
+            }, 5000);
         }
     }
 
