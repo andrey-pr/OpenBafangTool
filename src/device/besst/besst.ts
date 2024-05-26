@@ -115,6 +115,7 @@ class BesstDevice {
 
     private processReadedData(data: Uint8Array): void {
         if (data.length === 0) return;
+        log.info('received raw data from besst:', data);
         const array: number[] = [...data];
         switch (array[0]) {
             case 0x10:
