@@ -18,7 +18,7 @@ export function generateBesstWritePacket(
     reject?: (...args: any[]) => void,
     data: number[] = [0],
 ) {
-    let msg = [0, actionCode || 0x15, 0, 0, ...cmd, data.length || 0, ...data];
+    let msg = [0, actionCode, 0, 0, ...cmd, data.length || 0, ...data];
     msg = [...msg, ...new Array(65 - msg.length).fill(0)];
     let interval;
     let timeout;

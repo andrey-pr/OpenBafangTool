@@ -737,7 +737,7 @@ export function prepareParameter1WritePromise(
     new_pkg[58] = value.controller_displayless_mode ? 1 : 0;
     new_pkg[59] = value.controller_lamps_always_on ? 1 : 0;
     let summ = 0;
-    new_pkg.slice(0, 63).forEach((item) => summ += item);
+    new_pkg.slice(0, 63).forEach((item) => (summ += item));
     new_pkg[63] = summ & 0b11111111;
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
@@ -766,8 +766,9 @@ export function prepareSpeedPackageWritePromise(
     if (
         !value.controller_circumference ||
         typeof value.controller_speed_limit !== 'number' ||
-        typeof value.controller_circumference !== 'number'
-        // || !(value.controller_wheel_diameter instanceof BafangCanWheel)
+        typeof value.controller_circumference !== 'number' ||
+        !value.controller_wheel_diameter ||
+        !value.controller_wheel_diameter.code
     )
         return;
     const limit = value.controller_speed_limit * 100;

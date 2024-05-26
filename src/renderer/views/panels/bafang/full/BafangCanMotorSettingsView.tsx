@@ -53,7 +53,7 @@ type SettingsState = BafangCanControllerRealtime &
 // TODO add redux
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
-    // TODO add param1 and calibration buttons
+    // TODO add param2 and torque calibration button
     SettingsProps,
     SettingsState
 > {
@@ -149,10 +149,14 @@ class BafangCanMotorSettingsView extends React.Component<
                 this.state.controller_system_voltage,
                 'V',
             ),
-            generateSimpleNumberListItem(
+            generateEditableNumberListItem(
                 'Current limit',
-                this.state.controller_current_limit, //TODO make editable???
+                this.state.controller_current_limit,
+                (controller_current_limit: number) =>
+                    this.setState({ controller_current_limit }),
                 'A',
+                1,
+                100,
             ),
             generateEditableNumberListItem(
                 'High voltage limit',
@@ -171,7 +175,16 @@ class BafangCanMotorSettingsView extends React.Component<
                 'V',
                 0,
                 100,
-            ), //TODO add low voltage with no load
+            ),
+            generateEditableNumberListItem(
+                'Idle low voltage limit',
+                this.state.controller_undervoltage,
+                (controller_undervoltage: number) =>
+                    this.setState({ controller_undervoltage }),
+                'V',
+                0,
+                100,
+            ),
         ];
     }
 
@@ -194,6 +207,15 @@ class BafangCanMotorSettingsView extends React.Component<
                 'Km',
                 1,
                 255,
+            ),
+            generateEditableNumberListItem(
+                'Max current on low capacity',
+                this.state.controller_max_current_on_low_charge,
+                (controller_max_current_on_low_charge: number) =>
+                    this.setState({ controller_max_current_on_low_charge }),
+                'A',
+                1,
+                100,
             ),
             //TODO add three low charge decay parameters, recovery voltage
         ];
@@ -221,7 +243,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateSimpleNumberListItem(
                 'Max motor rotation speed',
-                this.state.controller_motor_max_rotor_rpm, //TODO make editable???
+                this.state.controller_motor_max_rotor_rpm,
                 'RPM',
             ),
             generateSimpleNumberListItem(

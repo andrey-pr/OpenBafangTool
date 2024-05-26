@@ -47,7 +47,6 @@ type DeviceSelectionState = {
 };
 
 class DeviceSelectionView extends React.Component<
-    //TODO fix dropdown logic
     DeviceSelectionProps,
     DeviceSelectionState
 > {

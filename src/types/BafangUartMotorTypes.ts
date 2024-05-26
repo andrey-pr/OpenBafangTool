@@ -177,6 +177,21 @@ export const AssistLevelOptions = [
 
 export const SpeedLimitByDisplay: number = 255;
 
+export const SimplifiedPedalSpeedLimitOptions = [
+    {
+        value: 25,
+        label: '25 km/h (EU region)',
+    },
+    {
+        value: 32,
+        label: '32 km/h (USA region)',
+    },
+    {
+        value: SpeedLimitByDisplay,
+        label: 'By limit in display module',
+    },
+];
+
 export type BafangUartMotorPedalParameters = {
     pedal_type: PedalType;
     pedal_assist_level: AssistLevel;

@@ -2,8 +2,6 @@ import React from 'react';
 import {
     Typography,
     Descriptions,
-    Table,
-    Select,
     FloatButton,
     message,
     Radio,
@@ -20,13 +18,19 @@ import {
     BafangUartMotorThrottleParameters,
     ParameterNames,
     PedalSensorSignals,
+    SimplifiedPedalSpeedLimitOptions,
     SpeedLimitByDisplay,
     ThrottleMode,
+    ThrottleModeOptions,
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../components/ParameterInput';
-import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import {
+    generateEditableNumberListItemWithWarning,
+    generateSimpleStringListItem,
+} from '../../../../utils/UIUtils';
 import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
+import SelectParameterComponent from '../../../components/SelectParameterComponent';
 
 const { Title } = Typography;
 
@@ -156,28 +160,18 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
     }
 
     getPhysicalParameterItems(): DescriptionsProps['items'] {
-        const { wheel_diameter } = this.state;
         return [
-            {
-                key: 'wheel_diameter',
-                label: 'Wheel diameter',
-                children: (
-                    <ParameterInputComponent
-                        value={wheel_diameter}
-                        unit="″"
-                        min={1}
-                        max={100}
-                        onNewValue={(e) => {
-                            this.setState({
-                                wheel_diameter: e,
-                            });
-                        }}
-                        warningText="Usually bike wheels has size in range from 12 to 29 inches"
-                        warningBelow={12}
-                        warningAbove={29}
-                    />
-                ),
-            },
+            generateEditableNumberListItemWithWarning(
+                'Wheel diameter',
+                this.state.wheel_diameter,
+                'Usually bike wheels has size in range from 12 to 29 inches',
+                12,
+                29,
+                (wheel_diameter) => this.setState({ wheel_diameter }),
+                '″',
+                1,
+                100,
+            ),
         ];
     }
 
@@ -206,31 +200,31 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     </>
                 ),
                 children: (
-                    <Radio.Group
+                    <SelectParameterComponent
+                        value={pedal_speed_limit}
+                        options={[
+                            {
+                                value: this.initial_pedal_parameters
+                                    .pedal_speed_limit,
+                                label: (
+                                    <>
+                                        Leave old value -&nbsp;
+                                        {this.initial_pedal_parameters
+                                            .pedal_speed_limit ===
+                                        SpeedLimitByDisplay
+                                            ? 'By display'
+                                            : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`}
+                                    </>
+                                ),
+                            },
+                            ...SimplifiedPedalSpeedLimitOptions,
+                        ]}
                         onChange={(e) => {
                             this.setState({
-                                pedal_speed_limit: e.target.value,
+                                pedal_speed_limit: e as number,
                             });
                         }}
-                        value={pedal_speed_limit}
-                    >
-                        <Radio
-                            value={
-                                this.initial_pedal_parameters.pedal_speed_limit
-                            }
-                        >
-                            Leave old value -&nbsp;
-                            {this.initial_pedal_parameters.pedal_speed_limit ===
-                            SpeedLimitByDisplay
-                                ? 'By display'
-                                : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`}
-                        </Radio>
-                        <Radio value={25}>25 km/h (EU region)</Radio>
-                        <Radio value={32}>32 km/h (USA region)</Radio>
-                        <Radio value={SpeedLimitByDisplay}>
-                            By limit in display module
-                        </Radio>
-                    </Radio.Group>
+                    />
                 ),
             },
             {
@@ -409,24 +403,12 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     </>
                 ),
                 children: (
-                    <Select
+                    <SelectParameterComponent
                         value={throttle_mode}
-                        style={{ width: '150px' }}
-                        options={[
-                            {
-                                value: ThrottleMode.Speed,
-                                label: 'Speed',
-                            },
-                            {
-                                value: ThrottleMode.Current,
-                                label: 'Current',
-                            },
-                        ]}
-                        onChange={(e) => {
-                            if (e !== null) {
-                                this.setState({ throttle_mode: e });
-                            }
-                        }}
+                        options={ThrottleModeOptions}
+                        onChange={(e) =>
+                            this.setState({ throttle_mode: e as ThrottleMode })
+                        }
                     />
                 ),
             },
