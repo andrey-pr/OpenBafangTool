@@ -42,7 +42,6 @@ const images: Image = {
     'assets/general_manual/simplified_warning.png': SimplifiedWarning,
     'assets/general_manual/besst_selector.png': BesstSelector,
     'assets/general_manual/device_protocol.png': DeviceProtocol,
-
 };
 
 export function getImage(name: string) {

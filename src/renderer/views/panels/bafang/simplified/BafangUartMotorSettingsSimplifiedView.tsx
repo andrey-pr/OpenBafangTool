@@ -606,7 +606,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 />
                 <Popconfirm
                     title="Parameter writing"
-                    description={`Are you sure that you want to write all parameters on device?`}
+                    description={
+                        'Are you sure that you want to write all parameters on device?'
+                    }
                     onConfirm={this.saveParameters}
                     okText="Yes"
                     cancelText="No"

@@ -87,6 +87,21 @@ export type BafangCanControllerParameter1 = {
     controller_lamps_always_on: boolean;
 };
 
+export type BafangCanTorqueProfile = {
+    start_torque_value: number;
+    max_torque_value: number;
+    return_torque_value: number;
+    min_current: number;
+    max_current: number;
+    start_pulse: number;
+    current_decay_time: number;
+    stop_delay: number;
+};
+
+export type BafangCanControllerParameter2 = {
+    controller_torque_profiles: BafangCanTorqueProfile[];
+};
+
 export type BafangCanWheel = {
     text: string;
     minimalCircumference: number;

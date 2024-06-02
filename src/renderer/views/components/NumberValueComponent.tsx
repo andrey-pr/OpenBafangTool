@@ -15,7 +15,8 @@ class NumberValueComponent extends React.Component<NumberValueProps> {
         const { unit, value } = this.props;
         if (value === NotLoadedYet) {
             return <>Isn&apos;t readed yet</>;
-        } else if (value === NotAvailable) {
+        }
+        if (value === NotAvailable) {
             return <>Not available on this hardware</>;
         }
         return (

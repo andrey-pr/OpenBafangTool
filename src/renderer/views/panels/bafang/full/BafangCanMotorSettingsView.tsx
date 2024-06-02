@@ -19,6 +19,7 @@ import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
+    BafangCanControllerParameter2,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
     BafangCanPedalSensorType,
@@ -39,6 +40,7 @@ import {
 import Title from 'antd/es/typography/Title';
 import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
 import { BooleanOptions } from '../../../../../types/common';
+import TorqueTableComponent from '../../../components/TorqueTableComponent';
 
 const { Text } = Typography;
 
@@ -49,6 +51,7 @@ type SettingsProps = {
 type SettingsState = BafangCanControllerRealtime &
     BafangCanControllerSpeedParameters &
     BafangCanControllerParameter1 &
+    BafangCanControllerParameter2 &
     BafangCanControllerCodes & { position_sensor_calibration_dialog: boolean };
 
 // TODO add redux
@@ -68,6 +71,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ...connection.controllerCodes,
             ...connection.controllerRealtimeData,
             ...connection.controllerParameter1,
+            ...connection.controllerParameter2,
             position_sensor_calibration_dialog: false,
         };
         this.getElectricItems = this.getElectricItems.bind(this);
@@ -79,6 +83,8 @@ class BafangCanMotorSettingsView extends React.Component<
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         connection.emitter.once('controller-speed-data', this.updateData);
+        connection.emitter.on('controller-parameter1', this.updateData);
+        connection.emitter.on('controller-parameter2', this.updateData);
         connection.emitter.on('controller-codes-data', this.updateData);
         connection.emitter.on('broadcast-data-controller', this.updateData);
     }
@@ -396,7 +402,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         min={1}
                         max={25}
                         disabled={
-                            typeof controller_speed_limit == 'number' &&
+                            typeof controller_speed_limit === 'number' &&
                             controller_speed_limit > 25
                         }
                         onNewValue={(e) => {
@@ -526,6 +532,8 @@ class BafangCanMotorSettingsView extends React.Component<
         connection.controllerCodes = this.state as BafangCanControllerCodes;
         connection.controllerParameter1 = this
             .state as BafangCanControllerParameter1;
+        connection.controllerParameter2 = this
+            .state as BafangCanControllerParameter2;
         connection.saveControllerData();
         message.open({
             key: 'writing',
@@ -636,15 +644,26 @@ class BafangCanMotorSettingsView extends React.Component<
                     column={1}
                 />
                 <br />
-                <Title level={5}>Assist levels (Cadence mode)</Title>
+                <Title level={5}>Assist levels</Title>
                 <br />
                 <AssistLevelTableComponent
                     assist_profiles={this.state.controller_assist_levels}
                     onChange={(controller_assist_levels) =>
                         this.setState({
-                            controller_assist_levels: controller_assist_levels,
+                            controller_assist_levels,
                         })
                     }
+                />
+                <br />
+                <Title level={5}>Torque sensor-controlled assist</Title>
+                <br />
+                <TorqueTableComponent
+                    torque_profiles={this.state.controller_torque_profiles}
+                    onChange={(controller_torque_profiles) => {
+                        this.setState({
+                            controller_torque_profiles,
+                        });
+                    }}
                 />
                 <br />
                 <Descriptions

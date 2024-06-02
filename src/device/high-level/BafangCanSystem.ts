@@ -43,7 +43,11 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerParameter1: types.BafangCanControllerParameter1;
 
+    private _controllerParameter2: types.BafangCanControllerParameter2;
+
     private controllerParameter1Array?: number[];
+
+    private controllerParameter2Array?: number[];
 
     private _controllerSpeedParameters: types.BafangCanControllerSpeedParameters;
 
@@ -77,6 +81,7 @@ export default class BafangCanSystem implements IConnection {
         this._controllerRealtimeData = utils.getEmptyControllerRealtimeData();
         this._sensorRealtimeData = utils.getEmptySensorRealtimeData();
         this._controllerParameter1 = utils.getEmptyControllerParameter1();
+        this._controllerParameter2 = utils.getEmptyControllerParameter2();
         this._controllerSpeedParameters =
             utils.getEmptyControllerSpeedParameters();
         this._displayData = utils.getEmptyDisplayData();
@@ -255,7 +260,15 @@ export default class BafangCanSystem implements IConnection {
                         deepCopy(this._controllerParameter1),
                     );
                 } else if (response.canCommandSubCode == 0x12) {
-                    console.log('parameter2:', response);
+                    this.controllerParameter2Array = response.data;
+                    utils.parseControllerParameter2(
+                        response,
+                        this._controllerParameter2,
+                    );
+                    this.emitter.emit(
+                        'controller-parameter2',
+                        deepCopy(this._controllerParameter2),
+                    );
                 } else {
                     utils.processCodeAnswerFromController(
                         response,
@@ -422,11 +435,18 @@ export default class BafangCanSystem implements IConnection {
                 utils.getControllerRealtimeDemoData();
             this._sensorRealtimeData = utils.getSensorRealtimeDemoData();
             this._controllerParameter1 = utils.getControllerParameter1Demo();
+            this._controllerParameter2 = utils.getControllerParameter2Demo();
             this.controllerParameter1Array = [
                 36, 18, 47, 128, 12, 172, 13, 16, 39, 3, 25, 15, 45, 0, 0, 24,
                 2, 12, 1, 4, 1, 1, 66, 14, 204, 16, 0, 0, 0, 0, 0, 0, 0, 0, 12,
                 36, 0, 25, 2, 5, 25, 30, 37, 45, 52, 60, 70, 80, 100, 100, 100,
                 100, 100, 100, 100, 100, 100, 100, 0, 0, 94, 1, 255, 183,
+            ];
+            this.controllerParameter2Array = [
+                8, 6, 5, 4, 3, 2, 50, 45, 40, 32, 25, 18, 6, 5, 4, 3, 2, 2, 100,
+                100, 100, 100, 100, 100, 15, 15, 15, 15, 15, 15, 5, 5, 4, 4, 3,
+                3, 1, 1, 1, 1, 1, 1, 16, 16, 14, 12, 10, 10, 90, 100, 90, 90,
+                85, 75, 255, 255, 255, 255, 255, 255, 255, 255, 255, 43,
             ];
             this._controllerSpeedParameters =
                 utils.getControllerSpeedParametersDemo();
@@ -449,6 +469,10 @@ export default class BafangCanSystem implements IConnection {
                 this.emitter.emit(
                     'controller-parameter1',
                     deepCopy(this._controllerParameter1),
+                );
+                this.emitter.emit(
+                    'controller-parameter2',
+                    deepCopy(this._controllerParameter2),
                 );
                 this.emitter.emit(
                     'display-general-data',
@@ -710,6 +734,12 @@ export default class BafangCanSystem implements IConnection {
             writePromises,
             this.writeLongParameter,
         );
+        utils.prepareParameter2WritePromise(
+            this._controllerParameter2,
+            this.controllerParameter2Array,
+            writePromises,
+            this.writeLongParameter,
+        );
         utils.prepareSpeedPackageWritePromise(
             this._controllerSpeedParameters,
             writePromises,
@@ -889,6 +919,14 @@ export default class BafangCanSystem implements IConnection {
 
     public set controllerParameter1(data: types.BafangCanControllerParameter1) {
         this._controllerParameter1 = deepCopy(data);
+    }
+
+    public get controllerParameter2(): types.BafangCanControllerParameter2 {
+        return deepCopy(this._controllerParameter2);
+    }
+
+    public set controllerParameter2(data: types.BafangCanControllerParameter2) {
+        this._controllerParameter2 = deepCopy(data);
     }
 
     public get controllerSpeedParameters(): types.BafangCanControllerSpeedParameters {

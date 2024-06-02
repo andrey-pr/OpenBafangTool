@@ -114,7 +114,8 @@ class ParameterInputComponent extends React.Component<
                                 let multiplier =
                                     10 ** (decimalPlaces as number);
                                 let value =
-                                    Math.floor(number * multiplier) / multiplier;
+                                    Math.floor(number * multiplier) /
+                                    multiplier;
                                 this.setState({
                                     value,
                                     warning: tmp,

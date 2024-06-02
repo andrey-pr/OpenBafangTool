@@ -12,6 +12,7 @@ import {
     BafangCanAssistLevel,
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
+    BafangCanControllerParameter2,
     BafangCanControllerRealtime,
     BafangCanControllerSpeedParameters,
     BafangCanDisplayCodes,
@@ -108,6 +109,73 @@ export function getEmptyControllerParameter1(): BafangCanControllerParameter1 {
         ],
         controller_displayless_mode: false,
         controller_lamps_always_on: false,
+    };
+}
+
+export function getEmptyControllerParameter2(): BafangCanControllerParameter2 {
+    return {
+        controller_torque_profiles: [
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+            {
+                start_torque_value: 0,
+                max_torque_value: 0,
+                return_torque_value: 0,
+                min_current: 0,
+                max_current: 0,
+                start_pulse: 0,
+                current_decay_time: 0,
+                stop_delay: 0,
+            },
+        ],
     };
 }
 
@@ -208,7 +276,7 @@ export function getSensorRealtimeDemoData(): BafangCanSensorRealtime {
 
 export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
     return {
-        controller_system_voltage: 36, // TODO fill with data
+        controller_system_voltage: 36,
         controller_current_limit: 18,
         controller_overvoltage: 47,
         controller_undervoltage: 128,
@@ -249,6 +317,73 @@ export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
         ],
         controller_displayless_mode: false,
         controller_lamps_always_on: false,
+    };
+}
+
+export function getControllerParameter2Demo(): BafangCanControllerParameter2 {
+    return {
+        controller_torque_profiles: [
+            {
+                start_torque_value: 8,
+                max_torque_value: 50,
+                return_torque_value: 6,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 80,
+                stop_delay: 180,
+            },
+            {
+                start_torque_value: 6,
+                max_torque_value: 45,
+                return_torque_value: 5,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 80,
+                stop_delay: 200,
+            },
+            {
+                start_torque_value: 5,
+                max_torque_value: 40,
+                return_torque_value: 4,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 70,
+                stop_delay: 180,
+            },
+            {
+                start_torque_value: 4,
+                max_torque_value: 32,
+                return_torque_value: 3,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 60,
+                stop_delay: 180,
+            },
+            {
+                start_torque_value: 3,
+                max_torque_value: 25,
+                return_torque_value: 2,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 50,
+                stop_delay: 170,
+            },
+            {
+                start_torque_value: 2,
+                max_torque_value: 18,
+                return_torque_value: 2,
+                min_current: 15,
+                max_current: 100,
+                start_pulse: 1,
+                current_decay_time: 50,
+                stop_delay: 150,
+            },
+        ],
     };
 }
 
@@ -599,7 +734,7 @@ export function parseControllerParameter1(
     dto.controller_max_current_on_low_charge = packet.data[9];
     dto.controller_full_capacity_range = packet.data[12];
     dto.controller_pedal_sensor_type = packet.data[13];
-    dto.controller_coaster_brake = packet.data[14] == 1;
+    dto.controller_coaster_brake = packet.data[14] === 1;
     dto.controller_pedal_sensor_signals_per_rotation = packet.data[15];
     dto.controller_speed_sensor_channel_number = packet
         .data[16] as BafangCanSpeedSensorChannelNumber;
@@ -608,7 +743,7 @@ export function parseControllerParameter1(
     dto.controller_speedmeter_magnets_number = packet.data[20];
     dto.controller_temperature_sensor_type = packet.data[21];
     dto.controller_deceleration_ratio =
-        ((packet.data[23] << 8) + packet.data[22])/100;
+        ((packet.data[23] << 8) + packet.data[22]) / 100;
     dto.controller_motor_max_rotor_rpm =
         (packet.data[25] << 8) + packet.data[24];
     dto.controller_motor_d_axis_inductance =
@@ -635,8 +770,26 @@ export function parseControllerParameter1(
         { current_limit: packet.data[47], speed_limit: packet.data[56] },
         { current_limit: packet.data[48], speed_limit: packet.data[57] },
     ];
-    dto.controller_displayless_mode = packet.data[58] == 1;
-    dto.controller_lamps_always_on = packet.data[59] == 1;
+    dto.controller_displayless_mode = packet.data[58] === 1;
+    dto.controller_lamps_always_on = packet.data[59] === 1;
+}
+
+export function parseControllerParameter2(
+    packet: BesstReadedCanFrame,
+    dto: BafangCanControllerParameter2,
+): void {
+    for (let i = 0; i <= 5; i++) {
+        dto.controller_torque_profiles[i] = {
+            start_torque_value: packet.data[0 + i],
+            max_torque_value: packet.data[6 + i],
+            return_torque_value: packet.data[12 + i],
+            min_current: packet.data[24 + i],
+            max_current: packet.data[18 + i],
+            start_pulse: packet.data[36 + i],
+            current_decay_time: packet.data[42 + i] * 5,
+            stop_delay: packet.data[48 + i] * 2,
+        };
+    }
 }
 
 export function parseSensorPackage(
@@ -699,7 +852,7 @@ export function prepareParameter1WritePromise(
     ) => void,
 ): void {
     if (!old_pkg) return;
-    let new_pkg: number[] = deepCopy(old_pkg);
+    const new_pkg: number[] = deepCopy(old_pkg);
     new_pkg[1] = value.controller_current_limit;
     new_pkg[2] = value.controller_overvoltage;
     new_pkg[3] = value.controller_undervoltage;
@@ -735,6 +888,51 @@ export function prepareParameter1WritePromise(
     new_pkg[57] = value.controller_assist_levels[8].speed_limit;
     new_pkg[58] = value.controller_displayless_mode ? 1 : 0;
     new_pkg[59] = value.controller_lamps_always_on ? 1 : 0;
+    let summ = 0;
+    new_pkg.slice(0, 63).forEach((item) => (summ += item));
+    new_pkg[63] = summ & 0b11111111;
+    promise_array.push(
+        new Promise<boolean>((resolve, reject) => {
+            write_function(
+                DeviceNetworkId.DRIVE_UNIT,
+                CanWriteCommandsList.Parameter1,
+                new_pkg,
+                resolve,
+                reject,
+            );
+        }),
+    );
+}
+
+export function prepareParameter2WritePromise(
+    value: BafangCanControllerParameter2,
+    old_pkg: number[] | undefined,
+    promise_array: Promise<boolean>[],
+    write_function: (
+        target: DeviceNetworkId,
+        can_command: CanCommand,
+        value: number[],
+        resolve?: (...args: any[]) => void,
+        reject?: (...args: any[]) => void,
+    ) => void,
+): void {
+    if (!old_pkg) return;
+    const new_pkg: number[] = deepCopy(old_pkg);
+    for (let i = 0; i <= 5; i++) {
+        new_pkg[0 + i] = value.controller_torque_profiles[i].start_torque_value;
+        new_pkg[6 + i] = value.controller_torque_profiles[i].max_torque_value;
+        new_pkg[12 + i] =
+            value.controller_torque_profiles[i].return_torque_value;
+        new_pkg[24 + i] = value.controller_torque_profiles[i].min_current;
+        new_pkg[18 + i] = value.controller_torque_profiles[i].max_current;
+        new_pkg[36 + i] = value.controller_torque_profiles[i].start_pulse;
+        new_pkg[42 + i] = Math.floor(
+            value.controller_torque_profiles[i].current_decay_time / 5,
+        );
+        new_pkg[48 + i] = Math.floor(
+            value.controller_torque_profiles[i].stop_delay / 2,
+        );
+    }
     let summ = 0;
     new_pkg.slice(0, 63).forEach((item) => (summ += item));
     new_pkg[63] = summ & 0b11111111;
