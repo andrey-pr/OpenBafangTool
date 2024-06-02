@@ -940,7 +940,7 @@ export function prepareParameter2WritePromise(
         new Promise<boolean>((resolve, reject) => {
             write_function(
                 DeviceNetworkId.DRIVE_UNIT,
-                CanWriteCommandsList.Parameter1,
+                CanWriteCommandsList.Parameter2,
                 new_pkg,
                 resolve,
                 reject,
