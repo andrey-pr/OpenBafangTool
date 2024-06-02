@@ -9,20 +9,20 @@ import {
     RotateRightOutlined,
 } from '@ant-design/icons';
 import { Button, Layout, Menu, Modal, Spin, message } from 'antd';
-import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
-import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
-import IConnection from '../../../device/high-level/Connection';
-import BafangUartMotor from '../../../device/high-level/BafangUartMotor';
+import IConnection from '../../device/high-level/Connection';
+import BafangUartMotor from '../../device/high-level/BafangUartMotor';
 import DocumentationView from '../panels/common/DocumentationView';
-import { DocPages } from '../../../docs/document_resolver';
-import InterfaceType from '../../models/InterfaceType';
-import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView';
-import BafangCanSystemInfoView from '../panels/bafang/full/BafangCanSystemInfoView';
-import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
-import BafangCanMotorSettingsView from '../panels/bafang/full/BafangCanMotorSettingsView';
-import BafangCanDisplaySettingsView from '../panels/bafang/full/BafangCanDisplaySettingsView';
-import BafangCanSensorSettingsView from '../panels/bafang/full/BafangCanSensorSettingsView';
-import { DeviceName } from '../../../types/DeviceType';
+import { DocPages } from '../../docs/document_resolver';
+import InterfaceType from '../models/InterfaceType';
+import BafangCanSystem from '../../device/high-level/BafangCanSystem';
+import { DeviceName } from '../../types/DeviceType';
+import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/uart/simplified/BafangUartMotorSettingsSimplifiedView';
+import BafangUartMotorInfoView from '../panels/bafang/uart/full/BafangUartMotorInfoView';
+import BafangUartMotorSettingsView from '../panels/bafang/uart/full/BafangUartMotorSettingsView';
+import BafangCanSystemInfoView from '../panels/bafang/can/full/BafangCanSystemInfoView';
+import BafangCanMotorSettingsView from '../panels/bafang/can/full/BafangCanMotorSettingsView';
+import BafangCanDisplaySettingsView from '../panels/bafang/can/full/BafangCanDisplaySettingsView';
+import BafangCanSensorSettingsView from '../panels/bafang/can/full/BafangCanSensorSettingsView';
 
 const { Sider } = Layout;
 

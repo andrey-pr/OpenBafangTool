@@ -2,7 +2,7 @@ import { Table } from 'antd';
 import React from 'react';
 import Column from 'antd/es/table/Column';
 import ParameterInputComponent from './ParameterInput';
-import { BafangAssistProfile } from '../../../types/common';
+import { BafangAssistProfile } from '../../types/common';
 import { deepCopy } from 'deep-copy-ts';
 
 type AssistTableRow = {

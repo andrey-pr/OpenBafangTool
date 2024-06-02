@@ -13,7 +13,7 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import NumberValueComponent from '../../../components/NumberValueComponent';
+import NumberValueComponent from '../../../../components/NumberValueComponent';
 import {
     generateEditableNumberListItem,
     generateEditableStringListItem,

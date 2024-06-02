@@ -1,6 +1,6 @@
 import { Select } from 'antd';
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type SelectParameterProps = {
     value: string | number | boolean | NoData;

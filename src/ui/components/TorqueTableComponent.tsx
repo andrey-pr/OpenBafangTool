@@ -3,7 +3,7 @@ import React from 'react';
 import Column from 'antd/es/table/Column';
 import ParameterInputComponent from './ParameterInput';
 import { deepCopy } from 'deep-copy-ts';
-import { BafangCanTorqueProfile } from '../../../types/BafangCanSystemTypes';
+import { BafangCanTorqueProfile } from '../../types/BafangCanSystemTypes';
 
 type TorqueTableRow = {
     key: React.Key;

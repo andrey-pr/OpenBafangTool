@@ -1,6 +1,6 @@
 import { Input, InputNumber, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type ParameterInputProps = {
     value: number | NoData | null;

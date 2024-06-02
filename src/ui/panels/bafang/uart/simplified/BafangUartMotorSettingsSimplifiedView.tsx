@@ -24,13 +24,13 @@ import {
     ThrottleModeOptions,
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
-import ParameterInputComponent from '../../../components/ParameterInput';
+import ParameterInputComponent from '../../../../components/ParameterInput';
 import {
     generateEditableNumberListItemWithWarning,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
-import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
-import SelectParameterComponent from '../../../components/SelectParameterComponent';
+import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
+import SelectParameterComponent from '../../../../components/SelectParameterComponent';
 
 const { Title } = Typography;
 

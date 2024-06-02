@@ -1,7 +1,7 @@
 /* eslint-disable no-else-return */
 import React from 'react';
-import DeviceSelectionView from './views/connect/DeviceSelectionView';
-import MainView from './views/main/MainView';
+import DeviceSelectionView from './views/DeviceSelectionView';
+import MainView from './views/MainView';
 import IConnection from '../device/high-level/Connection';
 import InterfaceType from './models/InterfaceType';
 

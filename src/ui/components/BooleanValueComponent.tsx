@@ -1,6 +1,6 @@
 import { Typography } from 'antd';
 import React, { ReactNode } from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type BooleanValueProps = {
     value: boolean | number | NoData;

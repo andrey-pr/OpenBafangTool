@@ -28,8 +28,8 @@ import {
     TriggerTypeOptions,
 } from '../../../../../types/BafangCanSystemTypes';
 import { NotAvailable, NotLoadedYet } from '../../../../../types/no_data';
-import ParameterInputComponent from '../../../components/ParameterInput';
-import ParameterSelectComponent from '../../../components/ParameterSelect';
+import ParameterInputComponent from '../../../../components/ParameterInput';
+import ParameterSelectComponent from '../../../../components/ParameterSelect';
 import {
     generateAnnotatedEditableNumberListItem,
     generateEditableNumberListItem,
@@ -39,9 +39,9 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 import Title from 'antd/es/typography/Title';
-import AssistLevelTableComponent from '../../../components/AssistLevelTableComponent';
+import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
 import { BooleanOptions } from '../../../../../types/common';
-import TorqueTableComponent from '../../../components/TorqueTableComponent';
+import TorqueTableComponent from '../../../../components/TorqueTableComponent';
 
 const { Text } = Typography;
 

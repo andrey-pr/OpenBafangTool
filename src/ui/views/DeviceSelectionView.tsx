@@ -11,17 +11,17 @@ import {
 } from 'antd';
 import { SerialPort } from 'serialport';
 import HID from 'node-hid';
-import IConnection from '../../../device/high-level/Connection';
-import BafangUartMotor from '../../../device/high-level/BafangUartMotor';
-import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
+import IConnection from '../../device/high-level/Connection';
+import BafangUartMotor from '../../device/high-level/BafangUartMotor';
+import BafangCanSystem from '../../device/high-level/BafangCanSystem';
 import {
     DeviceBrand,
     DeviceInterface,
     DeviceType,
-} from '../../../types/DeviceType';
-import InterfaceType from '../../models/InterfaceType';
-import filterPorts from '../../../device/serial/serial-patcher';
-import { listBesstDevices } from '../../../device/besst/besst';
+} from '../../types/DeviceType';
+import InterfaceType from '../models/InterfaceType';
+import filterPorts from '../../device/serial/serial-patcher';
+import { listBesstDevices } from '../../device/besst/besst';
 
 const { Option } = Select;
 

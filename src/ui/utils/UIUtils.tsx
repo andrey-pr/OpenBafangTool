@@ -1,13 +1,13 @@
 import { ReactNode } from 'react';
 import { Typography } from 'antd';
 import { DescriptionsItemType } from 'antd/es/descriptions';
-import StringValueComponent from '../views/components/StringValueComponent';
+import StringValueComponent from '../components/StringValueComponent';
 import { NoData } from '../../types/no_data';
-import NumberValueComponent from '../views/components/NumberValueComponent';
-import BooleanValueComponent from '../views/components/BooleanValueComponent';
-import StringInputComponent from '../views/components/StringInput';
-import ParameterInputComponent from '../views/components/ParameterInput';
-import SelectParameterComponent from '../views/components/SelectParameterComponent';
+import NumberValueComponent from '../components/NumberValueComponent';
+import BooleanValueComponent from '../components/BooleanValueComponent';
+import StringInputComponent from '../components/StringInput';
+import ParameterInputComponent from '../components/ParameterInput';
+import SelectParameterComponent from '../components/SelectParameterComponent';
 
 const { Text } = Typography;
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../../types/no_data';
+import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type StringValueProps = {
     value: string | number | NoData;
