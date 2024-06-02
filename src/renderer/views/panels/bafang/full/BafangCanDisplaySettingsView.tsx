@@ -24,7 +24,8 @@ import {
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanDisplayCodes,
-    BafangCanDisplayData,
+    BafangCanDisplayData1,
+    BafangCanDisplayData2,
     BafangCanDisplayState,
 } from '../../../../../types/BafangCanSystemTypes';
 import { getErrorCodeText } from '../../../../../constants/BafangCanConstants';
@@ -35,7 +36,8 @@ type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanDisplayData &
+type SettingsState = BafangCanDisplayData1 &
+    BafangCanDisplayData2 &
     BafangCanDisplayState &
     BafangCanDisplayCodes & {
         display_error_codes: number[];
@@ -72,7 +74,8 @@ class BafangCanDisplaySettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.displayData,
+            ...connection.displayData1,
+            ...connection.displayData2,
             ...connection.displayRealtimeData,
             ...connection.displayCodes,
             display_error_codes: connection.displayErrorCodes,
@@ -360,7 +363,7 @@ class BafangCanDisplaySettingsView extends React.Component<
         if (this.writingInProgress) return;
         this.writingInProgress = true;
         const { connection } = this.props;
-        connection.displayData = this.state as BafangCanDisplayData;
+        connection.displayData1 = this.state as BafangCanDisplayData1;
         connection.displayCodes = this.state as BafangCanDisplayCodes;
         connection.saveDisplayData();
         message.open({

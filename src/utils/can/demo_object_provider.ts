@@ -3,10 +3,12 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
-    BafangCanControllerRealtime,
+    BafangCanControllerRealtime0,
+    BafangCanControllerRealtime1,
     BafangCanControllerSpeedParameters,
     BafangCanDisplayCodes,
-    BafangCanDisplayData,
+    BafangCanDisplayData1,
+    BafangCanDisplayData2,
     BafangCanDisplayState,
     BafangCanMotorType,
     BafangCanPedalSensorType,
@@ -18,20 +20,23 @@ import {
 } from '../../types/BafangCanSystemTypes';
 import { NotAvailable } from '../../types/no_data';
 
-export function getControllerRealtimeDemoData(): BafangCanControllerRealtime {
+export function getControllerRealtime0DemoData(): BafangCanControllerRealtime0 {
     return {
         controller_cadence: 0,
         controller_torque: 750,
+        controller_remaining_capacity: 0,
+        controller_single_trip: 0,
+        controller_remaining_distance: 0,
+    };
+}
+
+export function getControllerRealtime1DemoData(): BafangCanControllerRealtime1 {
+    return {
         controller_speed: 0,
         controller_current: 0,
         controller_voltage: 29.7,
         controller_temperature: 24,
         controller_motor_temperature: 25,
-        controller_walk_assistance: false,
-        controller_calories: 0,
-        controller_remaining_capacity: 0,
-        controller_single_trip: 0,
-        controller_remaining_distance: 0,
     };
 }
 
@@ -97,6 +102,15 @@ export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
         controller_displayless_mode: false,
         controller_lamps_always_on: false,
     };
+}
+
+export function getControllerParameter1ArrayDemo(): number[] {
+    return [
+        36, 18, 47, 128, 12, 172, 13, 16, 39, 3, 25, 15, 45, 0, 0, 24, 2, 12, 1,
+        4, 1, 1, 66, 14, 204, 16, 0, 0, 0, 0, 0, 0, 0, 0, 12, 36, 0, 25, 2, 5,
+        25, 30, 37, 45, 52, 60, 70, 80, 100, 100, 100, 100, 100, 100, 100, 100,
+        100, 100, 0, 0, 94, 1, 255, 183,
+    ];
 }
 
 export function getControllerParameter2Demo(): BafangCanControllerParameter2 {
@@ -166,6 +180,19 @@ export function getControllerParameter2Demo(): BafangCanControllerParameter2 {
     };
 }
 
+export function getControllerParameter2ArrayDemo(): number[] {
+    return [
+        8, 6, 5, 4, 3, 2, 50, 45, 40, 32, 25, 18, 6, 5, 4, 3, 2, 2, 100, 100,
+        100, 100, 100, 100, 15, 15, 15, 15, 15, 15, 5, 5, 4, 4, 3, 3, 1, 1, 1,
+        1, 1, 1, 16, 16, 14, 12, 10, 10, 90, 100, 90, 90, 85, 75, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 43,
+    ];
+}
+
+export function getDisplayErrorCodesDemo(): number[] {
+    return [14, 21, -1];
+}
+
 export function getControllerSpeedParametersDemo(): BafangCanControllerSpeedParameters {
     return {
         controller_wheel_diameter: BafangCanWheelDiameterTable[14],
@@ -174,14 +201,18 @@ export function getControllerSpeedParametersDemo(): BafangCanControllerSpeedPara
     };
 }
 
-export function getDisplayDemoData(): BafangCanDisplayData {
+export function getDisplayDemoData1(): BafangCanDisplayData1 {
     return {
         display_total_mileage: 10000,
         display_single_mileage: 1000,
         display_max_speed: 0,
+    };
+}
+
+export function getDisplayDemoData2(): BafangCanDisplayData2 {
+    return {
         display_average_speed: 0,
         display_service_mileage: 0,
-        display_last_shutdown_time: 5,
     };
 }
 

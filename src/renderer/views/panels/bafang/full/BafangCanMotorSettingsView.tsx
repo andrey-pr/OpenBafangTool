@@ -20,7 +20,8 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
-    BafangCanControllerRealtime,
+    BafangCanControllerRealtime0,
+    BafangCanControllerRealtime1,
     BafangCanControllerSpeedParameters,
     BafangCanPedalSensorType,
     BafangCanWheelDiameterTable,
@@ -48,7 +49,8 @@ type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanControllerRealtime &
+type SettingsState = BafangCanControllerRealtime0 &
+    BafangCanControllerRealtime1 &
     BafangCanControllerSpeedParameters &
     BafangCanControllerParameter1 &
     BafangCanControllerParameter2 &
@@ -69,7 +71,8 @@ class BafangCanMotorSettingsView extends React.Component<
         this.state = {
             ...connection.controllerSpeedParameters,
             ...connection.controllerCodes,
-            ...connection.controllerRealtimeData,
+            ...connection.controllerRealtimeData0,
+            ...connection.controllerRealtimeData1,
             ...connection.controllerParameter1,
             ...connection.controllerParameter2,
             position_sensor_calibration_dialog: false,

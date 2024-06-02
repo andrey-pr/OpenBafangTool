@@ -1,19 +1,20 @@
 import { BafangAssistProfile } from './common';
 import { NoData } from './no_data';
 
-export type BafangCanControllerRealtime = {
+export type BafangCanControllerRealtime0 = {
     controller_cadence: number | NoData;
     controller_torque: number | NoData;
+    controller_remaining_capacity: number | NoData;
+    controller_single_trip: number | NoData;
+    controller_remaining_distance: number | NoData;
+};
+
+export type BafangCanControllerRealtime1 = {
     controller_speed: number | NoData;
     controller_current: number | NoData;
     controller_voltage: number | NoData;
     controller_temperature: number | NoData;
     controller_motor_temperature: number | NoData;
-    controller_walk_assistance: boolean | NoData;
-    controller_calories: number | NoData;
-    controller_remaining_capacity: number | NoData;
-    controller_single_trip: number | NoData;
-    controller_remaining_distance: number | NoData;
 };
 
 export type BafangCanSystemVoltage = 36 | 43 | 48;
@@ -287,13 +288,15 @@ export type BafangCanDisplayCodes = {
     display_bootload_version: string | NoData;
 };
 
-export type BafangCanDisplayData = {
+export type BafangCanDisplayData1 = {
     display_total_mileage: number | NoData;
     display_single_mileage: number | NoData;
     display_max_speed: number | NoData;
+};
+
+export type BafangCanDisplayData2 = {
     display_average_speed: number | NoData;
     display_service_mileage: number | NoData;
-    display_last_shutdown_time: number | NoData;
 };
 
 export enum BafangCanRideMode {

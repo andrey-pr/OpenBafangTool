@@ -28,6 +28,8 @@ type SentRequest = {
     can_operation: CanOperation;
 };
 
+type CommandProcessor = { log: boolean; processWriteAnswer: boolean };
+
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
 
@@ -41,7 +43,9 @@ export default class BafangCanSystem implements IConnection {
 
     private simulationRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
 
-    private _controllerRealtimeData: types.BafangCanControllerRealtime;
+    private _controllerRealtimeData0: types.BafangCanControllerRealtime0;
+
+    private _controllerRealtimeData1: types.BafangCanControllerRealtime1;
 
     private _sensorRealtimeData: types.BafangCanSensorRealtime;
 
@@ -55,7 +59,9 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerSpeedParameters: types.BafangCanControllerSpeedParameters;
 
-    private _displayData: types.BafangCanDisplayData;
+    private _displayData1: types.BafangCanDisplayData1;
+
+    private _displayData2: types.BafangCanDisplayData2;
 
     private _displayState: types.BafangCanDisplayState;
 
@@ -82,13 +88,15 @@ export default class BafangCanSystem implements IConnection {
     constructor(devicePath: string) {
         this.devicePath = devicePath;
         this.emitter = new EventEmitter();
-        this._controllerRealtimeData = ep.getEmptyControllerRealtimeData();
+        this._controllerRealtimeData0 = ep.getEmptyControllerRealtime0Data();
+        this._controllerRealtimeData1 = ep.getEmptyControllerRealtime1Data();
         this._sensorRealtimeData = ep.getEmptySensorRealtimeData();
         this._controllerParameter1 = ep.getEmptyControllerParameter1();
         this._controllerParameter2 = ep.getEmptyControllerParameter2();
         this._controllerSpeedParameters =
             ep.getEmptyControllerSpeedParameters();
-        this._displayData = ep.getEmptyDisplayData();
+        this._displayData1 = ep.getEmptyDisplayData1();
+        this._displayData2 = ep.getEmptyDisplayData2();
         this._displayState = ep.getEmptyDisplayRealtimeData();
         this._displayErrorCodes = [];
         this._controllerCodes = ep.getEmptyControllerCodes();
@@ -121,7 +129,11 @@ export default class BafangCanSystem implements IConnection {
     private simulationDataPublisher(): void {
         this.emitter.emit(
             'broadcast-data-controller',
-            deepCopy(this._controllerRealtimeData),
+            deepCopy(this._controllerRealtimeData0),
+        );
+        this.emitter.emit(
+            'broadcast-data-controller',
+            deepCopy(this._controllerRealtimeData1),
         );
         this.emitter.emit(
             'broadcast-data-display',
@@ -224,18 +236,64 @@ export default class BafangCanSystem implements IConnection {
         }
     }
 
+    private commandProcessingTable: {
+        [key: number]: { [key: number]: { [key: number]: CommandProcessor } };
+    } = {
+        0x01: {
+            0x60: {
+                0x00: { log: true, processWriteAnswer: false },
+                0x01: { log: true, processWriteAnswer: false },
+                0x02: { log: true, processWriteAnswer: false },
+                0x03: { log: true, processWriteAnswer: false },
+                0x04: { log: true, processWriteAnswer: true },
+            },
+            0x31: { 0x00: { log: true, processWriteAnswer: false } },
+        },
+        0x02: {
+            0x60: {
+                0x00: { log: true, processWriteAnswer: false },
+                0x01: { log: true, processWriteAnswer: false },
+                0x02: { log: true, processWriteAnswer: false },
+                0x03: { log: true, processWriteAnswer: false },
+                0x05: { log: true, processWriteAnswer: true },
+            },
+            0x32: {
+                0x00: { log: false, processWriteAnswer: false },
+                0x01: { log: false, processWriteAnswer: false },
+                0x03: { log: true, processWriteAnswer: false },
+            },
+        },
+        0x03: {
+            0x60: {
+                0x00: { log: true, processWriteAnswer: false },
+                0x01: { log: true, processWriteAnswer: false },
+                0x02: { log: true, processWriteAnswer: false },
+                0x03: { log: true, processWriteAnswer: false },
+                0x04: { log: true, processWriteAnswer: true },
+                0x05: { log: true, processWriteAnswer: true },
+                0x07: { log: true, processWriteAnswer: false },
+                0x08: { log: true, processWriteAnswer: false },
+            },
+            0x63: {
+                0x00: { log: false, processWriteAnswer: false },
+                0x01: { log: true, processWriteAnswer: true },
+                0x02: { log: true, processWriteAnswer: true },
+            },
+        },
+        // 0x1f: { 0x63: [], 0x31: { 0x00: [] }, 0x32: {} },
+    };
+
     private processParsedCanResponse(response: BesstReadedCanFrame) {
         this.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
             log.info('received can package:', response);
             if (response.data.length === 0) {
-                this.resolveRequest(response);
                 this.rereadParameter(response);
                 return;
             }
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 if (response.canCommandSubCode === 0x07) {
-                    parsers.parseErrorCodes(response, this._displayErrorCodes);
+                    this._displayErrorCodes = parsers.parseErrorCodes(response);
                     this.emitter.emit(
                         'display-error-codes',
                         this._displayErrorCodes,
@@ -255,20 +313,16 @@ export default class BafangCanSystem implements IConnection {
             ) {
                 if (response.canCommandSubCode == 0x11) {
                     this.controllerParameter1Array = response.data;
-                    parsers.parseControllerParameter1(
-                        response,
-                        this._controllerParameter1,
-                    );
+                    this._controllerParameter1 =
+                        parsers.parseControllerParameter1(response);
                     this.emitter.emit(
                         'controller-parameter1',
                         deepCopy(this._controllerParameter1),
                     );
                 } else if (response.canCommandSubCode == 0x12) {
                     this.controllerParameter2Array = response.data;
-                    parsers.parseControllerParameter2(
-                        response,
-                        this._controllerParameter2,
-                    );
+                    this._controllerParameter2 =
+                        parsers.parseControllerParameter2(response);
                     this.emitter.emit(
                         'controller-parameter2',
                         deepCopy(this._controllerParameter2),
@@ -299,7 +353,7 @@ export default class BafangCanSystem implements IConnection {
             //code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    parsers.parseDisplayPackage0(response, this._displayState);
+                    this._displayState = parsers.parseDisplayPackage0(response);
                     this.emitter.emit(
                         'broadcast-data-display',
                         deepCopy(this._displayState),
@@ -308,27 +362,25 @@ export default class BafangCanSystem implements IConnection {
                 case 0x01:
                     log.info('received can package:', response);
                     if (response.data.length === 0) {
-                        this.resolveRequest(response);
                         this.rereadParameter(response);
                         break;
                     }
-                    parsers.parseDisplayPackage1(response, this._displayData);
+                    this._displayData1 = parsers.parseDisplayPackage1(response);
                     this.emitter.emit(
                         'display-general-data',
-                        deepCopy(this._displayData),
+                        deepCopy(this._displayData1),
                     );
                     break;
                 case 0x02:
                     log.info('received can package:', response);
                     if (response.data.length === 0) {
-                        this.resolveRequest(response);
                         this.rereadParameter(response);
                         break;
                     }
-                    parsers.parseDisplayPackage2(response, this._displayData);
+                    this._displayData2 = parsers.parseDisplayPackage2(response);
                     this.emitter.emit(
                         'display-general-data',
-                        deepCopy(this._displayData),
+                        deepCopy(this._displayData2),
                     );
                     break;
                 default:
@@ -338,7 +390,7 @@ export default class BafangCanSystem implements IConnection {
             response.canCommandCode === 0x31 &&
             response.canCommandSubCode === 0x00
         ) {
-            parsers.parseSensorPackage(response, this._sensorRealtimeData);
+            this._sensorRealtimeData = parsers.parseSensorPackage(response);
             this.emitter.emit(
                 'broadcast-data-sensor',
                 deepCopy(this._sensorRealtimeData),
@@ -346,31 +398,25 @@ export default class BafangCanSystem implements IConnection {
         } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    parsers.parseControllerPackage0(
-                        response,
-                        this._controllerRealtimeData,
-                    );
+                    this._controllerRealtimeData0 =
+                        parsers.parseControllerPackage0(response);
                     this.emitter.emit(
                         'broadcast-data-controller',
-                        deepCopy(this._controllerRealtimeData),
+                        deepCopy(this._controllerRealtimeData0),
                     );
                     break;
                 case 0x01:
-                    parsers.parseControllerPackage1(
-                        response,
-                        this._controllerRealtimeData,
-                    );
+                    this._controllerRealtimeData1 =
+                        parsers.parseControllerPackage1(response);
                     this.emitter.emit(
                         'broadcast-data-controller',
-                        deepCopy(this._controllerRealtimeData),
+                        deepCopy(this._controllerRealtimeData1),
                     );
                     break;
                 case 0x03:
                     log.info('received can package:', response);
-                    parsers.parseControllerPackage3(
-                        response,
-                        this._controllerSpeedParameters,
-                    );
+                    this._controllerSpeedParameters =
+                        parsers.parseControllerPackage3(response);
                     this.emitter.emit(
                         'controller-speed-data',
                         deepCopy(this._controllerSpeedParameters),
@@ -438,27 +484,21 @@ export default class BafangCanSystem implements IConnection {
 
     public loadData(): void {
         if (this.devicePath === 'simulator') {
-            this._controllerRealtimeData = dp.getControllerRealtimeDemoData();
+            this._controllerRealtimeData0 = dp.getControllerRealtime0DemoData();
+            this._controllerRealtimeData1 = dp.getControllerRealtime1DemoData();
             this._sensorRealtimeData = dp.getSensorRealtimeDemoData();
             this._controllerParameter1 = dp.getControllerParameter1Demo();
             this._controllerParameter2 = dp.getControllerParameter2Demo();
-            this.controllerParameter1Array = [
-                36, 18, 47, 128, 12, 172, 13, 16, 39, 3, 25, 15, 45, 0, 0, 24,
-                2, 12, 1, 4, 1, 1, 66, 14, 204, 16, 0, 0, 0, 0, 0, 0, 0, 0, 12,
-                36, 0, 25, 2, 5, 25, 30, 37, 45, 52, 60, 70, 80, 100, 100, 100,
-                100, 100, 100, 100, 100, 100, 100, 0, 0, 94, 1, 255, 183,
-            ];
-            this.controllerParameter2Array = [
-                8, 6, 5, 4, 3, 2, 50, 45, 40, 32, 25, 18, 6, 5, 4, 3, 2, 2, 100,
-                100, 100, 100, 100, 100, 15, 15, 15, 15, 15, 15, 5, 5, 4, 4, 3,
-                3, 1, 1, 1, 1, 1, 1, 16, 16, 14, 12, 10, 10, 90, 100, 90, 90,
-                85, 75, 255, 255, 255, 255, 255, 255, 255, 255, 255, 43,
-            ];
+            this.controllerParameter1Array =
+                dp.getControllerParameter1ArrayDemo();
+            this.controllerParameter2Array =
+                dp.getControllerParameter2ArrayDemo();
             this._controllerSpeedParameters =
                 dp.getControllerSpeedParametersDemo();
-            this._displayData = dp.getDisplayDemoData();
+            this._displayData1 = dp.getDisplayDemoData1();
+            this._displayData2 = dp.getDisplayDemoData2();
             this._displayState = dp.getDisplayRealtimeDemoData();
-            this._displayErrorCodes = [14, 21, -1];
+            this._displayErrorCodes = dp.getDisplayErrorCodesDemo();
             this._controllerCodes = dp.getControllerCodesDemo();
             this._displayCodes = dp.getDisplayCodesDemo();
             this._sensorCodes = dp.getSensorCodesDemo();
@@ -482,7 +522,11 @@ export default class BafangCanSystem implements IConnection {
                 );
                 this.emitter.emit(
                     'display-general-data',
-                    deepCopy(this._displayData),
+                    deepCopy(this._displayData1),
+                );
+                this.emitter.emit(
+                    'display-general-data',
+                    deepCopy(this._displayData2),
                 );
                 this.emitter.emit(
                     'broadcast-data-display',
@@ -795,12 +839,12 @@ export default class BafangCanSystem implements IConnection {
             this.writeLongParameter,
         );
         serializers.prepareTotalMileageWritePromise(
-            this._displayData.display_total_mileage,
+            this._displayData1.display_total_mileage,
             writePromises,
             this.writeShortParameter,
         );
         serializers.prepareSingleMileageWritePromise(
-            this._displayData.display_single_mileage,
+            this._displayData1.display_single_mileage,
             writePromises,
             this.writeShortParameter,
         );
@@ -913,8 +957,12 @@ export default class BafangCanSystem implements IConnection {
         this._controllerCodes = deepCopy(data);
     }
 
-    public get controllerRealtimeData(): types.BafangCanControllerRealtime {
-        return deepCopy(this._controllerRealtimeData);
+    public get controllerRealtimeData0(): types.BafangCanControllerRealtime0 {
+        return deepCopy(this._controllerRealtimeData0);
+    }
+
+    public get controllerRealtimeData1(): types.BafangCanControllerRealtime1 {
+        return deepCopy(this._controllerRealtimeData1);
     }
 
     public get controllerParameter1(): types.BafangCanControllerParameter1 {
@@ -943,12 +991,16 @@ export default class BafangCanSystem implements IConnection {
         this._controllerSpeedParameters = deepCopy(data);
     }
 
-    public get displayData(): types.BafangCanDisplayData {
-        return deepCopy(this._displayData);
+    public get displayData1(): types.BafangCanDisplayData1 {
+        return deepCopy(this._displayData1);
     }
 
-    public set displayData(data: types.BafangCanDisplayData) {
-        this._displayData = deepCopy(data);
+    public set displayData1(data: types.BafangCanDisplayData1) {
+        this._displayData1 = deepCopy(data);
+    }
+
+    public get displayData2(): types.BafangCanDisplayData2 {
+        return deepCopy(this._displayData2);
     }
 
     public get displayRealtimeData(): types.BafangCanDisplayState {

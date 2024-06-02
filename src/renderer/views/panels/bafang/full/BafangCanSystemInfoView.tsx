@@ -6,9 +6,11 @@ import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangBesstCodes,
     BafangCanControllerCodes,
-    BafangCanControllerRealtime,
+    BafangCanControllerRealtime0,
+    BafangCanControllerRealtime1,
     BafangCanDisplayCodes,
-    BafangCanDisplayData,
+    BafangCanDisplayData1,
+    BafangCanDisplayData2,
     BafangCanDisplayState,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
@@ -25,10 +27,12 @@ type InfoProps = {
     connection: BafangCanSystem;
 };
 
-type InfoState = BafangCanControllerRealtime &
+type InfoState = BafangCanControllerRealtime0 &
+    BafangCanControllerRealtime1 &
     BafangCanSensorRealtime &
     BafangCanDisplayState &
-    BafangCanDisplayData &
+    BafangCanDisplayData1 &
+    BafangCanDisplayData2 &
     BafangCanControllerCodes &
     BafangCanDisplayCodes &
     BafangCanSensorCodes &
@@ -42,11 +46,13 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         this.state = {
             ...connection.controllerCodes,
-            ...connection.displayData,
+            ...connection.displayData1,
+            ...connection.displayData2,
             ...connection.displayCodes,
             ...connection.sensorCodes,
             ...connection.besstCodes,
-            ...connection.controllerRealtimeData,
+            ...connection.controllerRealtimeData0,
+            ...connection.controllerRealtimeData1,
             ...connection.displayRealtimeData,
             ...connection.sensorRealtimeData,
         };

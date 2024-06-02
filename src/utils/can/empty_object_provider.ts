@@ -3,10 +3,12 @@ import {
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
-    BafangCanControllerRealtime,
+    BafangCanControllerRealtime0,
+    BafangCanControllerRealtime1,
     BafangCanControllerSpeedParameters,
     BafangCanDisplayCodes,
-    BafangCanDisplayData,
+    BafangCanDisplayData1,
+    BafangCanDisplayData2,
     BafangCanDisplayState,
     BafangCanMotorType,
     BafangCanPedalSensorType,
@@ -16,20 +18,23 @@ import {
 } from '../../types/BafangCanSystemTypes';
 import { NotLoadedYet } from '../../types/no_data';
 
-export function getEmptyControllerRealtimeData(): BafangCanControllerRealtime {
+export function getEmptyControllerRealtime0Data(): BafangCanControllerRealtime0 {
     return {
         controller_cadence: NotLoadedYet,
         controller_torque: NotLoadedYet,
+        controller_remaining_capacity: NotLoadedYet,
+        controller_single_trip: NotLoadedYet,
+        controller_remaining_distance: NotLoadedYet,
+    };
+}
+
+export function getEmptyControllerRealtime1Data(): BafangCanControllerRealtime1 {
+    return {
         controller_speed: NotLoadedYet,
         controller_current: NotLoadedYet,
         controller_voltage: NotLoadedYet,
         controller_temperature: NotLoadedYet,
         controller_motor_temperature: NotLoadedYet,
-        controller_walk_assistance: NotLoadedYet,
-        controller_calories: NotLoadedYet,
-        controller_remaining_capacity: NotLoadedYet,
-        controller_single_trip: NotLoadedYet,
-        controller_remaining_distance: NotLoadedYet,
     };
 }
 
@@ -173,14 +178,18 @@ export function getEmptyControllerSpeedParameters(): BafangCanControllerSpeedPar
     };
 }
 
-export function getEmptyDisplayData(): BafangCanDisplayData {
+export function getEmptyDisplayData1(): BafangCanDisplayData1 {
     return {
         display_total_mileage: NotLoadedYet,
         display_single_mileage: NotLoadedYet,
         display_max_speed: NotLoadedYet,
+    };
+}
+
+export function getEmptyDisplayData2(): BafangCanDisplayData2 {
+    return {
         display_average_speed: NotLoadedYet,
         display_service_mileage: NotLoadedYet,
-        display_last_shutdown_time: NotLoadedYet,
     };
 }
 
