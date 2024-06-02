@@ -251,8 +251,8 @@ export default class BafangUartMotor implements IConnection {
     }
 
     connect(): Promise<boolean> {
-        if (this.port === 'simulator') {
-            console.log('Simulator connected');
+        if (this.port === 'demo') {
+            console.log('Demo mode: connected');
             return new Promise<boolean>((resolve) => {
                 resolve(true);
             });
@@ -294,15 +294,15 @@ export default class BafangUartMotor implements IConnection {
     }
 
     disconnect(): void {
-        if (this.port === 'simulator') {
-            console.log('Simulator disconnected');
+        if (this.port === 'demo') {
+            console.log('Demo mode: disconnected');
             return;
         }
         closePort(this.port);
     }
 
     testConnection(): Promise<boolean> {
-        if (this.port === 'simulator') {
+        if (this.port === 'demo') {
             return new Promise<boolean>((resolve) => {
                 resolve(true);
             });
@@ -319,7 +319,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     loadData(): void {
-        if (this.port === 'simulator') {
+        if (this.port === 'demo') {
             this.info = {
                 serial_number: '201608080001',
                 model: 'SW06',
@@ -372,7 +372,7 @@ export default class BafangUartMotor implements IConnection {
                 this.emitter.emit('data');
                 this.emitter.emit('reading-finish', 7, 0);
             }, 300);
-            console.log('Simulator: blank data loaded');
+            console.log('Demo mode: blank data loaded');
             return;
         }
         const request = [
@@ -406,14 +406,14 @@ export default class BafangUartMotor implements IConnection {
         ) {
             return false;
         }
-        if (this.port === 'simulator') {
+        if (this.port === 'demo') {
             setTimeout(() => this.emitter.emit('write-success', 'basic'), 300);
             setTimeout(() => this.emitter.emit('write-success', 'pedal'), 600);
             setTimeout(
                 () => this.emitter.emit('write-success', 'throttle'),
                 900,
             );
-            console.log('Simulator: data saved');
+            console.log('Demo mode: data saved');
             console.log(this.info);
             console.log(this.basic_parameters);
             console.log(this.pedal_parameters);
