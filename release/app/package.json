@@ -14,7 +14,7 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "node-hid": "^3.0.0",
+    "node-hid": "^3.1.0",
     "serialport": "^10.5.0"
   }
 }
