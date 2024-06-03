@@ -8,21 +8,41 @@ import {
     DesktopOutlined,
     RotateRightOutlined,
 } from '@ant-design/icons';
-import { Button, Layout, Menu, Modal, Spin, message } from 'antd';
-import BafangUartMotorInfoView from '../panels/bafang/full/BafangUartMotorInfoView';
-import BafangUartMotorSettingsView from '../panels/bafang/full/BafangUartMotorSettingsView';
+import { Layout, Menu, Modal, Spin, message } from 'antd';
 import IConnection from '../../../device/high-level/Connection';
 import BafangUartMotor from '../../../device/high-level/BafangUartMotor';
-import DocumentationView from '../panels/common/DocumentationView';
 import { DocPages } from '../../../docs/document_resolver';
 import InterfaceType from '../../models/InterfaceType';
-import BafangUartMotorSettingsSimplifiedView from '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView';
-import BafangCanSystemInfoView from '../panels/bafang/full/BafangCanSystemInfoView';
 import BafangCanSystem from '../../../device/high-level/BafangCanSystem';
-import BafangCanMotorSettingsView from '../panels/bafang/full/BafangCanMotorSettingsView';
-import BafangCanDisplaySettingsView from '../panels/bafang/full/BafangCanDisplaySettingsView';
-import BafangCanSensorSettingsView from '../panels/bafang/full/BafangCanSensorSettingsView';
 import { DeviceName } from '../../../types/DeviceType';
+
+const BafangUartMotorSettingsSimplifiedView = React.lazy(
+    () =>
+        import(
+            '../panels/bafang/simplified/BafangUartMotorSettingsSimplifiedView'
+        ),
+);
+const BafangUartMotorInfoView = React.lazy(
+    () => import('../panels/bafang/full/BafangUartMotorInfoView'),
+);
+const BafangUartMotorSettingsView = React.lazy(
+    () => import('../panels/bafang/full/BafangUartMotorSettingsView'),
+);
+const BafangCanSystemInfoView = React.lazy(
+    () => import('../panels/bafang/full/BafangCanSystemInfoView'),
+);
+const BafangCanMotorSettingsView = React.lazy(
+    () => import('../panels/bafang/full/BafangCanMotorSettingsView'),
+);
+const BafangCanDisplaySettingsView = React.lazy(
+    () => import('../panels/bafang/full/BafangCanDisplaySettingsView'),
+);
+const BafangCanSensorSettingsView = React.lazy(
+    () => import('../panels/bafang/full/BafangCanSensorSettingsView'),
+);
+const DocumentationView = React.lazy(
+    () => import('../panels/common/DocumentationView'),
+);
 
 const { Sider } = Layout;
 
@@ -283,6 +303,12 @@ class MainView extends React.Component<MainProps, MainState> {
     render() {
         const { connection, interfaceType } = this.props;
         const { tab, loading } = this.state;
+        const loadingElement = (
+            <Spin
+                spinning={true}
+                style={{ height: '100%', width: '100%', marginTop: '100px' }}
+            />
+        );
         return (
             <Layout hasSider>
                 <Spin spinning={loading} fullscreen />
@@ -316,42 +342,58 @@ class MainView extends React.Component<MainProps, MainState> {
                 </Sider>
                 <Layout style={{ marginLeft: 200, backgroundColor: 'white' }}>
                     {tab === 'bafang_uart_motor_settings_simplified' && (
-                        <BafangUartMotorSettingsSimplifiedView
-                            connection={connection as BafangUartMotor}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangUartMotorSettingsSimplifiedView
+                                connection={connection as BafangUartMotor}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_uart_motor_info' && (
-                        <BafangUartMotorInfoView
-                            connection={connection as BafangUartMotor}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangUartMotorInfoView
+                                connection={connection as BafangUartMotor}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_uart_motor_settings' && (
-                        <BafangUartMotorSettingsView
-                            connection={connection as BafangUartMotor}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangUartMotorSettingsView
+                                connection={connection as BafangUartMotor}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_can_system_info' && (
-                        <BafangCanSystemInfoView
-                            connection={connection as BafangCanSystem}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangCanSystemInfoView
+                                connection={connection as BafangCanSystem}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_can_motor_settings' && (
-                        <BafangCanMotorSettingsView
-                            connection={connection as BafangCanSystem}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangCanMotorSettingsView
+                                connection={connection as BafangCanSystem}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_can_display_settings' && (
-                        <BafangCanDisplaySettingsView
-                            connection={connection as BafangCanSystem}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangCanDisplaySettingsView
+                                connection={connection as BafangCanSystem}
+                            />
+                        </React.Suspense>
                     )}
                     {tab === 'bafang_can_sensor_settings' && (
-                        <BafangCanSensorSettingsView
-                            connection={connection as BafangCanSystem}
-                        />
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangCanSensorSettingsView
+                                connection={connection as BafangCanSystem}
+                            />
+                        </React.Suspense>
                     )}
                     {tab.indexOf('manual') === 0 && (
-                        <DocumentationView page={tab.substring(7)} />
+                        <React.Suspense fallback={loadingElement}>
+                            <DocumentationView page={tab.substring(7)} />
+                        </React.Suspense>
                     )}
                 </Layout>
             </Layout>

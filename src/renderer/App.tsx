@@ -1,9 +1,13 @@
 /* eslint-disable no-else-return */
 import React from 'react';
-import DeviceSelectionView from './views/connect/DeviceSelectionView';
-import MainView from './views/main/MainView';
 import IConnection from '../device/high-level/Connection';
 import InterfaceType from './models/InterfaceType';
+import { Spin } from 'antd';
+
+const DeviceSelectionView = React.lazy(
+    () => import('./views/connect/DeviceSelectionView'),
+);
+const MainView = React.lazy(() => import('./views/main/MainView'));
 
 type AppProps = {};
 
@@ -62,19 +66,29 @@ class App extends React.Component<AppProps, AppState> {
     render() {
         const { view } = this.state;
         const { connection, interfaceType } = this.state;
+        const loading = (
+            <Spin
+                spinning={true}
+                style={{ height: '100%', width: '100%', marginTop: '100px' }}
+            />
+        );
         if (view === 'device_selector') {
             return (
-                <DeviceSelectionView
-                    deviceSelectionHook={this.deviceSelectionHook}
-                />
+                <React.Suspense fallback={loading}>
+                    <DeviceSelectionView
+                        deviceSelectionHook={this.deviceSelectionHook}
+                    />
+                </React.Suspense>
             );
         } else if (view === 'main_view') {
             return (
-                <MainView
-                    connection={connection as IConnection}
-                    interfaceType={interfaceType as InterfaceType}
-                    backHook={this.toDeviceSelector}
-                />
+                <React.Suspense fallback={loading}>
+                    <MainView
+                        connection={connection as IConnection}
+                        interfaceType={interfaceType as InterfaceType}
+                        backHook={this.toDeviceSelector}
+                    />
+                </React.Suspense>
             );
         } else if (view === 'connection_error') {
             console.log('connection error');
