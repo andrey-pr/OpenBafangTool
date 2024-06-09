@@ -40,24 +40,7 @@ if (isDebug) {
     require('electron-debug')();
 }
 
-const installExtensions = async () => {
-    const installer = require('electron-devtools-installer');
-    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-    const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-    return installer
-        .default(
-            extensions.map((name) => installer[name]),
-            forceDownload,
-        )
-        .catch(console.log);
-};
-
 const createWindow = async () => {
-    if (isDebug) {
-        await installExtensions();
-    }
-
     const RESOURCES_PATH = app.isPackaged
         ? path.join(process.resourcesPath, 'assets')
         : path.join(__dirname, '../../assets');
@@ -92,6 +75,7 @@ const createWindow = async () => {
 
     mainWindow.on('closed', () => {
         mainWindow = null;
+        app.exit();
     });
 
     const menuBuilder = new MenuBuilder(mainWindow);
@@ -116,7 +100,7 @@ app.on('window-all-closed', () => {
     // Respect the OSX convention of having the application in memory even
     // after all windows have been closed
     if (process.platform !== 'darwin') {
-        app.quit();
+        app.exit();
     }
 });
 
@@ -142,6 +126,7 @@ app.whenReady()
     .then(() => {
         createWindow();
         app.on('activate', () => {
+            app.disableHardwareAcceleration();
             // On macOS it's common to re-create a window in the app when the
             // dock icon is clicked and there are no other windows open.
             if (mainWindow === null) createWindow();

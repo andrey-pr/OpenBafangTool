@@ -186,8 +186,8 @@ const ErrorCodes: {
         recommendations: '-',
     },
     8: {
-        description: 'Description for this code is not available', //TODO
-        recommendations: '-',
+        description: 'Inner motor hall sensor (not speed hall sensor) error',
+        recommendations: 'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
     },
     9: {
         description: 'Description for this code is not available', //TODO

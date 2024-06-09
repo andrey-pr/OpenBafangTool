@@ -25,6 +25,10 @@
 <!-- RELEASE NOTES -->
 ## Release Notes
 
+### 2.0.1
+
+- Fixed bug with writing
+
 ### 2.0.0
 
 - Added support of new systems with CAN bus
@@ -62,7 +66,7 @@ You can download executables for Windows and Linux (AppImage) [here](https://git
 
 ### Prerequisites
 
-#### Minimal set of hardware that you need to use this program for motors with CAN (also possible to test program in simulator mode without real hardware):
+#### Minimal set of hardware that you need to use this program for motors with CAN (also possible to test program in demo mode without real hardware):
 
 ![Programming cable](docs/assets/readme/besst-tool.jpeg)
 
@@ -72,7 +76,7 @@ Official Bafang BESST Tool device - you can buy it in many shops for 150\$ or so
 
 Motor that you want to configure. 
 
-#### Minimal set of hardware that you need to use this program for motors with UART (also possible to test program in simulator mode without real hardware):
+#### Minimal set of hardware that you need to use this program for motors with UART (also possible to test program in demo mode without real hardware):
 
 ![Programming cable](docs/assets/readme/cable.webp)
 

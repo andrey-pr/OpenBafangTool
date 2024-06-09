@@ -139,11 +139,13 @@ export function parseControllerPackage3(
         (item) =>
             item.code[0] === packet.data[2] && item.code[1] === packet.data[3],
     );
-    return {
-        controller_speed_limit: ((packet.data[1] << 8) + packet.data[0]) / 100,
-        controller_wheel_diameter: diameter ? diameter : NotLoadedYet,
-        controller_circumference: (packet.data[5] << 8) + packet.data[4],
-    };
+    if (diameter)
+        return {
+            controller_speed_limit:
+                ((packet.data[1] << 8) + packet.data[0]) / 100,
+            controller_wheel_diameter: diameter,
+            controller_circumference: (packet.data[5] << 8) + packet.data[4],
+        };
 }
 
 export function parseControllerParameter1(

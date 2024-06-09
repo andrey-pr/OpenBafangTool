@@ -15,6 +15,7 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
     BafangCanTemperatureSensorType,
+    BafangCanWheelDiameterTable,
 } from '../../types/BafangCanSystemTypes';
 import { NotLoadedYet } from '../../types/no_data';
 
@@ -172,9 +173,9 @@ export function getEmptyControllerParameter2(): BafangCanControllerParameter2 {
 
 export function getEmptyControllerSpeedParameters(): BafangCanControllerSpeedParameters {
     return {
-        controller_wheel_diameter: NotLoadedYet,
-        controller_speed_limit: NotLoadedYet,
-        controller_circumference: NotLoadedYet,
+        controller_wheel_diameter: BafangCanWheelDiameterTable[0],
+        controller_speed_limit: 0,
+        controller_circumference: 0,
     };
 }
 
