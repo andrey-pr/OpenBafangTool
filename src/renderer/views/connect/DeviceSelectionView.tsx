@@ -203,7 +203,7 @@ class DeviceSelectionView extends React.Component<
                                 allowClear
                                 style={{ minWidth: '150px' }}
                             >
-                                <Option value="simulator">Simulator</Option>
+                                <Option value="demo">Demo</Option>
                                 {portComponents}
                             </Select>
                         </Form.Item>
@@ -229,7 +229,7 @@ class DeviceSelectionView extends React.Component<
                                 allowClear
                                 style={{ minWidth: '150px' }}
                             >
-                                <Option value="simulator">Simulator</Option>
+                                <Option value="demo">Demo</Option>
                                 {besstDeviceList.map((item) => {
                                     return (
                                         <Option

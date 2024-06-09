@@ -33,9 +33,9 @@ export default class BafangCanSystem implements IConnection {
 
     public emitter: EventEmitter;
 
-    private simulationDataPublisherInterval: NodeJS.Timeout | undefined;
+    private demoDataPublisherInterval: NodeJS.Timeout | undefined;
 
-    private simulationRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
+    private demoRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
 
     private _controllerRealtimeData: types.BafangCanControllerRealtime;
 
@@ -101,9 +101,9 @@ export default class BafangCanSystem implements IConnection {
         this.saveControllerData = this.saveControllerData.bind(this);
         this.saveDisplayData = this.saveDisplayData.bind(this);
         this.saveSensorData = this.saveSensorData.bind(this);
-        this.simulationDataPublisher = this.simulationDataPublisher.bind(this);
-        this.simulationRealtimeDataGenerator =
-            this.simulationRealtimeDataGenerator.bind(this);
+        this.demoDataPublisher = this.demoDataPublisher.bind(this);
+        this.demoRealtimeDataGenerator =
+            this.demoRealtimeDataGenerator.bind(this);
         this.processParsedCanResponse =
             this.processParsedCanResponse.bind(this);
         this.readParameter = this.readParameter.bind(this);
@@ -120,7 +120,7 @@ export default class BafangCanSystem implements IConnection {
         this.emitter.emit('disconnection');
     }
 
-    private simulationDataPublisher(): void {
+    private demoDataPublisher(): void {
         this.emitter.emit(
             'broadcast-data-controller',
             deepCopy(this._controllerRealtimeData),
@@ -135,7 +135,7 @@ export default class BafangCanSystem implements IConnection {
         );
     }
 
-    private simulationRealtimeDataGenerator(): void {
+    private demoRealtimeDataGenerator(): void {
         this._displayState = {
             display_assist_levels: 5,
             display_ride_mode: types.BafangCanRideMode.ECO,
@@ -157,7 +157,7 @@ export default class BafangCanSystem implements IConnection {
         subcode: number,
         resolve?: (...args: any[]) => void,
         reject?: (...args: any[]) => void,
-        attempt = 0,
+        attempt = 1,
     ): void {
         if (resolve && reject) {
             if (this.sentRequests[target] === undefined)
@@ -387,16 +387,16 @@ export default class BafangCanSystem implements IConnection {
     } //TODO
 
     public connect(): Promise<boolean> {
-        if (this.devicePath === 'simulator') {
-            this.simulationDataPublisherInterval = setInterval(
-                this.simulationDataPublisher,
+        if (this.devicePath === 'demo') {
+            this.demoDataPublisherInterval = setInterval(
+                this.demoDataPublisher,
                 1500,
             );
-            this.simulationRealtimeDataGeneratorInterval = setInterval(
-                this.simulationRealtimeDataGenerator,
+            this.demoRealtimeDataGeneratorInterval = setInterval(
+                this.demoRealtimeDataGenerator,
                 5000,
             );
-            console.log('Simulator connected');
+            console.log('Demo mode: connected');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         this.device = new BesstDevice(this.devicePath);
@@ -405,7 +405,9 @@ export default class BafangCanSystem implements IConnection {
 
         return new Promise<boolean>(async (resolve) => {
             this.device?.reset().then(() => {
+                this.device?.emitter.removeAllListeners();
                 this.device?.emitter.on('can', this.processParsedCanResponse);
+                this.device?.emitter.on('disconnection', this.onDisconnect);
                 this.device?.activateDriveUnit().then(() => {
                     resolve(true);
                 });
@@ -414,17 +416,17 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public disconnect(): void {
-        if (this.devicePath === 'simulator') {
-            console.log('Simulator disconnected');
-            clearInterval(this.simulationDataPublisherInterval);
-            clearInterval(this.simulationRealtimeDataGeneratorInterval);
+        if (this.devicePath === 'demo') {
+            console.log('Demo mode: disconnected');
+            clearInterval(this.demoDataPublisherInterval);
+            clearInterval(this.demoRealtimeDataGeneratorInterval);
             return;
         }
         this.device?.disconnect();
     }
 
     public testConnection(): Promise<boolean> {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve) => {
@@ -439,7 +441,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public loadData(): void {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             this._controllerRealtimeData =
                 utils.getControllerRealtimeDemoData();
             this._sensorRealtimeData = utils.getSensorRealtimeDemoData();
@@ -507,7 +509,7 @@ export default class BafangCanSystem implements IConnection {
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
-            console.log('Simulator: blank data loaded');
+            console.log('Demo mode: blank data loaded');
             return;
         }
         if (this.readingInProgress) return;
@@ -716,7 +718,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public saveControllerData(): void {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             setTimeout(
                 () => this.emitter.emit('controller-writing-finish', 10, 0),
                 300,
@@ -776,7 +778,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public saveDisplayData(): void {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             setTimeout(
                 () => this.emitter.emit('display-writing-finish', 10, 0),
                 300,
@@ -831,7 +833,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public saveSensorData(): void {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             setTimeout(
                 () => this.emitter.emit('sensor-writing-finish', 10, 0),
                 300,
@@ -866,7 +868,7 @@ export default class BafangCanSystem implements IConnection {
             console.log('time is invalid');
             return new Promise<boolean>((resolve) => resolve(false));
         }
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             console.log(`New display time is ${hours}:${minutes}:${seconds}`);
             return new Promise<boolean>((resolve) => resolve(true));
         }
@@ -882,7 +884,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public cleanDisplayServiceMileage(): Promise<boolean> {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             console.log('Cleaned display mileage');
             return new Promise<boolean>((resolve) => resolve(true));
         }
@@ -898,7 +900,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public calibratePositionSensor(): Promise<boolean> {
-        if (this.devicePath === 'simulator') {
+        if (this.devicePath === 'demo') {
             console.log('Calibrated position sensor');
             return new Promise<boolean>((resolve) => resolve(true));
         }
