@@ -8,7 +8,7 @@ import { deepCopy } from 'deep-copy-ts';
 type AssistTableRow = {
     key: React.Key;
     index: number;
-    assist_level: number; //TODO add support of not loaded yet
+    assist_level: number;
     current: number;
     speed: number;
     tip?: string;

@@ -241,17 +241,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getSensorItems(): DescriptionsProps['items'] {
-        return [
-            generateSimpleNumberListItem(
-                'Torque value',
-                this.state.sensor_torque,
-                'mV',
-            ),
-            generateSimpleNumberListItem(
-                'Cadence',
-                this.state.sensor_cadence,
-                'RPM',
-            ),
+        let codesArray = [
             generateSimpleStringListItem(
                 'Hardware version',
                 this.state.sensor_hardware_version,
@@ -273,6 +263,26 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Software version',
                 this.state.sensor_software_version,
             ),
+        ];
+        if (this.props.connection.isSensorRealtimeDataReady) {
+            return [
+                generateSimpleNumberListItem(
+                    'Torque value',
+                    this.state.sensor_torque,
+                    'mV',
+                ),
+                generateSimpleNumberListItem(
+                    'Cadence',
+                    this.state.sensor_cadence,
+                    'RPM',
+                ),
+                ...codesArray,
+            ];
+        }
+        return [
+            generateSimpleStringListItem('Torque value', 'Not available yet'),
+            generateSimpleStringListItem('Cadence', 'Not available yet'),
+            ...codesArray,
         ];
     }
 

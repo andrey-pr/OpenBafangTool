@@ -41,19 +41,19 @@ export function getEmptyControllerRealtime1Data(): BafangCanControllerRealtime1 
 
 export function getEmptyDisplayRealtimeData(): BafangCanDisplayState {
     return {
-        display_assist_levels: NotLoadedYet,
-        display_ride_mode: NotLoadedYet,
-        display_boost: NotLoadedYet,
-        display_current_assist_level: NotLoadedYet,
-        display_light: NotLoadedYet,
-        display_button: NotLoadedYet,
+        display_assist_levels: 0,
+        display_ride_mode: 0,
+        display_boost: false,
+        display_current_assist_level: 0,
+        display_light: false,
+        display_button: false,
     };
 }
 
 export function getEmptySensorRealtimeData(): BafangCanSensorRealtime {
     return {
-        sensor_torque: NotLoadedYet,
-        sensor_cadence: NotLoadedYet,
+        sensor_torque: 0,
+        sensor_cadence: 0,
     };
 }
 
