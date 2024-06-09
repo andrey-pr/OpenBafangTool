@@ -71,6 +71,8 @@ export default class BafangCanSystem implements IConnection {
 
     private _displayAvailable: boolean = false;
 
+    private _displayErrorCodesAvailable: boolean = false;
+
     private _controllerAvailable: boolean = false;
 
     private _controllerParameter1Available: boolean = false;
@@ -241,6 +243,7 @@ export default class BafangCanSystem implements IConnection {
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 if (response.canCommandSubCode === 0x07) {
                     utils.parseErrorCodes(response, this._displayErrorCodes);
+                    this._displayErrorCodesAvailable = true;
                     this.emitter.emit(
                         'display-error-codes',
                         this._displayErrorCodes,
@@ -509,6 +512,7 @@ export default class BafangCanSystem implements IConnection {
                 this._controllerParameter1Available = false;
                 this._controllerParameter2Available = false;
                 this._controllerSpeedParameterAvailable = false;
+                this._displayErrorCodesAvailable = false;
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
@@ -1028,7 +1032,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayErrorCodesAvailable(): boolean {
-        return true;
+        return this._displayErrorCodesAvailable;
     }
 
     public get displayErrorCodes(): number[] {
