@@ -11,6 +11,7 @@ import {
 } from '../../types/BafangCanSystemTypes';
 import { NoData } from '../../types/no_data';
 import { intToByteArray } from '../utils';
+import { calculateChecksum } from './utils';
 
 type WriteFunctionType = (
     target: DeviceNetworkId,
