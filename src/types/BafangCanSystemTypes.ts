@@ -263,9 +263,9 @@ export const BafangCanWheelDiameterTable: BafangCanWheel[] = [
 ];
 
 export type BafangCanControllerSpeedParameters = {
-    controller_wheel_diameter: BafangCanWheel | NoData;
-    controller_speed_limit: number | NoData;
-    controller_circumference: number | NoData;
+    controller_wheel_diameter: BafangCanWheel;
+    controller_speed_limit: number;
+    controller_circumference: number;
 };
 
 export type BafangCanControllerCodes = {
@@ -293,7 +293,6 @@ export type BafangCanDisplayData = {
     display_max_speed: number | NoData;
     display_average_speed: number | NoData;
     display_service_mileage: number | NoData;
-    display_last_shutdown_time: number | NoData;
 };
 
 export enum BafangCanRideMode {

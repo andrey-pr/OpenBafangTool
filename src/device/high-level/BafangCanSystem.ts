@@ -71,6 +71,12 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerAvailable: boolean = false;
 
+    private _controllerParameter1Available: boolean = false;
+
+    private _controllerParameter2Available: boolean = false;
+
+    private _controllerSpeedParameterAvailable: boolean = false;
+
     private _sensorAvailable: boolean = false;
 
     private readingInProgress: boolean = false;
@@ -255,6 +261,7 @@ export default class BafangCanSystem implements IConnection {
                         response,
                         this._controllerParameter1,
                     );
+                    this._controllerParameter1Available = true;
                     this.emitter.emit(
                         'controller-parameter1',
                         deepCopy(this._controllerParameter1),
@@ -265,6 +272,7 @@ export default class BafangCanSystem implements IConnection {
                         response,
                         this._controllerParameter2,
                     );
+                    this._controllerParameter2Available = true;
                     this.emitter.emit(
                         'controller-parameter2',
                         deepCopy(this._controllerParameter2),
@@ -364,6 +372,7 @@ export default class BafangCanSystem implements IConnection {
                         response,
                         this._controllerSpeedParameters,
                     );
+                    this._controllerSpeedParameterAvailable = true;
                     this.emitter.emit(
                         'controller-speed-data',
                         deepCopy(this._controllerSpeedParameters),
@@ -492,6 +501,9 @@ export default class BafangCanSystem implements IConnection {
                 );
                 this._displayAvailable = true;
                 this._controllerAvailable = true;
+                this._controllerParameter1Available = false;
+                this._controllerParameter2Available = false;
+                this._controllerSpeedParameterAvailable = false;
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
@@ -901,6 +913,10 @@ export default class BafangCanSystem implements IConnection {
         });
     }
 
+    public get isControllerCodesAvailable(): boolean {
+        return true;
+    }
+
     public get controllerCodes(): types.BafangCanControllerCodes {
         return deepCopy(this._controllerCodes);
     }
@@ -913,12 +929,20 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._controllerRealtimeData);
     }
 
+    public get isControllerParameter1Available(): boolean {
+        return this._controllerParameter1Available;
+    }
+
     public get controllerParameter1(): types.BafangCanControllerParameter1 {
         return deepCopy(this._controllerParameter1);
     }
 
     public set controllerParameter1(data: types.BafangCanControllerParameter1) {
         this._controllerParameter1 = deepCopy(data);
+    }
+
+    public get isControllerParameter2Available(): boolean {
+        return this._controllerParameter2Available;
     }
 
     public get controllerParameter2(): types.BafangCanControllerParameter2 {
@@ -929,6 +953,10 @@ export default class BafangCanSystem implements IConnection {
         this._controllerParameter2 = deepCopy(data);
     }
 
+    public get isControllerSpeedParametersAvailable(): boolean {
+        return this._controllerSpeedParameterAvailable;
+    }
+
     public get controllerSpeedParameters(): types.BafangCanControllerSpeedParameters {
         return deepCopy(this._controllerSpeedParameters);
     }
@@ -937,6 +965,10 @@ export default class BafangCanSystem implements IConnection {
         data: types.BafangCanControllerSpeedParameters,
     ) {
         this._controllerSpeedParameters = deepCopy(data);
+    }
+
+    public get isDisplayDataAvailable(): boolean {
+        return true;
     }
 
     public get displayData(): types.BafangCanDisplayData {
@@ -951,8 +983,16 @@ export default class BafangCanSystem implements IConnection {
         return deepCopy(this._displayState);
     }
 
+    public get isDisplayErrorCodesAvailable(): boolean {
+        return true;
+    }
+
     public get displayErrorCodes(): number[] {
         return deepCopy(this._displayErrorCodes);
+    }
+
+    public get isDisplayCodesAvailable(): boolean {
+        return true;
     }
 
     public get displayCodes(): types.BafangCanDisplayCodes {
@@ -965,6 +1005,10 @@ export default class BafangCanSystem implements IConnection {
 
     public get sensorRealtimeData(): types.BafangCanSensorRealtime {
         return deepCopy(this._sensorRealtimeData);
+    }
+
+    public get isSensorCodesAvailable(): boolean {
+        return true;
     }
 
     public get sensorCodes(): types.BafangCanSensorCodes {

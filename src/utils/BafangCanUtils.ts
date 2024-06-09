@@ -181,9 +181,9 @@ export function getEmptyControllerParameter2(): BafangCanControllerParameter2 {
 
 export function getEmptyControllerSpeedParameters(): BafangCanControllerSpeedParameters {
     return {
-        controller_wheel_diameter: NotLoadedYet,
-        controller_speed_limit: NotLoadedYet,
-        controller_circumference: NotLoadedYet,
+        controller_wheel_diameter: BafangCanWheelDiameterTable[0],
+        controller_speed_limit: 0,
+        controller_circumference: 0,
     };
 }
 
@@ -194,7 +194,6 @@ export function getEmptyDisplayData(): BafangCanDisplayData {
         display_max_speed: NotLoadedYet,
         display_average_speed: NotLoadedYet,
         display_service_mileage: NotLoadedYet,
-        display_last_shutdown_time: NotLoadedYet,
     };
 }
 
@@ -402,7 +401,6 @@ export function getDisplayDemoData(): BafangCanDisplayData {
         display_max_speed: 0,
         display_average_speed: 0,
         display_service_mileage: 0,
-        display_last_shutdown_time: 5,
     };
 }
 

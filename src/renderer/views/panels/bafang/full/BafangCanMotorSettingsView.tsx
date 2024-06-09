@@ -7,7 +7,6 @@ import {
     Popconfirm,
     Button,
     Modal,
-    Table,
 } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import {
@@ -401,10 +400,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         unit="km/h"
                         min={1}
                         max={25}
-                        disabled={
-                            typeof controller_speed_limit === 'number' &&
-                            controller_speed_limit > 25
-                        }
+                        disabled={controller_speed_limit > 25}
                         onNewValue={(e) => {
                             this.setState({ controller_speed_limit: e });
                         }}
@@ -426,24 +422,19 @@ class BafangCanMotorSettingsView extends React.Component<
                 ),
                 children: (
                     <ParameterSelectComponent
-                        value={
-                            controller_wheel_diameter !== NotLoadedYet &&
-                            controller_wheel_diameter !== NotAvailable
-                                ? controller_wheel_diameter.text
-                                : controller_wheel_diameter
-                        }
+                        value={controller_wheel_diameter.text}
                         options={BafangCanWheelDiameterTable.map(
                             (item) => item.text,
                         )}
                         onNewValue={(value) => {
-                            const wheel = BafangCanWheelDiameterTable.find(
-                                (item) => item.text === value,
-                            );
-                            this.setState({
-                                controller_wheel_diameter: wheel
-                                    ? wheel
-                                    : BafangCanWheelDiameterTable[0],
-                            });
+                            const controller_wheel_diameter =
+                                BafangCanWheelDiameterTable.find(
+                                    (item) => item.text === value,
+                                );
+                            if (controller_wheel_diameter)
+                                this.setState({
+                                    controller_wheel_diameter,
+                                });
                         }}
                         doNotBlock
                     />
@@ -456,8 +447,8 @@ class BafangCanMotorSettingsView extends React.Component<
                     <ParameterInputComponent
                         value={controller_circumference}
                         unit="mm"
-                        min={controller_wheel_diameter?.minimalCircumference}
-                        max={controller_wheel_diameter?.maximalCircumference}
+                        min={controller_wheel_diameter.minimalCircumference}
+                        max={controller_wheel_diameter.maximalCircumference}
                         onNewValue={(e) => {
                             this.setState({ controller_circumference: e });
                         }}
@@ -527,13 +518,19 @@ class BafangCanMotorSettingsView extends React.Component<
         if (this.writingInProgress) return;
         this.writingInProgress = true;
         const { connection } = this.props;
-        connection.controllerSpeedParameters = this
-            .state as BafangCanControllerSpeedParameters;
+        if (connection.isControllerSpeedParametersAvailable) {
+            connection.controllerSpeedParameters = this
+                .state as BafangCanControllerSpeedParameters;
+        }
         connection.controllerCodes = this.state as BafangCanControllerCodes;
-        connection.controllerParameter1 = this
-            .state as BafangCanControllerParameter1;
-        connection.controllerParameter2 = this
-            .state as BafangCanControllerParameter2;
+        if (connection.isControllerParameter1Available) {
+            connection.controllerParameter1 = this
+                .state as BafangCanControllerParameter1;
+        }
+        if (connection.isControllerParameter2Available) {
+            connection.controllerParameter2 = this
+                .state as BafangCanControllerParameter2;
+        }
         connection.saveControllerData();
         message.open({
             key: 'writing',
@@ -608,70 +605,118 @@ class BafangCanMotorSettingsView extends React.Component<
                     items={this.getRealtimeItems()}
                     column={1}
                 />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Electric parameters"
-                    items={this.getElectricItems()}
-                    column={1}
-                />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Battery parameters"
-                    items={this.getBatteryItems()}
-                    column={1}
-                />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Mechanical parameters"
-                    items={this.getMechanicalItems()}
-                    column={1}
-                />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Driving parameters"
-                    items={this.getDrivingItems()}
-                    column={1}
-                />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Throttle parameters"
-                    items={this.getThrottleItems()}
-                    column={1}
-                />
-                <br />
-                <Title level={5}>Assist levels</Title>
-                <br />
-                <AssistLevelTableComponent
-                    assist_profiles={this.state.controller_assist_levels}
-                    onChange={(controller_assist_levels) =>
-                        this.setState({
-                            controller_assist_levels,
-                        })
-                    }
-                />
-                <br />
-                <Title level={5}>Torque sensor-controlled assist</Title>
-                <br />
-                <TorqueTableComponent
-                    torque_profiles={this.state.controller_torque_profiles}
-                    onChange={(controller_torque_profiles) => {
-                        this.setState({
-                            controller_torque_profiles,
-                        });
-                    }}
-                />
-                <br />
-                <Descriptions
-                    bordered
-                    title="Speed settings"
-                    items={this.getSpeedItems()}
-                    column={1}
-                />
+                {connection.isControllerParameter1Available && (
+                    <>
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Electric parameters"
+                            items={this.getElectricItems()}
+                            column={1}
+                        />
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Battery parameters"
+                            items={this.getBatteryItems()}
+                            column={1}
+                        />
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Mechanical parameters"
+                            items={this.getMechanicalItems()}
+                            column={1}
+                        />
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Driving parameters"
+                            items={this.getDrivingItems()}
+                            column={1}
+                        />
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Throttle parameters"
+                            items={this.getThrottleItems()}
+                            column={1}
+                        />
+                        <br />
+                        <Title level={5}>Assist levels</Title>
+                        <br />
+                        <AssistLevelTableComponent
+                            assist_profiles={
+                                this.state.controller_assist_levels
+                            }
+                            onChange={(controller_assist_levels) =>
+                                this.setState({
+                                    controller_assist_levels,
+                                })
+                            }
+                        />
+                    </>
+                )}
+                {!connection.isControllerParameter1Available && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Controller does not have available to read and
+                                write parameter pack #1
+                            </Text>
+                        </div>
+                    </>
+                )}
+                {connection.isControllerParameter2Available && (
+                    <>
+                        <Title level={5}>Torque sensor-controlled assist</Title>
+                        <br />
+                        <TorqueTableComponent
+                            torque_profiles={
+                                this.state.controller_torque_profiles
+                            }
+                            onChange={(controller_torque_profiles) => {
+                                this.setState({
+                                    controller_torque_profiles,
+                                });
+                            }}
+                        />
+                    </>
+                )}
+                {!connection.isControllerParameter2Available && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Controller does not have available to read and
+                                write parameter pack #2
+                            </Text>
+                        </div>
+                    </>
+                )}
+                {connection.isControllerSpeedParametersAvailable && (
+                    <>
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Speed settings"
+                            items={this.getSpeedItems()}
+                            column={1}
+                        />
+                    </>
+                )}
+                {!connection.isControllerSpeedParametersAvailable && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Controller does not have available to read and
+                                write speed parameter pack
+                            </Text>
+                        </div>
+                    </>
+                )}
                 <br />
                 <Descriptions
                     bordered
