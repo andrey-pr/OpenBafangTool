@@ -311,6 +311,7 @@ export default class BafangCanSystem implements IConnection {
             switch (response.canCommandSubCode) {
                 case 0x00:
                     utils.parseDisplayPackage0(response, this._displayState);
+                    this._displayStateReady = true;
                     this.emitter.emit(
                         'broadcast-data-display',
                         deepCopy(this._displayState),
