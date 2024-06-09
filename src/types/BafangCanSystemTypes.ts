@@ -314,17 +314,17 @@ export type BafangCanAssistLevel =
     | 9;
 
 export type BafangCanDisplayState = {
-    display_assist_levels: number | NoData;
-    display_ride_mode: BafangCanRideMode | NoData;
-    display_boost: boolean | NoData;
-    display_current_assist_level: BafangCanAssistLevel | NoData;
-    display_light: boolean | NoData;
-    display_button: boolean | NoData;
+    display_assist_levels: number;
+    display_ride_mode: BafangCanRideMode;
+    display_boost: boolean;
+    display_current_assist_level: BafangCanAssistLevel;
+    display_light: boolean;
+    display_button: boolean;
 };
 
 export type BafangCanSensorRealtime = {
-    sensor_torque: number | NoData;
-    sensor_cadence: number | NoData;
+    sensor_torque: number;
+    sensor_cadence: number;
 };
 
 export type BafangCanSensorCodes = {

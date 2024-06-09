@@ -13,6 +13,8 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 
+const { Text } = Typography;
+
 type SettingsProps = {
     connection: BafangCanSystem;
 };
@@ -125,13 +127,27 @@ class BafangCanSensorSettingsView extends React.Component<
                 <Typography.Title level={2} style={{ margin: 0 }}>
                     Sensor settings
                 </Typography.Title>
-                <br />
-                <Descriptions
-                    bordered
-                    title="Real-Time data"
-                    items={this.getRealtimeItems()}
-                    column={1}
-                />
+                {connection.isSensorRealtimeDataReady && (
+                    <>
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="Real-Time data"
+                            items={this.getRealtimeItems()}
+                            column={1}
+                        />
+                    </>
+                )}
+                {!connection.isSensorRealtimeDataReady && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Real-time data from sensor is not received yet
+                            </Text>
+                        </div>
+                    </>
+                )}
                 <br />
                 <Descriptions
                     bordered

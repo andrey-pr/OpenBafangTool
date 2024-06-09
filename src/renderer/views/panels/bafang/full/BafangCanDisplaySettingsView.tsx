@@ -399,13 +399,27 @@ class BafangCanDisplaySettingsView extends React.Component<
                     items={this.getRecordsItems()}
                     column={1}
                 />
-                <br />
-                <Descriptions
-                    bordered
-                    title="State"
-                    items={this.getStateItems()}
-                    column={1}
-                />
+                {connection.isDisplayStateReady && (
+                    <>
+                        <br />
+                        <Descriptions
+                            bordered
+                            title="State"
+                            items={this.getStateItems()}
+                            column={1}
+                        />
+                    </>
+                )}
+                {!connection.isDisplayStateReady && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Real-time data from display is not received yet
+                            </Text>
+                        </div>
+                    </>
+                )}
                 {connection.isDisplayErrorCodesAvailable && (
                     <>
                         <br />
