@@ -30,6 +30,8 @@ import {
 } from '../../../../../types/BafangCanSystemTypes';
 import { getErrorCodeText } from '../../../../../constants/BafangCanConstants';
 
+const { Text } = Typography;
+
 dayjs.extend(customParseFormat);
 
 type SettingsProps = {
@@ -407,17 +409,32 @@ class BafangCanDisplaySettingsView extends React.Component<
                     items={this.getStateItems()}
                     column={1}
                 />
-                <br />
-                <Typography.Title level={5} style={{ margin: 0 }}>
-                    Error codes
-                </Typography.Title>
-                <br />
-                <Table
-                    dataSource={this.getErrorCodeTableItems()}
-                    columns={errorCodesTableLayout}
-                    pagination={false}
-                    bordered
-                />
+                {connection.isDisplayErrorCodesAvailable && (
+                    <>
+                        <br />
+                        <Typography.Title level={5} style={{ margin: 0 }}>
+                            Error codes
+                        </Typography.Title>
+                        <br />
+                        <Table
+                            dataSource={this.getErrorCodeTableItems()}
+                            columns={errorCodesTableLayout}
+                            pagination={false}
+                            bordered
+                        />
+                    </>
+                )}
+                {!connection.isDisplayErrorCodesAvailable && (
+                    <>
+                        <br />
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">
+                                Display does not have available to read error
+                                code storage
+                            </Text>
+                        </div>
+                    </>
+                )}
                 <br />
                 <Descriptions
                     bordered

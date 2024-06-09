@@ -21,6 +21,8 @@ import {
     DeviceNetworkId,
 } from '../besst/besst-types';
 import log from 'electron-log/renderer';
+import path from 'path';
+import getAppDataPath from 'appdata-path';
 
 type SentRequest = {
     resolve: (...args: any[]) => void;
@@ -79,6 +81,8 @@ export default class BafangCanSystem implements IConnection {
 
     private _displayAvailable: boolean = false;
 
+    private _displayErrorCodesAvailable: boolean = false;
+
     private _controllerAvailable: boolean = false;
 
     private _controllerParameter1Available: boolean = false;
@@ -125,6 +129,7 @@ export default class BafangCanSystem implements IConnection {
         this.resolveRequest = this.resolveRequest.bind(this);
         this.disconnect = this.disconnect.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
+        this.saveBackup = this.saveBackup.bind(this);
     }
 
     onDisconnect() {
@@ -300,6 +305,7 @@ export default class BafangCanSystem implements IConnection {
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 if (response.canCommandSubCode === 0x07) {
                     this._displayErrorCodes = parsers.parseErrorCodes(response);
+                    this._displayErrorCodesAvailable = true;
                     this.emitter.emit(
                         'display-error-codes',
                         this._displayErrorCodes,
@@ -556,6 +562,7 @@ export default class BafangCanSystem implements IConnection {
                 this._controllerParameter1Available = false;
                 this._controllerParameter2Available = false;
                 this._controllerSpeedParameterAvailable = false;
+                this._displayErrorCodesAvailable = false;
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
@@ -630,6 +637,7 @@ export default class BafangCanSystem implements IConnection {
                         this._displayAvailable = readedDisplay > 0;
                         this._controllerAvailable = readedController > 0;
                         this._sensorAvailable = readedSensor > 0;
+                        this.saveBackup();
                         this.emitter.emit(
                             'reading-finish',
                             readedSuccessfully,
@@ -640,6 +648,44 @@ export default class BafangCanSystem implements IConnection {
                 });
             });
         });
+    }
+
+    private saveBackup(): void {
+        const fs = require('fs');
+        let backup_text = JSON.stringify({
+            controller_parameter1: this._controllerParameter1,
+            controller_parameter2: this._controllerParameter2,
+            controller_parameter1_array: this.controllerParameter1Array,
+            controller_parameter2_array: this.controllerParameter2Array,
+            controller_speed_parameters: this._controllerSpeedParameters,
+            display_data: this._displayData,
+            controller_codes: this._controllerCodes,
+            display_codes: this._displayCodes,
+            sensor_codes: this.sensorCodes,
+            display_available: this._displayAvailable,
+            controller_available: this._controllerAvailable,
+            controller_parameter1_available:
+                this._controllerParameter1Available,
+            controller_parameter2_available:
+                this._controllerParameter2Available,
+            controller_speed_parameter_available:
+                this._controllerSpeedParameterAvailable,
+            sensor_available: this._sensorAvailable,
+        });
+        let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
+        try {
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, true);
+            }
+            fs.writeFileSync(
+                path.join(dir, `backup-${new Date().toISOString()}.json`),
+                backup_text,
+                'utf-8',
+            );
+        } catch (e) {
+            log.error('Failed to save the backup file! Backuping to logs:');
+            log.error(backup_text);
+        }
     }
 
     private rereadParameter(dto: BesstReadedCanFrame): void {
@@ -1045,7 +1091,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayErrorCodesAvailable(): boolean {
-        return true;
+        return this._displayErrorCodesAvailable;
     }
 
     public get displayErrorCodes(): number[] {
