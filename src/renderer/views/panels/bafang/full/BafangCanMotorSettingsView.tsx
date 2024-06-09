@@ -56,7 +56,7 @@ type SettingsState = BafangCanControllerRealtime &
 // TODO add redux
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
-    // TODO add param2 and torque calibration button
+    // TODO add torque calibration button
     SettingsProps,
     SettingsState
 > {
