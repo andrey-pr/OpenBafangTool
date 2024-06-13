@@ -144,39 +144,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getDisplayItems(): DescriptionsProps['items'] {
-        return [
-            generateSimpleNumberListItem(
-                'Assist levels number',
-                this.state.display_assist_levels,
-            ),
-            generateSimpleBooleanListItem(
-                'Mode',
-                this.state.display_ride_mode,
-                'SPORT',
-                'ECO',
-            ),
-            generateSimpleBooleanListItem(
-                'Boost',
-                this.state.display_boost,
-                'ON',
-                'OFF',
-            ),
-            generateSimpleStringListItem(
-                'Current assist',
-                this.state.display_current_assist_level,
-            ),
-            generateSimpleBooleanListItem(
-                'Light',
-                this.state.display_light,
-                'ON',
-                'OFF',
-            ),
-            generateSimpleBooleanListItem(
-                'Button',
-                this.state.display_button,
-                'Pressed',
-                'Not pressed',
-            ),
+        let items = [
             generateSimpleNumberListItem(
                 'Total mileage',
                 this.state.display_total_mileage,
@@ -231,6 +199,55 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Customer number',
                 this.state.display_customer_number,
             ),
+        ];
+        if (this.props.connection.isDisplayStateReady) {
+            return [
+                generateSimpleNumberListItem(
+                    'Assist levels number',
+                    this.state.display_assist_levels,
+                ),
+                generateSimpleBooleanListItem(
+                    'Mode',
+                    this.state.display_ride_mode,
+                    'SPORT',
+                    'ECO',
+                ),
+                generateSimpleBooleanListItem(
+                    'Boost',
+                    this.state.display_boost,
+                    'ON',
+                    'OFF',
+                ),
+                generateSimpleStringListItem(
+                    'Current assist',
+                    this.state.display_current_assist_level,
+                ),
+                generateSimpleBooleanListItem(
+                    'Light',
+                    this.state.display_light,
+                    'ON',
+                    'OFF',
+                ),
+                generateSimpleBooleanListItem(
+                    'Button',
+                    this.state.display_button,
+                    'Pressed',
+                    'Not pressed',
+                ),
+                ...items,
+            ];
+        }
+        return [
+            generateSimpleStringListItem(
+                'Assist levels number',
+                'Not available yet',
+            ),
+            generateSimpleStringListItem('Mode', 'Not available yet'),
+            generateSimpleStringListItem('Boost', 'Not available yet'),
+            generateSimpleStringListItem('Current assist', 'Not available yet'),
+            generateSimpleStringListItem('Light', 'Not available yet'),
+            generateSimpleStringListItem('Button', 'Not available yet'),
+            ...items,
         ];
     }
 
