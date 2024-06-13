@@ -181,16 +181,16 @@ export function getEmptyControllerSpeedParameters(): BafangCanControllerSpeedPar
 
 export function getEmptyDisplayData1(): BafangCanDisplayData1 {
     return {
-        display_total_mileage: NotLoadedYet,
-        display_single_mileage: NotLoadedYet,
-        display_max_speed: NotLoadedYet,
+        display_total_mileage: 0,
+        display_single_mileage: 0,
+        display_max_speed: 0,
     };
 }
 
 export function getEmptyDisplayData2(): BafangCanDisplayData2 {
     return {
-        display_average_speed: NotLoadedYet,
-        display_service_mileage: NotLoadedYet,
+        display_average_speed: 0,
+        display_service_mileage: 0,
     };
 }
 

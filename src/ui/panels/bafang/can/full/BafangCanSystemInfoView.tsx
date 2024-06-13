@@ -150,64 +150,10 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getDisplayItems(): DescriptionsProps['items'] {
-        let items = [
-            generateSimpleNumberListItem(
-                'Total mileage',
-                this.state.display_total_mileage,
-                'Km',
-            ),
-            generateSimpleNumberListItem(
-                'Single mileage',
-                this.state.display_single_mileage,
-                'Km',
-            ),
-            generateSimpleNumberListItem(
-                'Max registered speed',
-                this.state.display_max_speed,
-                'Km/H',
-            ),
-            generateSimpleNumberListItem(
-                'Average speed',
-                this.state.display_average_speed,
-                'Km/H',
-            ),
-            generateSimpleNumberListItem(
-                'Mileage since last service',
-                this.state.display_service_mileage,
-                'Km',
-            ),
-            generateSimpleStringListItem(
-                'Software version',
-                this.state.display_software_version,
-            ),
-            generateSimpleStringListItem(
-                'Manufacturer',
-                this.state.display_manufacturer,
-            ),
-            generateSimpleStringListItem(
-                'Hardware version',
-                this.state.display_hardware_version,
-            ),
-            generateSimpleStringListItem(
-                'Model number',
-                this.state.display_model_number,
-            ),
-            generateSimpleStringListItem(
-                'Bootloader version',
-                this.state.display_bootload_version,
-            ),
-            generateSimpleStringListItem(
-                'Serial number',
-                this.state.display_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
-            ),
-            generateSimpleStringListItem(
-                'Customer number',
-                this.state.display_customer_number,
-            ),
-        ];
+        let items: DescriptionsProps['items'] = [];
         if (this.props.connection.isDisplayStateReady) {
-            return [
+            items = [
+                ...items,
                 generateSimpleNumberListItem(
                     'Assist levels number',
                     this.state.display_assist_levels,
@@ -240,21 +186,120 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                     'Pressed',
                     'Not pressed',
                 ),
+            ];
+        } else {
+            items = [
                 ...items,
+                generateSimpleStringListItem(
+                    'Assist levels number',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem('Mode', 'Not available yet'),
+                generateSimpleStringListItem('Boost', 'Not available yet'),
+                generateSimpleStringListItem(
+                    'Current assist',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem('Light', 'Not available yet'),
+                generateSimpleStringListItem('Button', 'Not available yet'),
             ];
         }
-        return [
-            generateSimpleStringListItem(
-                'Assist levels number',
-                'Not available yet',
-            ),
-            generateSimpleStringListItem('Mode', 'Not available yet'),
-            generateSimpleStringListItem('Boost', 'Not available yet'),
-            generateSimpleStringListItem('Current assist', 'Not available yet'),
-            generateSimpleStringListItem('Light', 'Not available yet'),
-            generateSimpleStringListItem('Button', 'Not available yet'),
+        if (this.props.connection.isDisplayData1Available) {
+            items = [
+                ...items,
+                generateSimpleNumberListItem(
+                    'Total mileage',
+                    this.state.display_total_mileage,
+                    'Km',
+                ),
+                generateSimpleNumberListItem(
+                    'Single mileage',
+                    this.state.display_single_mileage,
+                    'Km',
+                ),
+                generateSimpleNumberListItem(
+                    'Max registered speed',
+                    this.state.display_max_speed,
+                    'Km/H',
+                ),
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem(
+                    'Total mileage',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Single mileage',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Max registered speed',
+                    'Not available yet',
+                ),
+            ];
+        }
+        if (this.props.connection.isDisplayData2Available) {
+            items = [
+                ...items,
+                generateSimpleNumberListItem(
+                    'Average speed',
+                    this.state.display_average_speed,
+                    'Km/H',
+                ),
+                generateSimpleNumberListItem(
+                    'Mileage since last service',
+                    this.state.display_service_mileage,
+                    'Km',
+                ),
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem(
+                    'Average speed',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Mileage since last service',
+                    'Not available yet',
+                ),
+            ];
+        }
+        items = [
             ...items,
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.display_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Manufacturer',
+                this.state.display_manufacturer,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.display_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.display_model_number,
+            ),
+            generateSimpleStringListItem(
+                'Bootloader version',
+                this.state.display_bootload_version,
+            ),
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.display_serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
+            generateSimpleStringListItem(
+                'Customer number',
+                this.state.display_customer_number,
+            ),
         ];
+        return items;
     }
 
     getSensorItems(): DescriptionsProps['items'] {

@@ -108,70 +108,105 @@ class BafangCanDisplaySettingsView extends React.Component<
             display_single_mileage,
             display_service_mileage,
         } = this.state;
-        return [
-            generateEditableNumberListItem(
-                'Total mileage',
-                display_total_mileage,
-                (e) =>
-                    this.setState({
-                        display_total_mileage: e,
-                    }),
-                'Km',
-                0,
-                1000000,
-            ),
-            generateEditableNumberListItem(
-                'Single trip mileage',
-                display_single_mileage,
-                (e) =>
-                    this.setState({
-                        display_single_mileage: e,
-                    }),
-                'Km',
-                0,
-                display_total_mileage as number,
-            ),
-            generateSimpleNumberListItem(
-                'Max registered speed',
-                this.state.display_max_speed,
-                'Km/H',
-            ),
-            generateSimpleNumberListItem(
-                'Average speed',
-                this.state.display_average_speed,
-                'Km/H',
-            ),
-            {
-                key: 'display_service_mileage',
-                label: 'Mileage since last service',
-                children: (
-                    <>
-                        <NumberValueComponent
-                            value={display_service_mileage}
-                            unit="Km"
-                        />
-                        <br />
-                        <br />
-                        <Popconfirm
-                            title="Erase service mileage"
-                            description={`Are you sure to clean mileage since last service record?`}
-                            onConfirm={() => {
-                                message.open({
-                                    key: 'cleaning_service_mileage',
-                                    type: 'loading',
-                                    content: 'Cleaning mileage...',
-                                });
-                                this.props.connection
-                                    .cleanDisplayServiceMileage()
-                                    .then((success) => {
-                                        if (success) {
-                                            message.open({
-                                                key: 'cleaning_service_mileage',
-                                                type: 'success',
-                                                content: 'Cleaned sucessfully!',
-                                                duration: 2,
-                                            });
-                                        } else {
+        let items: DescriptionsProps['items'] = [];
+        if (this.props.connection.isDisplayData1Available) {
+            items = [
+                ...items,
+                generateEditableNumberListItem(
+                    'Total mileage',
+                    display_total_mileage,
+                    (e) =>
+                        this.setState({
+                            display_total_mileage: e,
+                        }),
+                    'Km',
+                    0,
+                    1000000,
+                ),
+                generateEditableNumberListItem(
+                    'Single trip mileage',
+                    display_single_mileage,
+                    (e) =>
+                        this.setState({
+                            display_single_mileage: e,
+                        }),
+                    'Km',
+                    0,
+                    display_total_mileage as number,
+                ),
+                generateSimpleNumberListItem(
+                    'Max registered speed',
+                    this.state.display_max_speed,
+                    'Km/H',
+                ),
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem(
+                    'Total mileage',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Single mileage',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Max registered speed',
+                    'Not available yet',
+                ),
+            ];
+        }
+        if (this.props.connection.isDisplayData2Available) {
+            items = [
+                ...items,
+                generateSimpleNumberListItem(
+                    'Average speed',
+                    this.state.display_average_speed,
+                    'Km/H',
+                ),
+                {
+                    key: 'display_service_mileage',
+                    label: 'Mileage since last service',
+                    children: (
+                        <>
+                            <NumberValueComponent
+                                value={display_service_mileage}
+                                unit="Km"
+                            />
+                            <br />
+                            <br />
+                            <Popconfirm
+                                title="Erase service mileage"
+                                description={`Are you sure to clean mileage since last service record?`}
+                                onConfirm={() => {
+                                    message.open({
+                                        key: 'cleaning_service_mileage',
+                                        type: 'loading',
+                                        content: 'Cleaning mileage...',
+                                    });
+                                    this.props.connection
+                                        .cleanDisplayServiceMileage()
+                                        .then((success) => {
+                                            if (success) {
+                                                message.open({
+                                                    key: 'cleaning_service_mileage',
+                                                    type: 'success',
+                                                    content:
+                                                        'Cleaned sucessfully!',
+                                                    duration: 2,
+                                                });
+                                            } else {
+                                                message.open({
+                                                    key: 'cleaning_service_mileage',
+                                                    type: 'error',
+                                                    content:
+                                                        'Error during cleaning!',
+                                                    duration: 2,
+                                                });
+                                            }
+                                        })
+                                        .catch(() => {
                                             message.open({
                                                 key: 'cleaning_service_mileage',
                                                 type: 'error',
@@ -179,25 +214,32 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                     'Error during cleaning!',
                                                 duration: 2,
                                             });
-                                        }
-                                    })
-                                    .catch(() => {
-                                        message.open({
-                                            key: 'cleaning_service_mileage',
-                                            type: 'error',
-                                            content: 'Error during cleaning!',
-                                            duration: 2,
                                         });
-                                    });
-                            }}
-                            okText="Yes"
-                            cancelText="No"
-                        >
-                            <Button type="primary">Erase record</Button>
-                        </Popconfirm>
-                    </>
+                                }}
+                                okText="Yes"
+                                cancelText="No"
+                            >
+                                <Button type="primary">Erase record</Button>
+                            </Popconfirm>
+                        </>
+                    ),
+                },
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem(
+                    'Average speed',
+                    'Not available yet',
                 ),
-            },
+                generateSimpleStringListItem(
+                    'Mileage since last service',
+                    'Not available yet',
+                ),
+            ];
+        }
+        return [
+            ...items,
             {
                 key: 'display_current_time',
                 label: 'Set current time',
@@ -365,7 +407,9 @@ class BafangCanDisplaySettingsView extends React.Component<
         if (this.writingInProgress) return;
         this.writingInProgress = true;
         const { connection } = this.props;
-        connection.displayData1 = this.state as BafangCanDisplayData1;
+        if (this.props.connection.isDisplayData1Available) {
+            connection.displayData1 = this.state as BafangCanDisplayData1;
+        }
         connection.displayCodes = this.state as BafangCanDisplayCodes;
         connection.saveDisplayData();
         message.open({

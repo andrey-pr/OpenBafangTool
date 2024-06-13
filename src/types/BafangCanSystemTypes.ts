@@ -289,14 +289,14 @@ export type BafangCanDisplayCodes = {
 };
 
 export type BafangCanDisplayData1 = {
-    display_total_mileage: number | NoData;
-    display_single_mileage: number | NoData;
-    display_max_speed: number | NoData;
+    display_total_mileage: number;
+    display_single_mileage: number;
+    display_max_speed: number;
 };
 
 export type BafangCanDisplayData2 = {
-    display_average_speed: number | NoData;
-    display_service_mileage: number | NoData;
+    display_average_speed: number;
+    display_service_mileage: number;
 };
 
 export enum BafangCanRideMode {

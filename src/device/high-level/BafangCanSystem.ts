@@ -89,6 +89,10 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerAvailable: boolean = false;
 
+    private _displayData1Available: boolean = false;
+
+    private _displayData2Available: boolean = false;
+
     private _controllerParameter1Available: boolean = false;
 
     private _controllerParameter2Available: boolean = false;
@@ -385,6 +389,7 @@ export default class BafangCanSystem implements IConnection {
                         break;
                     }
                     this._displayData1 = parsers.parseDisplayPackage1(response);
+                    this._displayData1Available = true;
                     this.emitter.emit(
                         'display-general-data',
                         deepCopy(this._displayData1),
@@ -397,6 +402,7 @@ export default class BafangCanSystem implements IConnection {
                         break;
                     }
                     this._displayData2 = parsers.parseDisplayPackage2(response);
+                    this._displayData2Available = true;
                     this.emitter.emit(
                         'display-general-data',
                         deepCopy(this._displayData2),
@@ -564,6 +570,8 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._sensorCodes),
                 );
                 this._displayAvailable = true;
+                this._displayData1Available = false;
+                this._displayData2Available = false;
                 this._controllerAvailable = true;
                 this._controllerParameter1Available = false;
                 this._controllerParameter2Available = false;
@@ -1076,7 +1084,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayData1Available(): boolean {
-        return true;
+        return this._displayData1Available;
     }
     public get displayData1(): types.BafangCanDisplayData1 {
         return deepCopy(this._displayData1);
@@ -1087,7 +1095,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayData2Available(): boolean {
-        return true;
+        return this._displayData2Available;
     }
 
     public get displayData2(): types.BafangCanDisplayData2 {
