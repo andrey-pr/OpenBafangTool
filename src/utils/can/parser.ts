@@ -109,13 +109,13 @@ export function parseDisplayPackage2(
 export function parseControllerPackage0(
     packet: BesstReadedCanFrame,
 ): BafangCanControllerRealtime0 {
-    const tem = (packet.data[7] << 8) + packet.data[6];
+    const tmp = (packet.data[7] << 8) + packet.data[6];
     return {
         controller_remaining_capacity: packet.data[0],
         controller_single_trip: ((packet.data[2] << 8) + packet.data[1]) / 100,
         controller_cadence: packet.data[3],
         controller_torque: (packet.data[5] << 8) + packet.data[4],
-        controller_remaining_distance: tem < 65535 ? tem / 100 : NotAvailable,
+        controller_remaining_distance: tmp < 65535 ? tmp / 100 : -255,
     };
 }
 
@@ -128,7 +128,7 @@ export function parseControllerPackage1(
         controller_voltage: ((packet.data[5] << 8) + packet.data[4]) / 100,
         controller_temperature: packet.data[6] - 40,
         controller_motor_temperature:
-            packet.data[7] === 255 ? NotAvailable : packet.data[7] - 40,
+            packet.data[7] === 255 ? -255 : packet.data[7] - 40,
     };
 }
 

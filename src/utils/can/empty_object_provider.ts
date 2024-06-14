@@ -21,21 +21,21 @@ import { NotLoadedYet } from '../../types/no_data';
 
 export function getEmptyControllerRealtime0Data(): BafangCanControllerRealtime0 {
     return {
-        controller_cadence: NotLoadedYet,
-        controller_torque: NotLoadedYet,
-        controller_remaining_capacity: NotLoadedYet,
-        controller_single_trip: NotLoadedYet,
-        controller_remaining_distance: NotLoadedYet,
+        controller_cadence: 0,
+        controller_torque: 0,
+        controller_remaining_capacity: 0,
+        controller_single_trip: 0,
+        controller_remaining_distance: 0,
     };
 }
 
 export function getEmptyControllerRealtime1Data(): BafangCanControllerRealtime1 {
     return {
-        controller_speed: NotLoadedYet,
-        controller_current: NotLoadedYet,
-        controller_voltage: NotLoadedYet,
-        controller_temperature: NotLoadedYet,
-        controller_motor_temperature: NotLoadedYet,
+        controller_speed: 0,
+        controller_current: 0,
+        controller_voltage: 0,
+        controller_temperature: 0,
+        controller_motor_temperature: 0,
     };
 }
 

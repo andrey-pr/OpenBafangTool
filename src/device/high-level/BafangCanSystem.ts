@@ -47,7 +47,11 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerRealtimeData0: types.BafangCanControllerRealtime0;
 
+    private _controllerRealtimeData0Ready: boolean = false;
+
     private _controllerRealtimeData1: types.BafangCanControllerRealtime1;
+
+    private _controllerRealtimeData1Ready: boolean = false;
 
     private _sensorRealtimeData: types.BafangCanSensorRealtime;
 
@@ -426,6 +430,7 @@ export default class BafangCanSystem implements IConnection {
                 case 0x00:
                     this._controllerRealtimeData0 =
                         parsers.parseControllerPackage0(response);
+                    this._controllerRealtimeData0Ready = true;
                     this.emitter.emit(
                         'broadcast-data-controller',
                         deepCopy(this._controllerRealtimeData0),
@@ -434,6 +439,7 @@ export default class BafangCanSystem implements IConnection {
                 case 0x01:
                     this._controllerRealtimeData1 =
                         parsers.parseControllerPackage1(response);
+                    this._controllerRealtimeData1Ready = true;
                     this.emitter.emit(
                         'broadcast-data-controller',
                         deepCopy(this._controllerRealtimeData1),
@@ -579,6 +585,8 @@ export default class BafangCanSystem implements IConnection {
                 this._displayErrorCodesAvailable = false;
                 this._displayStateReady = false;
                 this._sensorRealtimeDataReady = false;
+                this._controllerRealtimeData0Ready = false;
+                this._controllerRealtimeData1Ready = false;
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
@@ -1128,6 +1136,14 @@ export default class BafangCanSystem implements IConnection {
 
     public set displayCodes(data: types.BafangCanDisplayCodes) {
         this._displayCodes = deepCopy(data);
+    }
+
+    public get isControllerRealtimeData0Ready(): boolean {
+        return this._controllerRealtimeData0Ready;
+    }
+
+    public get isControllerRealtimeData1Ready(): boolean {
+        return this._controllerRealtimeData1Ready;
     }
 
     public get isSensorRealtimeDataReady(): boolean {

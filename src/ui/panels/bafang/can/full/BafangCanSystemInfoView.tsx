@@ -74,57 +74,105 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getControllerItems(): DescriptionsProps['items'] {
-        return [
-            generateSimpleNumberListItem(
-                'Remaining capacity',
-                this.state.controller_remaining_capacity,
-                '%',
-            ),
-            generateSimpleNumberListItem(
-                'Remaining trip distance',
-                this.state.controller_remaining_distance,
-                'Km',
-            ),
-            generateSimpleNumberListItem(
-                'Last trip distance',
-                this.state.controller_single_trip,
-                'Km',
-            ),
-            generateSimpleNumberListItem(
-                'Cadence',
-                this.state.controller_cadence,
-                'RPM',
-            ),
-            generateSimpleNumberListItem(
-                'Torque value',
-                this.state.controller_torque,
-                'mV',
-            ),
-            generateSimpleNumberListItem(
-                'Voltage',
-                this.state.controller_voltage,
-                'V',
-            ),
-            generateSimpleNumberListItem(
-                'Controller temperature',
-                this.state.controller_temperature,
-                'C°',
-            ),
-            generateSimpleNumberListItem(
-                'Motor temperature',
-                this.state.controller_motor_temperature,
-                'C°',
-            ),
-            generateSimpleNumberListItem(
-                'Current',
-                this.state.controller_current,
-                'A',
-            ),
-            generateSimpleNumberListItem(
-                'Speed',
-                this.state.controller_speed,
-                'Km/H',
-            ),
+        let items: DescriptionsProps['items'] = [];
+        if (this.props.connection.isControllerRealtimeData0Ready) {
+            items = [
+                ...items,
+                generateSimpleNumberListItem(
+                    'Remaining capacity',
+                    this.state.controller_remaining_capacity,
+                    '%',
+                ),
+                generateSimpleNumberListItem(
+                    'Remaining trip distance',
+                    this.state.controller_remaining_distance,
+                    'Km',
+                ),
+                generateSimpleNumberListItem(
+                    'Last trip distance',
+                    this.state.controller_single_trip,
+                    'Km',
+                ),
+                generateSimpleNumberListItem(
+                    'Cadence',
+                    this.state.controller_cadence,
+                    'RPM',
+                ),
+                generateSimpleNumberListItem(
+                    'Torque value',
+                    this.state.controller_torque,
+                    'mV',
+                ),
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem(
+                    'Remaining capacity',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Remaining trip distance',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Last trip distance',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem('Cadence', 'Not available yet'),
+                generateSimpleStringListItem(
+                    'Torque value',
+                    'Not available yet',
+                ),
+            ];
+        }
+        if (this.props.connection.isControllerRealtimeData1Ready) {
+            items = [
+                ...items,
+                generateSimpleNumberListItem(
+                    'Voltage',
+                    this.state.controller_voltage,
+                    'V',
+                ),
+                generateSimpleNumberListItem(
+                    'Controller temperature',
+                    this.state.controller_temperature,
+                    'C°',
+                ),
+                generateSimpleNumberListItem(
+                    'Motor temperature',
+                    this.state.controller_motor_temperature,
+                    'C°',
+                ),
+                generateSimpleNumberListItem(
+                    'Current',
+                    this.state.controller_current,
+                    'A',
+                ),
+                generateSimpleNumberListItem(
+                    'Speed',
+                    this.state.controller_speed,
+                    'Km/H',
+                ),
+            ];
+        } else {
+            items = [
+                ...items,
+                generateSimpleStringListItem('Voltage', 'Not available yet'),
+                generateSimpleStringListItem(
+                    'Controller temperature',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    'Motor temperature',
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem('Current', 'Not available yet'),
+                generateSimpleStringListItem('Speed', 'Not available yet'),
+            ];
+        }
+        items = [
+            ...items,
             generateSimpleStringListItem(
                 'Manufacturer',
                 this.state.controller_manufacturer,
@@ -147,6 +195,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
         ];
+        return items;
     }
 
     getDisplayItems(): DescriptionsProps['items'] {

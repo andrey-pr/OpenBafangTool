@@ -2,19 +2,19 @@ import { BafangAssistProfile } from './common';
 import { NoData } from './no_data';
 
 export type BafangCanControllerRealtime0 = {
-    controller_cadence: number | NoData;
-    controller_torque: number | NoData;
-    controller_remaining_capacity: number | NoData;
-    controller_single_trip: number | NoData;
-    controller_remaining_distance: number | NoData;
+    controller_cadence: number;
+    controller_torque: number;
+    controller_remaining_capacity: number;
+    controller_single_trip: number;
+    controller_remaining_distance: number;
 };
 
 export type BafangCanControllerRealtime1 = {
-    controller_speed: number | NoData;
-    controller_current: number | NoData;
-    controller_voltage: number | NoData;
-    controller_temperature: number | NoData;
-    controller_motor_temperature: number | NoData;
+    controller_speed: number;
+    controller_current: number;
+    controller_voltage: number;
+    controller_temperature: number;
+    controller_motor_temperature: number;
 };
 
 export type BafangCanSystemVoltage = 36 | 43 | 48;

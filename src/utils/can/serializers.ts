@@ -150,7 +150,7 @@ export function prepareSpeedPackageWritePromise(
         ...intToByteArray(value.controller_speed_limit * 100, 2),
         value.controller_wheel_diameter.code[0],
         value.controller_wheel_diameter.code[1],
-        intToByteArray(value.controller_circumference as number, 2),
+        ...intToByteArray(value.controller_circumference as number, 2),
     ];
     addWritePromise(
         DeviceNetworkId.DRIVE_UNIT,
