@@ -576,17 +576,17 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._sensorCodes),
                 );
                 this._displayAvailable = true;
-                this._displayData1Available = false;
-                this._displayData2Available = false;
+                this._displayData1Available = true;
+                this._displayData2Available = true;
                 this._controllerAvailable = true;
-                this._controllerParameter1Available = false;
-                this._controllerParameter2Available = false;
-                this._controllerSpeedParameterAvailable = false;
-                this._displayErrorCodesAvailable = false;
-                this._displayStateReady = false;
-                this._sensorRealtimeDataReady = false;
-                this._controllerRealtimeData0Ready = false;
-                this._controllerRealtimeData1Ready = false;
+                this._controllerParameter1Available = true;
+                this._controllerParameter2Available = true;
+                this._controllerSpeedParameterAvailable = true;
+                this._displayErrorCodesAvailable = true;
+                this._displayStateReady = true;
+                this._sensorRealtimeDataReady = true;
+                this._controllerRealtimeData0Ready = true;
+                this._controllerRealtimeData1Ready = true;
                 this._sensorAvailable = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
