@@ -12,13 +12,13 @@ import {
 import { NoData } from '../../types/no_data';
 import { intToByteArray } from '../utils';
 import { calculateChecksum } from './utils';
+import { PromiseControls } from '../../types/common';
 
 type WriteFunctionType = (
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    resolve?: (...args: any[]) => void,
-    reject?: (...args: any[]) => void,
+    promise?: PromiseControls,
 ) => void;
 
 function serializeMileage(mileage: number): number[] {
@@ -38,7 +38,7 @@ function addWritePromise(
 ): void {
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
-            write_function(target, command, data, resolve, reject);
+            write_function(target, command, data, { resolve, reject });
         }),
     );
 }
@@ -138,14 +138,6 @@ export function prepareSpeedPackageWritePromise(
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
 ): void {
-    if (
-        !value.controller_circumference ||
-        typeof value.controller_speed_limit !== 'number' ||
-        typeof value.controller_circumference !== 'number' ||
-        !value.controller_wheel_diameter ||
-        !value.controller_wheel_diameter.code
-    )
-        return;
     const data = [
         ...intToByteArray(value.controller_speed_limit * 100, 2),
         value.controller_wheel_diameter.code[0],
@@ -162,11 +154,10 @@ export function prepareSpeedPackageWritePromise(
 }
 
 export function prepareTotalMileageWritePromise(
-    value: number | NoData,
+    value: number,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
 ): void {
-    if (typeof value !== 'number') return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplayTotalMileage,
@@ -177,11 +168,10 @@ export function prepareTotalMileageWritePromise(
 }
 
 export function prepareSingleMileageWritePromise(
-    value: number | NoData,
+    value: number,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
 ): void {
-    if (typeof value !== 'number') return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplaySingleMileage,

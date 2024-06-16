@@ -1,3 +1,5 @@
+import { PromiseControls } from '../../types/common';
+
 export enum BesstPacketType {
     CAN_REQUEST = 0x15,
     CAN_RESPONSE = 0x12,
@@ -44,8 +46,5 @@ export type BesstWritePacket = {
     interval: number;
     timeout: number;
     type: BesstPacketType;
-    promise?: {
-        resolve: (...args: any[]) => void;
-        reject: (...args: any[]) => void;
-    };
+    promise?: PromiseControls;
 };

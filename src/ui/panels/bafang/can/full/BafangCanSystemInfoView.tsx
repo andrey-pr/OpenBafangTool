@@ -352,7 +352,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getSensorItems(): DescriptionsProps['items'] {
-        let codesArray = [
+        const codesArray = [
             generateSimpleStringListItem(
                 'Hardware version',
                 this.state.sensor_hardware_version,

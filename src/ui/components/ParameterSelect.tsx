@@ -1,18 +1,16 @@
 import { Select } from 'antd';
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 const { Option } = Select;
 
 type ParameterSelectProps = {
-    value: string | NoData | null;
+    value: string | null;
     options: string[];
     onNewValue: (value: string) => void;
-    doNotBlock?: boolean;
 };
 
 type ParameterSelectState = {
-    value: string | NoData | null;
+    value: string | null;
 };
 
 class ParameterSelectComponent extends React.Component<
@@ -40,33 +38,6 @@ class ParameterSelectComponent extends React.Component<
     render() {
         const { value } = this.state;
         const { onNewValue, options } = this.props;
-        if (!this.props.doNotBlock && value === NotLoadedYet) {
-            return (
-                <Select
-                    allowClear
-                    style={{ minWidth: '150px' }}
-                    value="error"
-                    disabled
-                >
-                    <Option value="error" key="error">
-                        Isn&apos;t readed yet
-                    </Option>
-                </Select>
-            );
-        } else if (!this.props.doNotBlock && value === NotAvailable) {
-            return (
-                <Select
-                    allowClear
-                    style={{ minWidth: '150px' }}
-                    value="error"
-                    disabled
-                >
-                    <Option value="error" key="error">
-                        Not available on this hardware
-                    </Option>
-                </Select>
-            );
-        }
         return (
             <Select
                 onChange={(new_value) => {

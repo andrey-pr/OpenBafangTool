@@ -178,7 +178,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                             <br />
                             <Popconfirm
                                 title="Erase service mileage"
-                                description={`Are you sure to clean mileage since last service record?`}
+                                description="Are you sure to clean mileage since last service record?"
                                 onConfirm={() => {
                                     message.open({
                                         key: 'cleaning_service_mileage',
@@ -254,7 +254,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                         <br />
                         <Popconfirm
                             title="Set new time on display"
-                            description={`Are you sure to set new time on display clock?`}
+                            description="Are you sure to set new time on display clock?"
                             onConfirm={() => {
                                 if (this.state.currentTimeToSet === null) {
                                     message.error(
@@ -526,7 +526,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                 />
                 <Popconfirm
                     title="Parameter writing"
-                    description={`Are you sure that you want to write all parameters on device?`}
+                    description="Are you sure that you want to write all parameters on device?"
                     onConfirm={this.saveParameters}
                     okText="Yes"
                     cancelText="No"

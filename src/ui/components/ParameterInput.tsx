@@ -1,9 +1,8 @@
-import { Input, InputNumber, Tooltip } from 'antd';
+import { InputNumber, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type ParameterInputProps = {
-    value: number | NoData | null;
+    value: number | null;
     unit?: ReactNode;
     min?: number;
     max?: number;
@@ -19,7 +18,7 @@ type ParameterInputProps = {
 };
 
 type ParameterInputState = {
-    value: number | NoData | null;
+    value: number | null;
     warning: boolean;
 };
 
@@ -73,62 +72,40 @@ class ParameterInputComponent extends React.Component<
             decimalPlaces,
             noDataType,
         } = this.props;
-        if (noDataType && value === NotLoadedYet) {
-            return (
-                <Input
-                    value="Isn't readed yet"
+        return (
+            <Tooltip title={warningText} trigger="click" open={warning}>
+                <InputNumber
+                    min={min}
+                    max={max}
+                    value={value as number}
                     addonAfter={unit}
                     style={{ minWidth: '150px' }}
-                    disabled
+                    onChange={(number) => {
+                        if (number !== null) {
+                            let tmp = false;
+                            tmp ||=
+                                warningBelow !== undefined &&
+                                number < warningBelow;
+                            tmp ||=
+                                warningAbove !== undefined &&
+                                number > warningAbove;
+                            tmp ||=
+                                checkValue !== undefined && !checkValue(number);
+                            let multiplier = 10 ** (decimalPlaces as number);
+                            let value =
+                                Math.floor(number * multiplier) / multiplier;
+                            this.setState({
+                                value,
+                                warning: tmp,
+                            });
+                            onNewValue(value);
+                        }
+                    }}
+                    status={warning ? 'warning' : ''}
+                    disabled={disabled}
                 />
-            );
-        } else if (noDataType && value === NotAvailable) {
-            return (
-                <Input
-                    value="Not available on this hardware"
-                    style={{ minWidth: '150px' }}
-                    disabled
-                />
-            );
-        } else {
-            return (
-                <Tooltip title={warningText} trigger="click" open={warning}>
-                    <InputNumber
-                        min={min}
-                        max={max}
-                        value={value as number}
-                        addonAfter={unit}
-                        style={{ minWidth: '150px' }}
-                        onChange={(number) => {
-                            if (number !== null) {
-                                let tmp = false;
-                                tmp ||=
-                                    warningBelow !== undefined &&
-                                    number < warningBelow;
-                                tmp ||=
-                                    warningAbove !== undefined &&
-                                    number > warningAbove;
-                                tmp ||=
-                                    checkValue !== undefined &&
-                                    !checkValue(number);
-                                let multiplier =
-                                    10 ** (decimalPlaces as number);
-                                let value =
-                                    Math.floor(number * multiplier) /
-                                    multiplier;
-                                this.setState({
-                                    value,
-                                    warning: tmp,
-                                });
-                                onNewValue(value);
-                            }
-                        }}
-                        status={warning ? 'warning' : ''}
-                        disabled={disabled}
-                    />
-                </Tooltip>
-            );
-        }
+            </Tooltip>
+        );
     }
 }
 

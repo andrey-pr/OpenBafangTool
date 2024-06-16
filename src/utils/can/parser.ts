@@ -18,7 +18,6 @@ import {
     BafangCanSystemVoltage,
     BafangCanWheelDiameterTable,
 } from '../../types/BafangCanSystemTypes';
-import { NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 function decodeCurrentAssistLevel(
     currentAssistLevelCode: number,
@@ -57,7 +56,7 @@ export function parseErrorCodes(answer: BesstReadedCanFrame): number[] {
     const errors: number[] = [];
     let errorString = String.fromCharCode.apply(null, answer.data);
     while (errorString.length >= 2) {
-        errors.push(parseInt(errorString.substring(0, 2)));
+        errors.push(parseInt(errorString.substring(0, 2), 10));
         errorString = errorString.substring(2);
     }
     return errors;
@@ -203,7 +202,9 @@ export function parseControllerParameter1(
 export function parseControllerParameter2(
     packet: BesstReadedCanFrame,
 ): BafangCanControllerParameter2 {
-    let pkg: BafangCanControllerParameter2 = { controller_torque_profiles: [] };
+    const pkg: BafangCanControllerParameter2 = {
+        controller_torque_profiles: [],
+    };
     for (let i = 0; i <= 5; i++) {
         pkg.controller_torque_profiles.push({
             start_torque_value: packet.data[0 + i],

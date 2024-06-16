@@ -1,6 +1,9 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
 import { deepCopy } from 'deep-copy-ts';
+import path from 'path';
+import getAppDataPath from 'appdata-path';
+import log from 'electron-log/renderer';
 import IConnection from './Connection';
 import { DeviceName } from '../../types/DeviceType';
 import * as types from '../../types/BafangCanSystemTypes';
@@ -20,17 +23,33 @@ import {
     CanOperation,
     DeviceNetworkId,
 } from '../besst/besst-types';
-import log from 'electron-log/renderer';
-import path from 'path';
-import getAppDataPath from 'appdata-path';
+import { PromiseControls } from '../../types/common';
 
 type SentRequest = {
-    resolve: (...args: any[]) => void;
-    reject: (...args: any[]) => void;
+    promise: PromiseControls;
     can_operation: CanOperation;
 };
 
 type CommandProcessor = { log: boolean; processWriteAnswer: boolean };
+
+type AvailabilityList = {
+    controller: {
+        device: boolean;
+        realtime0: boolean;
+        realtime1: boolean;
+        parameter1: boolean;
+        parameter2: boolean;
+        speed_parameter: boolean;
+    };
+    display: {
+        device: boolean;
+        error_codes: boolean;
+        data1: boolean;
+        data2: boolean;
+        realtime: boolean;
+    };
+    sensor: { device: boolean; realtime: boolean };
+};
 
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
@@ -47,15 +66,9 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerRealtimeData0: types.BafangCanControllerRealtime0;
 
-    private _controllerRealtimeData0Ready: boolean = false;
-
     private _controllerRealtimeData1: types.BafangCanControllerRealtime1;
 
-    private _controllerRealtimeData1Ready: boolean = false;
-
     private _sensorRealtimeData: types.BafangCanSensorRealtime;
-
-    private _sensorRealtimeDataReady: boolean = false;
 
     private _controllerParameter1: types.BafangCanControllerParameter1;
 
@@ -73,8 +86,6 @@ export default class BafangCanSystem implements IConnection {
 
     private _displayState: types.BafangCanDisplayState;
 
-    private _displayStateReady: boolean = false;
-
     private _displayErrorCodes: number[];
 
     private _controllerCodes: types.BafangCanControllerCodes;
@@ -87,23 +98,24 @@ export default class BafangCanSystem implements IConnection {
 
     private sentRequests: SentRequest[][][] = [];
 
-    private _displayAvailable: boolean = false;
-
-    private _displayErrorCodesAvailable: boolean = false;
-
-    private _controllerAvailable: boolean = false;
-
-    private _displayData1Available: boolean = false;
-
-    private _displayData2Available: boolean = false;
-
-    private _controllerParameter1Available: boolean = false;
-
-    private _controllerParameter2Available: boolean = false;
-
-    private _controllerSpeedParameterAvailable: boolean = false;
-
-    private _sensorAvailable: boolean = false;
+    private _availabilityList: AvailabilityList = {
+        controller: {
+            device: false,
+            realtime0: false,
+            realtime1: false,
+            parameter1: false,
+            parameter2: false,
+            speed_parameter: false,
+        },
+        display: {
+            device: false,
+            error_codes: false,
+            data1: false,
+            data2: false,
+            realtime: false,
+        },
+        sensor: { device: false, realtime: false },
+    };
 
     private readingInProgress: boolean = false;
 
@@ -188,18 +200,16 @@ export default class BafangCanSystem implements IConnection {
         can_operation: CanOperation,
         code: number,
         subcode: number,
-        resolve?: (...args: any[]) => void,
-        reject?: (...args: any[]) => void,
+        promise?: PromiseControls,
         attempt = 1,
     ): void {
-        if (resolve && reject) {
+        if (promise) {
             if (this.sentRequests[target] === undefined)
                 this.sentRequests[target] = [];
             if (this.sentRequests[target][code] === undefined)
                 this.sentRequests[target][code] = [];
             this.sentRequests[target][code][subcode] = {
-                resolve,
-                reject,
+                promise,
                 can_operation,
             };
             setTimeout(() => {
@@ -209,7 +219,7 @@ export default class BafangCanSystem implements IConnection {
                             .can_operation !== CanOperation.READ_CMD ||
                         attempt >= 3
                     ) {
-                        resolve(false);
+                        promise.resolve(false);
                         return;
                     }
                     this.device
@@ -227,8 +237,7 @@ export default class BafangCanSystem implements IConnection {
                                 can_operation,
                                 code,
                                 subcode,
-                                resolve,
-                                reject,
+                                promise,
                                 ++attempt,
                             ),
                         );
@@ -252,7 +261,7 @@ export default class BafangCanSystem implements IConnection {
         ) {
             this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
-            ][response.canCommandSubCode].resolve(success);
+            ][response.canCommandSubCode].promise.resolve(success);
             delete this.sentRequests[response.sourceDeviceCode][
                 response.canCommandCode
             ][response.canCommandSubCode];
@@ -317,7 +326,7 @@ export default class BafangCanSystem implements IConnection {
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 if (response.canCommandSubCode === 0x07) {
                     this._displayErrorCodes = parsers.parseErrorCodes(response);
-                    this._displayErrorCodesAvailable = true;
+                    this._availabilityList.display.error_codes = true;
                     this.emitter.emit(
                         'display-error-codes',
                         this._displayErrorCodes,
@@ -335,20 +344,20 @@ export default class BafangCanSystem implements IConnection {
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
             ) {
-                if (response.canCommandSubCode == 0x11) {
+                if (response.canCommandSubCode === 0x11) {
                     this.controllerParameter1Array = response.data;
                     this._controllerParameter1 =
                         parsers.parseControllerParameter1(response);
-                    this._controllerParameter1Available = true;
+                    this._availabilityList.controller.parameter1 = true;
                     this.emitter.emit(
                         'controller-parameter1',
                         deepCopy(this._controllerParameter1),
                     );
-                } else if (response.canCommandSubCode == 0x12) {
+                } else if (response.canCommandSubCode === 0x12) {
                     this.controllerParameter2Array = response.data;
                     this._controllerParameter2 =
                         parsers.parseControllerParameter2(response);
-                    this._controllerParameter2Available = true;
+                    this._availabilityList.controller.parameter2 = true;
                     this.emitter.emit(
                         'controller-parameter2',
                         deepCopy(this._controllerParameter2),
@@ -376,11 +385,11 @@ export default class BafangCanSystem implements IConnection {
                 );
             }
         } else if (response.canCommandCode === 0x63) {
-            //code is hmi only
+            // code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
                     this._displayState = parsers.parseDisplayPackage0(response);
-                    this._displayStateReady = true;
+                    this._availabilityList.display.realtime = true;
                     this.emitter.emit(
                         'broadcast-data-display',
                         deepCopy(this._displayState),
@@ -393,7 +402,7 @@ export default class BafangCanSystem implements IConnection {
                         break;
                     }
                     this._displayData1 = parsers.parseDisplayPackage1(response);
-                    this._displayData1Available = true;
+                    this._availabilityList.display.data1 = true;
                     this.emitter.emit(
                         'display-general-data',
                         deepCopy(this._displayData1),
@@ -406,7 +415,7 @@ export default class BafangCanSystem implements IConnection {
                         break;
                     }
                     this._displayData2 = parsers.parseDisplayPackage2(response);
-                    this._displayData2Available = true;
+                    this._availabilityList.display.data2 = true;
                     this.emitter.emit(
                         'display-general-data',
                         deepCopy(this._displayData2),
@@ -420,7 +429,7 @@ export default class BafangCanSystem implements IConnection {
             response.canCommandSubCode === 0x00
         ) {
             this._sensorRealtimeData = parsers.parseSensorPackage(response);
-            this._sensorRealtimeDataReady = true;
+            this._availabilityList.sensor.realtime = true;
             this.emitter.emit(
                 'broadcast-data-sensor',
                 deepCopy(this._sensorRealtimeData),
@@ -430,7 +439,7 @@ export default class BafangCanSystem implements IConnection {
                 case 0x00:
                     this._controllerRealtimeData0 =
                         parsers.parseControllerPackage0(response);
-                    this._controllerRealtimeData0Ready = true;
+                    this._availabilityList.controller.realtime0 = true;
                     this.emitter.emit(
                         'broadcast-data-controller',
                         deepCopy(this._controllerRealtimeData0),
@@ -439,7 +448,7 @@ export default class BafangCanSystem implements IConnection {
                 case 0x01:
                     this._controllerRealtimeData1 =
                         parsers.parseControllerPackage1(response);
-                    this._controllerRealtimeData1Ready = true;
+                    this._availabilityList.controller.realtime1 = true;
                     this.emitter.emit(
                         'broadcast-data-controller',
                         deepCopy(this._controllerRealtimeData1),
@@ -449,7 +458,7 @@ export default class BafangCanSystem implements IConnection {
                     log.info('received can package:', response);
                     this._controllerSpeedParameters =
                         parsers.parseControllerPackage3(response);
-                    this._controllerSpeedParameterAvailable = true;
+                    this._availabilityList.controller.speed_parameter = true;
                     this.emitter.emit(
                         'controller-speed-data',
                         deepCopy(this._controllerSpeedParameters),
@@ -461,7 +470,7 @@ export default class BafangCanSystem implements IConnection {
         } else {
             console.log(response);
         }
-    } //TODO
+    } // TODO
 
     public connect(): Promise<boolean> {
         if (this.devicePath === 'demo') {
@@ -575,19 +584,19 @@ export default class BafangCanSystem implements IConnection {
                     'sensor-codes-data',
                     deepCopy(this._sensorCodes),
                 );
-                this._displayAvailable = true;
-                this._displayData1Available = false;
-                this._displayData2Available = false;
-                this._controllerAvailable = true;
-                this._controllerParameter1Available = false;
-                this._controllerParameter2Available = false;
-                this._controllerSpeedParameterAvailable = false;
-                this._displayErrorCodesAvailable = false;
-                this._displayStateReady = false;
-                this._sensorRealtimeDataReady = false;
-                this._controllerRealtimeData0Ready = false;
-                this._controllerRealtimeData1Ready = false;
-                this._sensorAvailable = true;
+                this._availabilityList.controller.device = true;
+                this._availabilityList.controller.realtime0 = true;
+                this._availabilityList.controller.realtime1 = true;
+                this._availabilityList.controller.speed_parameter = true;
+                this._availabilityList.controller.parameter1 = true;
+                this._availabilityList.controller.parameter2 = true;
+                this._availabilityList.display.device = true;
+                this._availabilityList.display.realtime = true;
+                this._availabilityList.display.data1 = true;
+                this._availabilityList.display.data2 = true;
+                this._availabilityList.display.error_codes = true;
+                this._availabilityList.sensor.device = true;
+                this._availabilityList.sensor.realtime = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
             console.log('Demo mode: blank data loaded');
@@ -644,7 +653,7 @@ export default class BafangCanSystem implements IConnection {
         commands.forEach((command) => {
             command.applicableDevices.forEach((device) => {
                 new Promise<boolean>((resolve, reject) => {
-                    this.readParameter(device, command, resolve, reject);
+                    this.readParameter(device, command, { resolve, reject });
                 }).then((success) => {
                     if (success) readedSuccessfully++;
                     else readedUnsuccessfully++;
@@ -658,9 +667,11 @@ export default class BafangCanSystem implements IConnection {
                     )
                         readedSensor++;
                     if (readedSuccessfully + readedUnsuccessfully >= summ) {
-                        this._displayAvailable = readedDisplay > 0;
-                        this._controllerAvailable = readedController > 0;
-                        this._sensorAvailable = readedSensor > 0;
+                        this._availabilityList.display.device =
+                            readedDisplay > 0;
+                        this._availabilityList.controller.device =
+                            readedController > 0;
+                        this._availabilityList.sensor.device = readedSensor > 0;
                         this.saveBackup();
                         this.emitter.emit(
                             'reading-finish',
@@ -682,19 +693,20 @@ export default class BafangCanSystem implements IConnection {
             controller_parameter1_array: this.controllerParameter1Array,
             controller_parameter2_array: this.controllerParameter2Array,
             controller_speed_parameters: this._controllerSpeedParameters,
-            display_data: this._displayData,
+            display_data1: this._displayData1,
+            display_data2: this._displayData2,
             controller_codes: this._controllerCodes,
             display_codes: this._displayCodes,
             sensor_codes: this.sensorCodes,
-            display_available: this._displayAvailable,
-            controller_available: this._controllerAvailable,
+            display_available: this._availabilityList.display.device,
+            controller_available: this._availabilityList.controller.device,
             controller_parameter1_available:
-                this._controllerParameter1Available,
+                this._availabilityList.controller.parameter1,
             controller_parameter2_available:
-                this._controllerParameter2Available,
+                this._availabilityList.controller.parameter2,
             controller_speed_parameter_available:
-                this._controllerSpeedParameterAvailable,
-            sensor_available: this._sensorAvailable,
+                this._availabilityList.controller.speed_parameter,
+            sensor_available: this._availabilityList.sensor.device,
         });
         let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
         try {
@@ -725,8 +737,7 @@ export default class BafangCanSystem implements IConnection {
     private readParameter(
         target: DeviceNetworkId,
         can_command: CanCommand,
-        resolve?: (...args: any[]) => void,
-        reject?: (...args: any[]) => void,
+        promise?: PromiseControls,
     ): void {
         this.device
             ?.sendCanFrame(
@@ -743,8 +754,7 @@ export default class BafangCanSystem implements IConnection {
                     CanOperation.READ_CMD,
                     can_command.canCommandCode,
                     can_command.canCommandSubCode,
-                    resolve,
-                    reject,
+                    promise,
                 ),
             );
     }
@@ -753,8 +763,7 @@ export default class BafangCanSystem implements IConnection {
         target: DeviceNetworkId,
         can_command: CanCommand,
         value: number[],
-        resolve?: (...args: any[]) => void,
-        reject?: (...args: any[]) => void,
+        promise?: PromiseControls,
     ): void {
         this.device
             ?.sendCanFrame(
@@ -772,8 +781,7 @@ export default class BafangCanSystem implements IConnection {
                     CanOperation.WRITE_CMD,
                     can_command.canCommandCode,
                     can_command.canCommandSubCode,
-                    resolve,
-                    reject,
+                    promise,
                 ),
             );
     }
@@ -782,8 +790,7 @@ export default class BafangCanSystem implements IConnection {
         target: DeviceNetworkId,
         can_command: CanCommand,
         value: number[],
-        resolve?: (...args: any[]) => void,
-        reject?: (...args: any[]) => void,
+        promise?: PromiseControls,
     ): void {
         let arrayClone = [...value];
         this.device?.sendCanFrame(
@@ -831,8 +838,7 @@ export default class BafangCanSystem implements IConnection {
                     CanOperation.WRITE_CMD,
                     can_command.canCommandCode,
                     can_command.canCommandSubCode,
-                    resolve,
-                    reject,
+                    promise,
                 ),
             );
     }
@@ -995,8 +1001,7 @@ export default class BafangCanSystem implements IConnection {
                 DeviceNetworkId.DISPLAY,
                 CanWriteCommandsList.DisplayTime,
                 [hours, minutes, seconds],
-                resolve,
-                reject,
+                { resolve, reject },
             );
         });
     }
@@ -1011,8 +1016,7 @@ export default class BafangCanSystem implements IConnection {
                 DeviceNetworkId.DISPLAY,
                 CanWriteCommandsList.CleanServiceMileage,
                 [0x00, 0x00, 0x00, 0x00, 0x00],
-                resolve,
-                reject,
+                { resolve, reject },
             );
         });
     }
@@ -1027,8 +1031,7 @@ export default class BafangCanSystem implements IConnection {
                 DeviceNetworkId.DRIVE_UNIT,
                 CanWriteCommandsList.CalibratePositionSensor,
                 [0x00, 0x00, 0x00, 0x00, 0x00],
-                resolve,
-                reject,
+                { resolve, reject },
             );
         });
     }
@@ -1054,7 +1057,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isControllerParameter1Available(): boolean {
-        return this._controllerParameter1Available;
+        return this._availabilityList.controller.parameter1;
     }
 
     public get controllerParameter1(): types.BafangCanControllerParameter1 {
@@ -1066,7 +1069,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isControllerParameter2Available(): boolean {
-        return this._controllerParameter2Available;
+        return this._availabilityList.controller.parameter2;
     }
 
     public get controllerParameter2(): types.BafangCanControllerParameter2 {
@@ -1078,7 +1081,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isControllerSpeedParametersAvailable(): boolean {
-        return this._controllerSpeedParameterAvailable;
+        return this._availabilityList.controller.speed_parameter;
     }
 
     public get controllerSpeedParameters(): types.BafangCanControllerSpeedParameters {
@@ -1092,7 +1095,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayData1Available(): boolean {
-        return this._displayData1Available;
+        return this._availabilityList.display.data1;
     }
     public get displayData1(): types.BafangCanDisplayData1 {
         return deepCopy(this._displayData1);
@@ -1103,7 +1106,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayData2Available(): boolean {
-        return this._displayData2Available;
+        return this._availabilityList.display.data2;
     }
 
     public get displayData2(): types.BafangCanDisplayData2 {
@@ -1111,7 +1114,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayStateReady(): boolean {
-        return this._displayStateReady;
+        return this._availabilityList.display.realtime;
     }
 
     public get displayRealtimeData(): types.BafangCanDisplayState {
@@ -1119,7 +1122,7 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayErrorCodesAvailable(): boolean {
-        return this._displayErrorCodesAvailable;
+        return this._availabilityList.display.error_codes;
     }
 
     public get displayErrorCodes(): number[] {
@@ -1139,15 +1142,15 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isControllerRealtimeData0Ready(): boolean {
-        return this._controllerRealtimeData0Ready;
+        return this._availabilityList.controller.realtime0;
     }
 
     public get isControllerRealtimeData1Ready(): boolean {
-        return this._controllerRealtimeData1Ready;
+        return this._availabilityList.controller.realtime1;
     }
 
     public get isSensorRealtimeDataReady(): boolean {
-        return this._sensorRealtimeDataReady;
+        return this._availabilityList.sensor.realtime;
     }
 
     public get sensorRealtimeData(): types.BafangCanSensorRealtime {
@@ -1175,14 +1178,14 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayAvailable(): boolean {
-        return this._displayAvailable;
+        return this._availabilityList.display.device;
     }
 
     public get isControllerAvailable(): boolean {
-        return this._controllerAvailable;
+        return this._availabilityList.controller.device;
     }
 
     public get isSensorAvailable(): boolean {
-        return this._sensorAvailable;
+        return this._availabilityList.sensor.device;
     }
 }

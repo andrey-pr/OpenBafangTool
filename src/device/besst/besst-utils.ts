@@ -1,3 +1,4 @@
+import { PromiseControls } from '../../types/common';
 import {
     BesstReadedCanFrame,
     BesstPacketType,
@@ -14,8 +15,7 @@ export function hexMsgDecoder(msg: number[]) {
 export function generateBesstWritePacket(
     actionCode: number,
     cmd: number[],
-    resolve?: (...args: any[]) => void,
-    reject?: (...args: any[]) => void,
+    promise?: PromiseControls,
     data: number[] = [0],
 ) {
     let msg = [0, actionCode, 0, 0, ...cmd, data.length || 0, ...data];
@@ -48,10 +48,10 @@ export function generateBesstWritePacket(
     }
     return {
         data: msg,
-        interval: interval,
-        timeout: timeout,
+        interval,
+        timeout,
         type: actionCode,
-        promise: resolve && reject ? { resolve, reject } : undefined,
+        promise,
     };
 }
 
@@ -61,8 +61,7 @@ export function buildBesstCanCommandPacket(
     canOperationCode: number,
     canCommandCode: number,
     canCommandSubCode: number,
-    resolve?: (...args: any[]) => void,
-    reject?: (...args: any[]) => void,
+    promise?: PromiseControls,
     data: number[] = [0],
 ) {
     return generateBesstWritePacket(
@@ -73,8 +72,7 @@ export function buildBesstCanCommandPacket(
             ((target & 0b11111) << 3) + (canOperationCode & 0b111),
             source & 0b11111,
         ],
-        resolve,
-        reject,
+        promise,
         data,
     );
 }

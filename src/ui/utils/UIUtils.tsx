@@ -63,7 +63,7 @@ export function generateEditableStringListItem(
 
 export function generateSimpleNumberListItem(
     text: string,
-    content: number | NoData,
+    content: number,
     content_unit?: ReactNode,
 ): DescriptionsItemType {
     return {
@@ -75,7 +75,7 @@ export function generateSimpleNumberListItem(
 
 export function generateEditableNumberListItem(
     text: string,
-    content: number | NoData,
+    content: number,
     onNewValue: (e: number) => void,
     content_unit?: ReactNode,
     min?: number,
@@ -100,7 +100,7 @@ export function generateEditableNumberListItem(
 
 export function generateAnnotatedEditableNumberListItem(
     text: string,
-    content: number | NoData,
+    content: number,
     onNewValue: (e: number) => void,
     note: string,
     content_unit?: ReactNode,
@@ -135,7 +135,7 @@ export function generateAnnotatedEditableNumberListItem(
 
 export function generateEditableNumberListItemWithWarning(
     text: string,
-    content: number | NoData,
+    content: number,
     warningText: string,
     warningBelow: number,
     warningAbove: number,
@@ -166,7 +166,7 @@ export function generateEditableNumberListItemWithWarning(
 
 export function generateSimpleBooleanListItem(
     text: string,
-    content: boolean | number | NoData,
+    content: boolean | number,
     text_true?: string,
     text_false?: string,
 ): DescriptionsItemType {
@@ -186,7 +186,7 @@ export function generateSimpleBooleanListItem(
 export function generateEditableSelectListItem(
     text: string,
     options: { value: string | number | boolean; label: string }[],
-    value: string | number | boolean | NoData,
+    value: string | number | boolean,
     onChange: (e: string | number | boolean) => void,
 ): DescriptionsItemType {
     return {

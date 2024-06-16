@@ -1,5 +1,5 @@
 export function intToByteArray(integer: number, bytes: number): number[] {
-    let array: number[] = [];
+    const array: number[] = [];
     for (let i = 0; i < bytes; i++) {
         array.push(integer & 255);
         integer >>= 8;

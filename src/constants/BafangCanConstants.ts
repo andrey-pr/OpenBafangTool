@@ -174,35 +174,36 @@ const ErrorCodes: {
     [key: number]: { description: string; recommendations: string };
 } = {
     4: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     5: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     7: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     8: {
         description: 'Inner motor hall sensor (not speed hall sensor) error',
-        recommendations: 'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
+        recommendations:
+            'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
     },
     9: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     10: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     11: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     12: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     14: {
@@ -211,7 +212,7 @@ const ErrorCodes: {
             'Check connection with motor. If its overheated, let it cool down. Check if motor has supply. Check contacts in connectors for dirt and damage.',
     },
     15: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     21: {
@@ -220,71 +221,71 @@ const ErrorCodes: {
             'Check magnet on wheel. Check connection with of hall sensor. Check hall sensor with multimeter. Try to connect spare sensor if available.',
     },
     25: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     26: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     27: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     30: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     33: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     35: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     36: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     37: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     41: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     42: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     43: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     45: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     46: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     47: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     48: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     71: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
     81: {
-        description: 'Description for this code is not available', //TODO
+        description: 'Description for this code is not available', // TODO
         recommendations: '-',
     },
 };

@@ -700,7 +700,6 @@ class BafangUartMotorSettingsView extends React.Component<
             throttle_end_voltage,
             throttle_speed_limit,
             throttle_speed_limit_unit,
-            throttle_start_current,
         } = this.state;
         return [
             {
@@ -987,7 +986,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 />
                 <Popconfirm
                     title="Parameter writing"
-                    description={`Are you sure that you want to write all parameters on device?`}
+                    description="Are you sure that you want to write all parameters on device?"
                     onConfirm={this.saveParameters}
                     okText="Yes"
                     cancelText="No"

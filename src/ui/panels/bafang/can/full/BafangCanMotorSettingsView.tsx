@@ -14,6 +14,7 @@ import {
     DeliveredProcedureOutlined,
     WarningTwoTone,
 } from '@ant-design/icons';
+import Title from 'antd/es/typography/Title';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
     BafangCanControllerCodes,
@@ -36,7 +37,6 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
-import Title from 'antd/es/typography/Title';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
 import { BooleanOptions } from '../../../../../types/common';
 import TorqueTableComponent from '../../../../components/TorqueTableComponent';
@@ -275,7 +275,7 @@ class BafangCanMotorSettingsView extends React.Component<
             //     1,
             //     100,
             // ),
-            //TODO add three low charge decay parameters, recovery voltage
+            // TODO add three low charge decay parameters, recovery voltage
         ];
     }
 
@@ -351,7 +351,7 @@ class BafangCanMotorSettingsView extends React.Component<
     getDrivingItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Start current',
                 this.state.controller_start_current,
                 (controller_start_current: number) =>
@@ -361,7 +361,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Current loading time',
                 this.state.controller_current_loading_time,
                 (controller_current_loading_time: number) =>
@@ -372,7 +372,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 1,
             ),
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Current shedding time',
                 this.state.controller_current_shedding_time,
                 (controller_current_shedding_time: number) =>
@@ -433,12 +433,10 @@ class BafangCanMotorSettingsView extends React.Component<
                 key: 'speed_limit',
                 label: (
                     <>
-                        {'Speed limit'}
+                        Speed limit
                         <br />
                         <Text italic>
-                            {
-                                'Its illegal to set speed limit bigger than 25km/h'
-                            }
+                            Its illegal to set speed limit bigger than 25km/h
                         </Text>
                     </>
                 ),
@@ -459,12 +457,11 @@ class BafangCanMotorSettingsView extends React.Component<
                 key: 'wheel_diameter',
                 label: (
                     <>
-                        {'Wheel diameter'}
+                        Wheel diameter
                         <br />
                         <Text italic>
-                            {
-                                'NEVER try to set wrong wheel diameter - its illegal, because it can lead to incorrect speed measurement'
-                            }
+                            NEVER try to set wrong wheel diameter - its illegal,
+                            because it can lead to incorrect speed measurement
                         </Text>
                     </>
                 ),
@@ -484,7 +481,6 @@ class BafangCanMotorSettingsView extends React.Component<
                                     controller_wheel_diameter,
                                 });
                         }}
-                        doNotBlock
                     />
                 ),
             },
@@ -514,7 +510,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <Popconfirm
                         title="Position sensor calibration"
-                        description={`Are you sure to calibrate position sensor?`}
+                        description="Are you sure to calibrate position sensor?"
                         onConfirm={() =>
                             this.setState({
                                 position_sensor_calibration_dialog: true,

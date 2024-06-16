@@ -305,7 +305,7 @@ class MainView extends React.Component<MainProps, MainState> {
         const { tab, loading } = this.state;
         const loadingElement = (
             <Spin
-                spinning={true}
+                spinning
                 style={{ height: '100%', width: '100%', marginTop: '100px' }}
             />
         );
