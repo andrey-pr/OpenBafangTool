@@ -21,6 +21,9 @@ class DocumentationView extends React.Component<InfoProps, InfoState> {
             <div style={{ margin: '36px' }}>
                 <MarkdownPreview
                     source={getDocumentById(page)}
+                    wrapperElement={{
+                        'data-color-mode': 'light',
+                    }}
                     rehypeRewrite={async (node) => {
                         if (
                             node.tagName === 'a' &&
