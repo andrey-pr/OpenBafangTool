@@ -25,6 +25,10 @@
 <!-- RELEASE NOTES -->
 ## Release Notes
 
+### 2.1.1
+
+- Added support of more configurable parameters
+
 ### 2.0.1
 
 - Fixed bug with writing
