@@ -71,6 +71,16 @@ export const CanReadCommandsList: {
         canCommandSubCode: 0x08,
         applicableDevices: [DeviceNetworkId.DISPLAY],
     },
+    Parameter1: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x11,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
+    Parameter2: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x12,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
     MotorSpeedParameters: {
         canCommandCode: 0x32,
         canCommandSubCode: 0x03,
@@ -117,6 +127,16 @@ export const CanWriteCommandsList: {
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.TORQUE_SENSOR,
         ],
+    },
+    Parameter1: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x11,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
+    },
+    Parameter2: {
+        canCommandCode: 0x60,
+        canCommandSubCode: 0x12,
+        applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
     },
     DisplayTotalMileage: {
         canCommandCode: 0x62,
@@ -166,8 +186,8 @@ const ErrorCodes: {
         recommendations: '-',
     },
     8: {
-        description: 'Description for this code is not available', //TODO
-        recommendations: '-',
+        description: 'Inner motor hall sensor (not speed hall sensor) error',
+        recommendations: 'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
     },
     9: {
         description: 'Description for this code is not available', //TODO

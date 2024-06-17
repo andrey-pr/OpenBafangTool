@@ -108,6 +108,7 @@ class BesstDevice {
             log.info('sent besst package:', packet.data);
             this.device?.write(packet.data);
         } catch (e) {
+            console.log('write error:', e);
             this.onDisconnect();
         }
         setTimeout(this.processWriteQueue, packet.interval + 10);

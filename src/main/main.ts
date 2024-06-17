@@ -17,14 +17,11 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
 log.initialize();
+app.disableHardwareAcceleration();
 
-class AppUpdater {
-    constructor() {
-        log.transports.file.level = 'info';
-        log.transports.file.resolvePathFn = () =>
-            path.join(getAppDataPath('open-bafang-tool'), 'logs/log.log');
-    }
-}
+log.transports.file.level = 'info';
+log.transports.file.resolvePathFn = () =>
+    path.join(getAppDataPath('open-bafang-tool'), 'logs/log.log');
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -40,24 +37,7 @@ if (isDebug) {
     require('electron-debug')();
 }
 
-const installExtensions = async () => {
-    const installer = require('electron-devtools-installer');
-    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-    const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-    return installer
-        .default(
-            extensions.map((name) => installer[name]),
-            forceDownload,
-        )
-        .catch(console.log);
-};
-
 const createWindow = async () => {
-    if (isDebug) {
-        await installExtensions();
-    }
-
     const RESOURCES_PATH = app.isPackaged
         ? path.join(process.resourcesPath, 'assets')
         : path.join(__dirname, '../../assets');
@@ -92,6 +72,7 @@ const createWindow = async () => {
 
     mainWindow.on('closed', () => {
         mainWindow = null;
+        app.quit();
     });
 
     const menuBuilder = new MenuBuilder(mainWindow);
@@ -102,10 +83,6 @@ const createWindow = async () => {
         shell.openExternal(edata.url);
         return { action: 'deny' };
     });
-
-    // Remove this if your app does not use auto updates
-    // eslint-disable-next-line
-    new AppUpdater();
 };
 
 /**
@@ -113,11 +90,7 @@ const createWindow = async () => {
  */
 
 app.on('window-all-closed', () => {
-    // Respect the OSX convention of having the application in memory even
-    // after all windows have been closed
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
 
 app.on('browser-window-focus', () => {

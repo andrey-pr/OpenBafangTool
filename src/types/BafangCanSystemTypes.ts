@@ -1,23 +1,20 @@
+import { BafangAssistProfile } from './common';
 import { NoData } from './no_data';
 
-export type BafangCanControllerRealtime = {
-    controller_cadence: number | NoData;
-    controller_torque: number | NoData;
-    controller_speed: number | NoData;
-    controller_current: number | NoData;
-    controller_voltage: number | NoData;
-    controller_temperature: number | NoData;
-    controller_motor_temperature: number | NoData;
-    controller_walk_assistance: boolean | NoData;
-    controller_calories: number | NoData;
-    controller_remaining_capacity: number | NoData;
-    controller_single_trip: number | NoData;
-    controller_remaining_distance: number | NoData;
+export type BafangCanControllerRealtime0 = {
+    controller_cadence: number;
+    controller_torque: number;
+    controller_remaining_capacity: number;
+    controller_single_trip: number;
+    controller_remaining_distance: number;
 };
 
-export type BafangCanAssistProfile = {
-    current_limit: number;
-    speed_limit: number;
+export type BafangCanControllerRealtime1 = {
+    controller_speed: number;
+    controller_current: number;
+    controller_voltage: number;
+    controller_temperature: number;
+    controller_motor_temperature: number;
 };
 
 export type BafangCanSystemVoltage = 36 | 43 | 48;
@@ -27,6 +24,21 @@ export enum BafangCanPedalSensorType {
     CadenceSensor = 1,
     ThrottleLeverOnly = 2,
 }
+
+export const TriggerTypeOptions = [
+    {
+        value: BafangCanPedalSensorType.TorqueSensor,
+        label: 'Torque sensor and throttle lever',
+    },
+    {
+        value: BafangCanPedalSensorType.CadenceSensor,
+        label: 'Cadence sensor and throttle lever',
+    },
+    {
+        value: BafangCanPedalSensorType.ThrottleLeverOnly,
+        label: 'Throttle lever only',
+    },
+];
 
 export enum BafangCanMotorType {
     HubMotor = 0,
@@ -42,7 +54,7 @@ export enum BafangCanTemperatureSensorType {
 
 export type BafangCanSpeedSensorChannelNumber = 1 | 2;
 
-export type BafangCanControllerParameters1 = {
+export type BafangCanControllerParameter1 = {
     controller_system_voltage: BafangCanSystemVoltage;
     controller_current_limit: number;
     controller_overvoltage: number;
@@ -51,17 +63,14 @@ export type BafangCanControllerParameters1 = {
     controller_battery_recovery_voltage: number;
     controller_battery_capacity: number;
     controller_max_current_on_low_charge: number;
-    // Battery "Capacity percentage for current begins to decay" - int/percents, read, write
-    // Battery "Capacity percentage for current begins to decay coefficient" - int/percents, read, write
     controller_full_capacity_range: number;
     controller_pedal_sensor_type: BafangCanPedalSensorType;
     controller_coaster_brake: boolean;
-    // Pedal sensor "Speed signal channel number" - its something different, no read, no write
+    controller_pedal_sensor_signals_per_rotation: number;
     controller_speed_sensor_channel_number: BafangCanSpeedSensorChannelNumber;
-    // Pedal sensor "Check teeth for heel torque",
     controller_motor_type: BafangCanMotorType;
     controller_motor_pole_pair_number: number;
-    controller_magnets_on_speed_sensor: number;
+    controller_speedmeter_magnets_number: number;
     controller_temperature_sensor_type: BafangCanTemperatureSensorType;
     controller_deceleration_ratio: number;
     controller_motor_max_rotor_rpm: number;
@@ -71,14 +80,27 @@ export type BafangCanControllerParameters1 = {
     controller_motor_reverse_potential_coefficient: number;
     controller_throttle_start_voltage: number;
     controller_throttle_max_voltage: number;
-    // Throttle "Speed limit switch function" - enum (0=no limit, 1=limit), read, write
-    controller_pas_start_current: number;
-    controller_pas_current_loading_time: number;
-    controller_pas_current_load_shedding_time: number;
-    controller_assist_levels: BafangCanAssistProfile[];
+    controller_start_current: number;
+    controller_current_loading_time: number;
+    controller_current_shedding_time: number;
+    controller_assist_levels: BafangAssistProfile[];
     controller_displayless_mode: boolean;
     controller_lamps_always_on: boolean;
-    // System "Assist speed" (unknown): number;
+};
+
+export type BafangCanTorqueProfile = {
+    start_torque_value: number;
+    max_torque_value: number;
+    return_torque_value: number;
+    min_current: number;
+    max_current: number;
+    start_pulse: number;
+    current_decay_time: number;
+    stop_delay: number;
+};
+
+export type BafangCanControllerParameter2 = {
+    controller_torque_profiles: BafangCanTorqueProfile[];
 };
 
 export type BafangCanWheel = {
@@ -242,9 +264,9 @@ export const BafangCanWheelDiameterTable: BafangCanWheel[] = [
 ];
 
 export type BafangCanControllerSpeedParameters = {
-    controller_wheel_diameter: BafangCanWheel | NoData;
-    controller_speed_limit: number | NoData;
-    controller_circumference: number | NoData;
+    controller_wheel_diameter: BafangCanWheel;
+    controller_speed_limit: number;
+    controller_circumference: number;
 };
 
 export type BafangCanControllerCodes = {
@@ -266,13 +288,15 @@ export type BafangCanDisplayCodes = {
     display_bootload_version: string | NoData;
 };
 
-export type BafangCanDisplayData = {
-    display_total_mileage: number | NoData;
-    display_single_mileage: number | NoData;
-    display_max_speed: number | NoData;
-    display_average_speed: number | NoData;
-    display_service_mileage: number | NoData;
-    display_last_shutdown_time: number | NoData;
+export type BafangCanDisplayData1 = {
+    display_total_mileage: number;
+    display_single_mileage: number;
+    display_max_speed: number;
+};
+
+export type BafangCanDisplayData2 = {
+    display_average_speed: number;
+    display_service_mileage: number;
 };
 
 export enum BafangCanRideMode {
@@ -294,17 +318,17 @@ export type BafangCanAssistLevel =
     | 9;
 
 export type BafangCanDisplayState = {
-    display_assist_levels: number | NoData;
-    display_ride_mode: BafangCanRideMode | NoData;
-    display_boost: boolean | NoData;
-    display_current_assist_level: BafangCanAssistLevel | NoData;
-    display_light: boolean | NoData;
-    display_button: boolean | NoData;
+    display_assist_levels: number;
+    display_ride_mode: BafangCanRideMode;
+    display_boost: boolean;
+    display_current_assist_level: BafangCanAssistLevel;
+    display_light: boolean;
+    display_button: boolean;
 };
 
 export type BafangCanSensorRealtime = {
-    sensor_torque: number | NoData;
-    sensor_cadence: number | NoData;
+    sensor_torque: number;
+    sensor_cadence: number;
 };
 
 export type BafangCanSensorCodes = {

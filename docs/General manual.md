@@ -16,11 +16,11 @@ For systems with UART available two kinds of UI - full and simplified. If you ar
 
 ![Serial port selector](assets/general_manual/port_selector.png)
 
-If you have motor with UART, select port where you device connected to. Check usual name of USB-Serial ports for you operational system in internet. Also, there is a item `Simulator` that connects program to virtual device for test purposes and virtual `/dev/tnt` ports if you have them in your system (available only for Linux). Non-USB serial ports usually removed from list on Linux due to high ammount of "dead" ports in standard list.
+If you have motor with UART, select port where you device connected to. Check usual name of USB-Serial ports for you operational system in internet. Also, there is a item `Demo` that connects program to virtual device for test purposes and virtual `/dev/tnt` ports if you have them in your system (available only for Linux). Non-USB serial ports usually removed from list on Linux due to high ammount of "dead" ports in standard list.
 
 ![HID device selector](assets/general_manual/besst_selector.png)
 
-If you have motor with CAN, select your BESST Tool USB device. Also, there is a item `Simulator` that connects program to virtual device for test purposes.
+If you have motor with CAN, select your BESST Tool USB device. Also, there is a item `Demo` that connects program to virtual device for test purposes.
 
 ![Disclaimers](assets/general_manual/disclaimers.png)
 

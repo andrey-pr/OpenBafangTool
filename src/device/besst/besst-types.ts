@@ -44,5 +44,8 @@ export type BesstWritePacket = {
     interval: number;
     timeout: number;
     type: BesstPacketType;
-    promise?: { resolve: any; reject: any }; // TODO fix types
+    promise?: {
+        resolve: (...args: any[]) => void;
+        reject: (...args: any[]) => void;
+    };
 };

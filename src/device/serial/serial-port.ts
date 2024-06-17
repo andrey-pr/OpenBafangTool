@@ -1,6 +1,6 @@
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { SerialPort } from 'serialport';
-import filterPorts from '../serial/serial-patcher';
+import filterPorts from './serial-patcher';
 
 const ports: {
     [id: string]: SerialPort<AutoDetectTypes>;
