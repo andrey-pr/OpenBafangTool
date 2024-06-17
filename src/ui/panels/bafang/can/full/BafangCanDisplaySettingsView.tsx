@@ -26,7 +26,7 @@ import {
     BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
-    BafangCanDisplayState,
+    BafangCanDisplayRealtimeData,
 } from '../../../../../types/BafangCanSystemTypes';
 import { getErrorCodeText } from '../../../../../constants/BafangCanConstants';
 
@@ -39,10 +39,10 @@ type SettingsProps = {
 };
 
 type SettingsState = BafangCanDisplayData1 &
-    BafangCanDisplayData2 &
-    BafangCanDisplayState &
     BafangCanDisplayCodes & {
-        display_error_codes: number[];
+        data2: BafangCanDisplayData2;
+        realtime_data: BafangCanDisplayRealtimeData;
+        error_codes: number[];
         currentTimeToSet: dayjs.Dayjs | null;
     };
 
@@ -77,24 +77,31 @@ class BafangCanDisplaySettingsView extends React.Component<
         const { connection } = this.props;
         this.state = {
             ...connection.displayData1,
-            ...connection.displayData2,
-            ...connection.displayRealtimeData,
             ...connection.displayCodes,
-            display_error_codes: connection.displayErrorCodes,
+            data2: connection.displayData2,
+            realtime_data: connection.displayRealtimeData,
+            error_codes: connection.displayErrorCodes,
             currentTimeToSet: null,
         };
         this.getRecordsItems = this.getRecordsItems.bind(this);
-        this.getStateItems = this.getStateItems.bind(this);
+        this.getRealtimeItems = this.getRealtimeItems.bind(this);
         this.getErrorCodeTableItems = this.getErrorCodeTableItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
-        connection.emitter.on('display-general-data', this.updateData);
-        connection.emitter.on('display-error-codes', (errors: number[]) =>
-            this.setState({ display_error_codes: errors }),
+        connection.emitter.on('display-data1', this.updateData);
+        connection.emitter.on('display-data2', (data2: BafangCanDisplayData2) =>
+            this.setState({ data2 }),
+        );
+        connection.emitter.on('display-error-codes', (error_codes: number[]) =>
+            this.setState({ error_codes }),
         );
         connection.emitter.on('display-codes-data', this.updateData);
-        connection.emitter.on('broadcast-data-display', this.updateData);
+        connection.emitter.on(
+            'display-realtime-data',
+            (realtime_data: BafangCanDisplayRealtimeData) =>
+                this.setState({ realtime_data }),
+        );
     }
 
     updateData(values: any) {
@@ -103,11 +110,7 @@ class BafangCanDisplaySettingsView extends React.Component<
     }
 
     getRecordsItems(): DescriptionsProps['items'] {
-        const {
-            display_total_mileage,
-            display_single_mileage,
-            display_service_mileage,
-        } = this.state;
+        const { display_total_mileage, display_single_mileage } = this.state;
         let items: DescriptionsProps['items'] = [];
         if (this.props.connection.isDisplayData1Available) {
             items = [
@@ -158,11 +161,12 @@ class BafangCanDisplaySettingsView extends React.Component<
             ];
         }
         if (this.props.connection.isDisplayData2Available) {
+            const { data2 } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Average speed',
-                    this.state.display_average_speed,
+                    data2.average_speed,
                     'Km/H',
                 ),
                 {
@@ -171,12 +175,12 @@ class BafangCanDisplaySettingsView extends React.Component<
                     children: (
                         <>
                             <NumberValueComponent
-                                value={display_service_mileage}
+                                value={data2.service_mileage}
                                 unit="Km"
                             />
                             <br />
                             <br />
-                            <Popconfirm
+                            <Popconfirm // TODO create separate component
                                 title="Erase service mileage"
                                 description="Are you sure to clean mileage since last service record?"
                                 onConfirm={() => {
@@ -303,37 +307,38 @@ class BafangCanDisplaySettingsView extends React.Component<
         ];
     }
 
-    getStateItems(): DescriptionsProps['items'] {
+    getRealtimeItems(): DescriptionsProps['items'] {
+        const { realtime_data } = this.state;
         return [
             generateSimpleNumberListItem(
                 'Assist levels number',
-                this.state.display_assist_levels,
+                realtime_data.assist_levels,
             ),
             generateSimpleBooleanListItem(
                 'Mode',
-                this.state.display_ride_mode,
+                realtime_data.ride_mode,
                 'SPORT',
                 'ECO',
             ),
             generateSimpleBooleanListItem(
                 'Boost',
-                this.state.display_boost,
+                realtime_data.boost,
                 'ON',
                 'OFF',
             ),
             generateSimpleStringListItem(
                 'Current assist',
-                this.state.display_current_assist_level,
+                realtime_data.current_assist_level,
             ),
             generateSimpleBooleanListItem(
                 'Light',
-                this.state.display_light,
+                realtime_data.light,
                 'ON',
                 'OFF',
             ),
             generateSimpleBooleanListItem(
                 'Button',
-                this.state.display_button,
+                realtime_data.button,
                 'Pressed',
                 'Not pressed',
             ),
@@ -347,7 +352,7 @@ class BafangCanDisplaySettingsView extends React.Component<
         recommendations: string;
     }[] {
         let i: number = 0;
-        return this.state.display_error_codes.map((code: number) => {
+        return this.state.error_codes.map((code: number) => {
             return {
                 key: `${i++}`,
                 code,
@@ -446,18 +451,18 @@ class BafangCanDisplaySettingsView extends React.Component<
                     items={this.getRecordsItems()}
                     column={1}
                 />
-                {connection.isDisplayStateReady && (
+                {connection.isDisplayRealtimeDataReady && (
                     <>
                         <br />
                         <Descriptions
                             bordered
                             title="State"
-                            items={this.getStateItems()}
+                            items={this.getRealtimeItems()}
                             column={1}
                         />
                     </>
                 )}
-                {!connection.isDisplayStateReady && (
+                {!connection.isDisplayRealtimeDataReady && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>

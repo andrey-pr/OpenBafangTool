@@ -1,4 +1,5 @@
 import { DeviceNetworkId } from '../device/besst/besst-types';
+import { Wheel } from '../types/BafangCanSystemTypes';
 
 export type CanCommand = {
     canCommandCode: number;
@@ -169,6 +170,159 @@ export const CanWriteCommandsList: {
         applicableDevices: [DeviceNetworkId.DRIVE_UNIT],
     },
 };
+
+export const WheelDiameterTable: Wheel[] = [
+    {
+        text: '6″',
+        minimalCircumference: 400,
+        maximalCircumference: 880,
+        code: [0x60, 0x00],
+    },
+    {
+        text: '7″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0x70, 0x00],
+    },
+    {
+        text: '8″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0x80, 0x00],
+    },
+    {
+        text: '10″',
+        minimalCircumference: 520,
+        maximalCircumference: 880,
+        code: [0xa0, 0x00],
+    },
+    {
+        text: '12″',
+        minimalCircumference: 910,
+        maximalCircumference: 1300,
+        code: [0xc0, 0x00],
+    },
+    {
+        text: '14″',
+        minimalCircumference: 910,
+        maximalCircumference: 1300,
+        code: [0xe0, 0x00],
+    },
+    {
+        text: '16″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x00, 0x01],
+    },
+    {
+        text: '17″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x01],
+    },
+    {
+        text: '18″',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x01],
+    },
+    {
+        text: '20″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x40, 0x01],
+    },
+    {
+        text: '22″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x60, 0x01],
+    },
+    {
+        text: '23″',
+        minimalCircumference: 1290,
+        maximalCircumference: 1880,
+        code: [0x70, 0x01],
+    },
+    {
+        text: '24″',
+        minimalCircumference: 1290,
+        maximalCircumference: 2200,
+        code: [0x80, 0x01],
+    },
+    {
+        text: '25″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2200,
+        code: [0x90, 0x01],
+    },
+    {
+        text: '26″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xa0, 0x01],
+    },
+    {
+        text: '27″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xb0, 0x01],
+    },
+    {
+        text: '27.5″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xb5, 0x01],
+    },
+    {
+        text: '28″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xc0, 0x01],
+    },
+    {
+        text: '29″',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xd0, 0x01],
+    },
+    {
+        text: '32″',
+        minimalCircumference: 2200,
+        maximalCircumference: 2652,
+        code: [0x00, 0x02],
+    },
+    {
+        text: '400 mm',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x00, 0x19],
+    },
+    {
+        text: '450 mm',
+        minimalCircumference: 1208,
+        maximalCircumference: 1600,
+        code: [0x10, 0x2c],
+    },
+    {
+        text: '600 mm',
+        minimalCircumference: 1600,
+        maximalCircumference: 2200,
+        code: [0x80, 0x25],
+    },
+    {
+        text: '650 mm',
+        minimalCircumference: 1600,
+        maximalCircumference: 2200,
+        code: [0xa0, 0x28],
+    },
+    {
+        text: '700 mm',
+        minimalCircumference: 1880,
+        maximalCircumference: 2510,
+        code: [0xc0, 0x2b],
+    },
+];
 
 const ErrorCodes: {
     [key: number]: { description: string; recommendations: string };

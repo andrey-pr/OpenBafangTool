@@ -1,6 +1,7 @@
+import { WheelDiameterTable } from '../../constants/BafangCanConstants';
 import { BesstReadedCanFrame } from '../../device/besst/besst-types';
 import {
-    BafangCanAssistLevel,
+    AssistLevel,
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
@@ -10,21 +11,20 @@ import {
     BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
-    BafangCanDisplayState,
+    BafangCanDisplayRealtimeData,
     BafangCanRideMode,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-    BafangCanSpeedSensorChannelNumber,
-    BafangCanSystemVoltage,
-    BafangCanWheelDiameterTable,
+    SpeedSensorChannelNumber,
+    SystemVoltage,
 } from '../../types/BafangCanSystemTypes';
 
 function decodeCurrentAssistLevel(
     currentAssistLevelCode: number,
     totalAssistLevels: number,
-): BafangCanAssistLevel {
+): AssistLevel {
     const assistLevelTable: {
-        [key: number]: { [key: number]: BafangCanAssistLevel };
+        [key: number]: { [key: number]: AssistLevel };
     } = {
         3: { 0: 0, 12: 1, 2: 2, 3: 3, 6: 'walk' },
         4: { 0: 0, 1: 1, 12: 2, 21: 3, 3: 4, 6: 'walk' },
@@ -64,20 +64,20 @@ export function parseErrorCodes(answer: BesstReadedCanFrame): number[] {
 
 export function parseDisplayPackage0(
     packet: BesstReadedCanFrame,
-): BafangCanDisplayState {
+): BafangCanDisplayRealtimeData {
     return {
-        display_assist_levels: packet.data[0] & 0b1111,
-        display_ride_mode:
+        assist_levels: packet.data[0] & 0b1111,
+        ride_mode:
             packet.data[0] & 0b10000
                 ? BafangCanRideMode.BOOST
                 : BafangCanRideMode.ECO,
-        display_boost: (packet.data[0] & 0b100000) >> 5 === 1,
-        display_current_assist_level: decodeCurrentAssistLevel(
+        boost: (packet.data[0] & 0b100000) >> 5 === 1,
+        current_assist_level: decodeCurrentAssistLevel(
             packet.data[1],
             packet.data[0] & 0b1111,
         ),
-        display_light: (packet.data[2] & 1) === 1,
-        display_button: (packet.data[2] & 0b10) >> 1 === 1,
+        light: (packet.data[2] & 1) === 1,
+        button: (packet.data[2] & 0b10) >> 1 === 1,
     };
 }
 
@@ -98,8 +98,8 @@ export function parseDisplayPackage2(
     packet: BesstReadedCanFrame,
 ): BafangCanDisplayData2 {
     return {
-        display_average_speed: ((packet.data[1] << 8) + packet.data[0]) / 10,
-        display_service_mileage:
+        average_speed: ((packet.data[1] << 8) + packet.data[0]) / 10,
+        service_mileage:
             ((packet.data[4] << 16) + (packet.data[3] << 8) + packet.data[2]) /
             10,
     };
@@ -110,11 +110,11 @@ export function parseControllerPackage0(
 ): BafangCanControllerRealtime0 {
     const tmp = (packet.data[7] << 8) + packet.data[6];
     return {
-        controller_remaining_capacity: packet.data[0],
-        controller_single_trip: ((packet.data[2] << 8) + packet.data[1]) / 100,
-        controller_cadence: packet.data[3],
-        controller_torque: (packet.data[5] << 8) + packet.data[4],
-        controller_remaining_distance: tmp < 65535 ? tmp / 100 : -255,
+        remaining_capacity: packet.data[0],
+        single_trip: ((packet.data[2] << 8) + packet.data[1]) / 100,
+        cadence: packet.data[3],
+        torque: (packet.data[5] << 8) + packet.data[4],
+        remaining_distance: tmp < 65535 ? tmp / 100 : -255,
     };
 }
 
@@ -122,19 +122,18 @@ export function parseControllerPackage1(
     packet: BesstReadedCanFrame,
 ): BafangCanControllerRealtime1 {
     return {
-        controller_speed: ((packet.data[1] << 8) + packet.data[0]) / 100,
-        controller_current: ((packet.data[3] << 8) + packet.data[2]) / 100,
-        controller_voltage: ((packet.data[5] << 8) + packet.data[4]) / 100,
-        controller_temperature: packet.data[6] - 40,
-        controller_motor_temperature:
-            packet.data[7] === 255 ? -255 : packet.data[7] - 40,
+        speed: ((packet.data[1] << 8) + packet.data[0]) / 100,
+        current: ((packet.data[3] << 8) + packet.data[2]) / 100,
+        voltage: ((packet.data[5] << 8) + packet.data[4]) / 100,
+        temperature: packet.data[6] - 40,
+        motor_temperature: packet.data[7] === 255 ? -255 : packet.data[7] - 40,
     };
 }
 
 export function parseControllerPackage3(
     packet: BesstReadedCanFrame,
 ): BafangCanControllerSpeedParameters {
-    const diameter = BafangCanWheelDiameterTable.find(
+    const diameter = WheelDiameterTable.find(
         (item) =>
             item.code[0] === packet.data[2] && item.code[1] === packet.data[3],
     );
@@ -151,7 +150,7 @@ export function parseControllerParameter1(
     packet: BesstReadedCanFrame,
 ): BafangCanControllerParameter1 {
     const pkg: BafangCanControllerParameter1 = {
-        controller_system_voltage: packet.data[0] as BafangCanSystemVoltage,
+        controller_system_voltage: packet.data[0] as SystemVoltage,
         controller_current_limit: packet.data[1],
         controller_overvoltage: packet.data[2],
         controller_undervoltage: packet.data[3],
@@ -164,7 +163,7 @@ export function parseControllerParameter1(
         controller_coaster_brake: packet.data[14] === 1,
         controller_pedal_sensor_signals_per_rotation: packet.data[15],
         controller_speed_sensor_channel_number: packet
-            .data[16] as BafangCanSpeedSensorChannelNumber,
+            .data[16] as SpeedSensorChannelNumber,
         controller_motor_type: packet.data[18],
         controller_motor_pole_pair_number: packet.data[19],
         controller_speedmeter_magnets_number: packet.data[20],
@@ -224,8 +223,8 @@ export function parseSensorPackage(
     packet: BesstReadedCanFrame,
 ): BafangCanSensorRealtime {
     return {
-        sensor_torque: (packet.data[1] << 8) + packet.data[0],
-        sensor_cadence: packet.data[2],
+        torque: (packet.data[1] << 8) + packet.data[0],
+        cadence: packet.data[2],
     };
 }
 

@@ -19,7 +19,9 @@ type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanSensorRealtime & BafangCanSensorCodes;
+type SettingsState = BafangCanSensorCodes & {
+    realtime: BafangCanSensorRealtime;
+};
 
 // TODO add redux
 /* eslint-disable camelcase */
@@ -34,13 +36,16 @@ class BafangCanSensorSettingsView extends React.Component<
         const { connection } = this.props;
         this.state = {
             ...connection.sensorCodes,
-            ...connection.sensorRealtimeData,
+            realtime: connection.sensorRealtimeData,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         connection.emitter.on('sensor-codes-data', this.updateData);
-        connection.emitter.on('broadcast-data-sensor', this.updateData);
+        connection.emitter.on(
+            'sensor-realtime-data',
+            (realtime: BafangCanSensorRealtime) => this.setState({ realtime }),
+        );
     }
 
     updateData(values: any) {
@@ -49,17 +54,10 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
+        const { realtime } = this.state;
         return [
-            generateSimpleNumberListItem(
-                'Torque value',
-                this.state.sensor_torque,
-                'mV',
-            ),
-            generateSimpleNumberListItem(
-                'Cadence',
-                this.state.sensor_cadence,
-                'RPM',
-            ),
+            generateSimpleNumberListItem('Torque value', realtime.torque, 'mV'),
+            generateSimpleNumberListItem('Cadence', realtime.cadence, 'RPM'),
         ];
     }
 

@@ -11,7 +11,7 @@ import {
     BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
-    BafangCanDisplayState,
+    BafangCanDisplayRealtimeData,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
 } from '../../../../../types/BafangCanSystemTypes';
@@ -27,16 +27,17 @@ type InfoProps = {
     connection: BafangCanSystem;
 };
 
-type InfoState = BafangCanControllerRealtime0 &
-    BafangCanControllerRealtime1 &
-    BafangCanSensorRealtime &
-    BafangCanDisplayState &
-    BafangCanDisplayData1 &
-    BafangCanDisplayData2 &
+type InfoState = BafangCanDisplayData1 &
     BafangCanControllerCodes &
     BafangCanDisplayCodes &
     BafangCanSensorCodes &
-    BafangBesstCodes;
+    BafangBesstCodes & {
+        controller_realtime0: BafangCanControllerRealtime0;
+        controller_realtime1: BafangCanControllerRealtime1;
+        display_realtime: BafangCanDisplayRealtimeData;
+        sensor_realtime: BafangCanSensorRealtime;
+        display_data2: BafangCanDisplayData2;
+    };
 
 // TODO add redux
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
@@ -47,25 +48,47 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         this.state = {
             ...connection.controllerCodes,
             ...connection.displayData1,
-            ...connection.displayData2,
             ...connection.displayCodes,
             ...connection.sensorCodes,
             ...connection.besstCodes,
-            ...connection.controllerRealtimeData0,
-            ...connection.controllerRealtimeData1,
-            ...connection.displayRealtimeData,
-            ...connection.sensorRealtimeData,
+            controller_realtime0: connection.controllerRealtimeData0,
+            controller_realtime1: connection.controllerRealtimeData1,
+            display_realtime: connection.displayRealtimeData,
+            sensor_realtime: connection.sensorRealtimeData,
+            display_data2: connection.displayData2,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
         this.updateData = this.updateData.bind(this);
         connection.emitter.on('controller-codes-data', this.updateData);
-        connection.emitter.on('display-general-data', this.updateData);
+        connection.emitter.on('display-data1', this.updateData);
         connection.emitter.on('display-codes-data', this.updateData);
         connection.emitter.on('sensor-codes-data', this.updateData);
         connection.emitter.on('besst-data', this.updateData);
-        connection.emitter.on('broadcast-data-controller', this.updateData);
-        connection.emitter.on('broadcast-data-display', this.updateData);
-        connection.emitter.on('broadcast-data-sensor', this.updateData);
+        connection.emitter.on(
+            'controller-realtime-data-0',
+            (controller_realtime0: BafangCanControllerRealtime0) =>
+                this.setState({ controller_realtime0 }),
+        );
+        connection.emitter.on(
+            'controller-realtime-data-1',
+            (controller_realtime1: BafangCanControllerRealtime1) =>
+                this.setState({ controller_realtime1 }),
+        );
+        connection.emitter.on(
+            'display-realtime-data',
+            (display_realtime: BafangCanDisplayRealtimeData) =>
+                this.setState({ display_realtime }),
+        );
+        connection.emitter.on(
+            'sensor-realtime-data',
+            (sensor_realtime: BafangCanSensorRealtime) =>
+                this.setState({ sensor_realtime }),
+        );
+        connection.emitter.on(
+            'display-data2',
+            (display_data2: BafangCanDisplayData2) =>
+                this.setState({ display_data2 }),
+        );
     }
 
     updateData(values: any) {
@@ -75,32 +98,33 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     getControllerItems(): DescriptionsProps['items'] {
         let items: DescriptionsProps['items'] = [];
+        const { controller_realtime0, controller_realtime1 } = this.state;
         if (this.props.connection.isControllerRealtimeData0Ready) {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Remaining capacity',
-                    this.state.controller_remaining_capacity,
+                    controller_realtime0.remaining_capacity,
                     '%',
                 ),
                 generateSimpleNumberListItem(
                     'Remaining trip distance',
-                    this.state.controller_remaining_distance,
+                    controller_realtime0.remaining_distance,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Last trip distance',
-                    this.state.controller_single_trip,
+                    controller_realtime0.single_trip,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Cadence',
-                    this.state.controller_cadence,
+                    controller_realtime0.cadence,
                     'RPM',
                 ),
                 generateSimpleNumberListItem(
                     'Torque value',
-                    this.state.controller_torque,
+                    controller_realtime0.torque,
                     'mV',
                 ),
             ];
@@ -131,27 +155,27 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleNumberListItem(
                     'Voltage',
-                    this.state.controller_voltage,
+                    controller_realtime1.voltage,
                     'V',
                 ),
                 generateSimpleNumberListItem(
                     'Controller temperature',
-                    this.state.controller_temperature,
+                    controller_realtime1.temperature,
                     'C°',
                 ),
                 generateSimpleNumberListItem(
                     'Motor temperature',
-                    this.state.controller_motor_temperature,
+                    controller_realtime1.motor_temperature,
                     'C°',
                 ),
                 generateSimpleNumberListItem(
                     'Current',
-                    this.state.controller_current,
+                    controller_realtime1.current,
                     'A',
                 ),
                 generateSimpleNumberListItem(
                     'Speed',
-                    this.state.controller_speed,
+                    controller_realtime1.speed,
                     'Km/H',
                 ),
             ];
@@ -200,38 +224,39 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     getDisplayItems(): DescriptionsProps['items'] {
         let items: DescriptionsProps['items'] = [];
-        if (this.props.connection.isDisplayStateReady) {
+        if (this.props.connection.isDisplayRealtimeDataReady) {
+            const { display_realtime } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Assist levels number',
-                    this.state.display_assist_levels,
+                    display_realtime.assist_levels,
                 ),
                 generateSimpleBooleanListItem(
                     'Mode',
-                    this.state.display_ride_mode,
+                    display_realtime.ride_mode,
                     'SPORT',
                     'ECO',
                 ),
                 generateSimpleBooleanListItem(
                     'Boost',
-                    this.state.display_boost,
+                    display_realtime.boost,
                     'ON',
                     'OFF',
                 ),
                 generateSimpleStringListItem(
                     'Current assist',
-                    this.state.display_current_assist_level,
+                    display_realtime.current_assist_level,
                 ),
                 generateSimpleBooleanListItem(
                     'Light',
-                    this.state.display_light,
+                    display_realtime.light,
                     'ON',
                     'OFF',
                 ),
                 generateSimpleBooleanListItem(
                     'Button',
-                    this.state.display_button,
+                    display_realtime.button,
                     'Pressed',
                     'Not pressed',
                 ),
@@ -290,16 +315,17 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             ];
         }
         if (this.props.connection.isDisplayData2Available) {
+            const { display_data2 } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Average speed',
-                    this.state.display_average_speed,
+                    display_data2.average_speed,
                     'Km/H',
                 ),
                 generateSimpleNumberListItem(
                     'Mileage since last service',
-                    this.state.display_service_mileage,
+                    display_data2.service_mileage,
                     'Km',
                 ),
             ];
@@ -376,15 +402,16 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             ),
         ];
         if (this.props.connection.isSensorRealtimeDataReady) {
+            const { sensor_realtime } = this.state;
             return [
                 generateSimpleNumberListItem(
                     'Torque value',
-                    this.state.sensor_torque,
+                    sensor_realtime.torque,
                     'mV',
                 ),
                 generateSimpleNumberListItem(
                     'Cadence',
-                    this.state.sensor_cadence,
+                    sensor_realtime.cadence,
                     'RPM',
                 ),
                 ...codesArray,

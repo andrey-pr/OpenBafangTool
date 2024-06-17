@@ -1,3 +1,4 @@
+import { WheelDiameterTable } from '../../constants/BafangCanConstants';
 import {
     BafangBesstCodes,
     BafangCanControllerCodes,
@@ -9,51 +10,50 @@ import {
     BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
-    BafangCanDisplayState,
-    BafangCanMotorType,
-    BafangCanPedalSensorType,
+    BafangCanDisplayRealtimeData,
+    MotorType,
+    PedalSensorType,
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
-    BafangCanTemperatureSensorType,
-    BafangCanWheelDiameterTable,
+    TemperatureSensorType,
 } from '../../types/BafangCanSystemTypes';
 import { NotLoadedYet } from '../../types/no_data';
 
 export function getEmptyControllerRealtime0Data(): BafangCanControllerRealtime0 {
     return {
-        controller_cadence: 0,
-        controller_torque: 0,
-        controller_remaining_capacity: 0,
-        controller_single_trip: 0,
-        controller_remaining_distance: 0,
+        cadence: 0,
+        torque: 0,
+        remaining_capacity: 0,
+        single_trip: 0,
+        remaining_distance: 0,
     };
 }
 
 export function getEmptyControllerRealtime1Data(): BafangCanControllerRealtime1 {
     return {
-        controller_speed: 0,
-        controller_current: 0,
-        controller_voltage: 0,
-        controller_temperature: 0,
-        controller_motor_temperature: 0,
+        speed: 0,
+        current: 0,
+        voltage: 0,
+        temperature: 0,
+        motor_temperature: 0,
     };
 }
 
-export function getEmptyDisplayRealtimeData(): BafangCanDisplayState {
+export function getEmptyDisplayRealtimeData(): BafangCanDisplayRealtimeData {
     return {
-        display_assist_levels: 0,
-        display_ride_mode: 0,
-        display_boost: false,
-        display_current_assist_level: 0,
-        display_light: false,
-        display_button: false,
+        assist_levels: 0,
+        ride_mode: 0,
+        boost: false,
+        current_assist_level: 0,
+        light: false,
+        button: false,
     };
 }
 
 export function getEmptySensorRealtimeData(): BafangCanSensorRealtime {
     return {
-        sensor_torque: 0,
-        sensor_cadence: 0,
+        torque: 0,
+        cadence: 0,
     };
 }
 
@@ -68,15 +68,15 @@ export function getEmptyControllerParameter1(): BafangCanControllerParameter1 {
         controller_battery_capacity: 0,
         controller_max_current_on_low_charge: 0,
         controller_full_capacity_range: 0,
-        controller_pedal_sensor_type: BafangCanPedalSensorType.TorqueSensor,
+        controller_pedal_sensor_type: PedalSensorType.TorqueSensor,
         controller_coaster_brake: false,
         controller_pedal_sensor_signals_per_rotation: 0,
         controller_speed_sensor_channel_number: 1,
-        controller_motor_type: BafangCanMotorType.HubMotor,
+        controller_motor_type: MotorType.HubMotor,
         controller_motor_pole_pair_number: 0,
         controller_speedmeter_magnets_number: 0,
         controller_temperature_sensor_type:
-            BafangCanTemperatureSensorType.NoSensor,
+            TemperatureSensorType.NoSensor,
         controller_deceleration_ratio: 0,
         controller_motor_max_rotor_rpm: 0,
         controller_motor_d_axis_inductance: 0,
@@ -173,7 +173,7 @@ export function getEmptyControllerParameter2(): BafangCanControllerParameter2 {
 
 export function getEmptyControllerSpeedParameters(): BafangCanControllerSpeedParameters {
     return {
-        controller_wheel_diameter: BafangCanWheelDiameterTable[0],
+        controller_wheel_diameter: WheelDiameterTable[0],
         controller_speed_limit: 0,
         controller_circumference: 0,
     };
@@ -189,8 +189,8 @@ export function getEmptyDisplayData1(): BafangCanDisplayData1 {
 
 export function getEmptyDisplayData2(): BafangCanDisplayData2 {
     return {
-        display_average_speed: 0,
-        display_service_mileage: 0,
+        average_speed: 0,
+        service_mileage: 0,
     };
 }
 
