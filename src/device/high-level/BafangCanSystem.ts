@@ -186,7 +186,9 @@ export default class BafangCanSystem implements IConnection {
             ride_mode: types.BafangCanRideMode.ECO,
             boost: false,
             current_assist_level:
-                this._displayRealtimeData.current_assist_level === 'walk' ? 5 : 'walk',
+                this._displayRealtimeData.current_assist_level === 'walk'
+                    ? 5
+                    : 'walk',
             light: !this._displayRealtimeData.light,
             button: !this._displayRealtimeData.button,
         };
@@ -386,7 +388,8 @@ export default class BafangCanSystem implements IConnection {
             // code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    this._displayRealtimeData = parsers.parseDisplayPackage0(response);
+                    this._displayRealtimeData =
+                        parsers.parseDisplayPackage0(response);
                     this._availabilityList.display.realtime = true;
                     this.emitter.emit(
                         'display-realtime-data',
@@ -1046,6 +1049,22 @@ export default class BafangCanSystem implements IConnection {
         return this._availabilityList.sensor.device;
     }
 
+    public get isBatteryAvailable(): boolean {
+        return true;
+    }
+
+    public get isBatteryCellVoltageReady(): boolean {
+        return true;
+    }
+
+    public get isBatteryCapacityDataReady(): boolean {
+        return true;
+    }
+
+    public get isBatteryCurrentStateDataReady(): boolean {
+        return true;
+    }
+
     public get isControllerRealtimeData0Ready(): boolean {
         return this._availabilityList.controller.realtime0;
     }
@@ -1099,7 +1118,7 @@ export default class BafangCanSystem implements IConnection {
     ) {
         this._controllerSpeedParameters = deepCopy(data);
     }
-    
+
     public get isControllerCodesAvailable(): boolean {
         return true;
     }
@@ -1115,7 +1134,7 @@ export default class BafangCanSystem implements IConnection {
     public get isDisplayData1Available(): boolean {
         return this._availabilityList.display.data1;
     }
-    
+
     public get displayData1(): types.BafangCanDisplayData1 {
         return deepCopy(this._displayData1);
     }

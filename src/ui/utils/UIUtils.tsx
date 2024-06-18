@@ -73,6 +73,17 @@ export function generateSimpleNumberListItem(
     };
 }
 
+export function generateSimpleNumberMulticolumnListItem(
+    text: string,
+    content: number,
+    content_unit?: ReactNode,
+): DescriptionsItemType {
+    return {
+        label: text,
+        children: <NumberValueComponent value={content} unit={content_unit} />,
+    };
+}
+
 export function generateEditableNumberListItem(
     text: string,
     content: number,
