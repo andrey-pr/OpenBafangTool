@@ -16,6 +16,9 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
     TemperatureSensorType,
+    BafangCanBatteryCodes,
+    BafangCanBatteryCapacityData,
+    BafangCanBatteryStateData,
 } from '../../types/BafangCanSystemTypes';
 import { NotLoadedYet } from '../../types/no_data';
 
@@ -75,8 +78,7 @@ export function getEmptyControllerParameter1(): BafangCanControllerParameter1 {
         controller_motor_type: MotorType.HubMotor,
         controller_motor_pole_pair_number: 0,
         controller_speedmeter_magnets_number: 0,
-        controller_temperature_sensor_type:
-            TemperatureSensorType.NoSensor,
+        controller_temperature_sensor_type: TemperatureSensorType.NoSensor,
         controller_deceleration_ratio: 0,
         controller_motor_max_rotor_rpm: 0,
         controller_motor_d_axis_inductance: 0,
@@ -224,6 +226,37 @@ export function getEmptySensorCodes(): BafangCanSensorCodes {
         sensor_model_number: NotLoadedYet,
         sensor_serial_number: NotLoadedYet,
         sensor_customer_number: NotLoadedYet,
+    };
+}
+
+export function getEmptyBatteryCellsVoltage(): number[] {
+    return [0];
+}
+
+export function getEmptyBatteryCapacityData(): BafangCanBatteryCapacityData {
+    return {
+        full_capacity: 0,
+        capacity_left: 0,
+        rsoc: 0,
+        asoc: 0,
+        soh: 0,
+    };
+}
+
+export function getEmptyBatteryStateData(): BafangCanBatteryStateData {
+    return {
+        voltage: 0,
+        current: 0,
+        temperature: 0,
+    };
+}
+
+export function getEmptyBatteryCodes(): BafangCanBatteryCodes {
+    return {
+        battery_hardware_version: NotLoadedYet,
+        battery_software_version: NotLoadedYet,
+        battery_model_number: NotLoadedYet,
+        battery_serial_number: NotLoadedYet,
     };
 }
 

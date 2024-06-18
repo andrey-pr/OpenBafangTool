@@ -476,6 +476,14 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
+                {!connection.isBatteryAvailable && (
+                    <>
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">Battery is not digital</Text>
+                        </div>
+                        <br />
+                    </>
+                )}
                 {connection.isControllerAvailable && (
                     <Descriptions
                         bordered

@@ -151,18 +151,7 @@ export enum BafangCanRideMode {
     BOOST = 1,
 }
 
-export type AssistLevel =
-    | 'walk'
-    | 0
-    | 1
-    | 2
-    | 3
-    | 4
-    | 5
-    | 6
-    | 7
-    | 8
-    | 9;
+export type AssistLevel = 'walk' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type BafangCanDisplayRealtimeData = {
     assist_levels: number;
@@ -184,6 +173,27 @@ export type BafangCanSensorCodes = {
     sensor_model_number: string | NoData;
     sensor_serial_number: string | NoData;
     sensor_customer_number: string | NoData;
+};
+
+export type BafangCanBatteryCapacityData = {
+    full_capacity: number;
+    capacity_left: number;
+    rsoc: number;
+    asoc: number;
+    soh: number;
+};
+
+export type BafangCanBatteryStateData = {
+    voltage: number;
+    current: number;
+    temperature: number;
+};
+
+export type BafangCanBatteryCodes = {
+    battery_hardware_version: string | NoData;
+    battery_software_version: string | NoData;
+    battery_model_number: string | NoData;
+    battery_serial_number: string | NoData;
 };
 
 export type BafangBesstCodes = {

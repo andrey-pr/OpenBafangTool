@@ -17,6 +17,9 @@ import {
     BafangCanSensorCodes,
     BafangCanSensorRealtime,
     TemperatureSensorType,
+    BafangCanBatteryCapacityData,
+    BafangCanBatteryStateData,
+    BafangCanBatteryCodes,
 } from '../../types/BafangCanSystemTypes';
 import { NotAvailable } from '../../types/no_data';
 
@@ -246,6 +249,39 @@ export function getSensorCodesDemo(): BafangCanSensorCodes {
         sensor_model_number: 'SR PA212.32.ST.C',
         sensor_serial_number: '0000000000',
         sensor_customer_number: NotAvailable,
+    };
+}
+
+export function getBatteryCellsVoltageDemo(): number[] {
+    return [
+        4.08, 4.087, 4.087, 4.088, 4.088, 4.088, 4.088, 4.091, 4.092, 4.093,
+    ];
+}
+
+export function getBatteryCapacityDemoData(): BafangCanBatteryCapacityData {
+    return {
+        full_capacity: 14481,
+        capacity_left: 13512,
+        rsoc: 93,
+        asoc: 93,
+        soh: 92,
+    };
+}
+
+export function getBatteryStateDemoData(): BafangCanBatteryStateData {
+    return {
+        voltage: 40.88,
+        current: 0,
+        temperature: 32,
+    };
+}
+
+export function getBatteryCodesDemo(): BafangCanBatteryCodes {
+    return {
+        battery_hardware_version: '1.0',
+        battery_software_version: '2.25',
+        battery_model_number: 'ZZ1311005',
+        battery_serial_number: '3C5HC20000331',
     };
 }
 

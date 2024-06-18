@@ -7,6 +7,7 @@ import {
     CarOutlined,
     DesktopOutlined,
     RotateRightOutlined,
+    ThunderboltOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Modal, Spin, message } from 'antd';
 import IConnection from '../../device/high-level/Connection';
@@ -39,6 +40,9 @@ const BafangCanDisplaySettingsView = React.lazy(
 );
 const BafangCanSensorSettingsView = React.lazy(
     () => import('../panels/bafang/can/full/BafangCanSensorSettingsView'),
+);
+const BafangCanBatteryView = React.lazy(
+    () => import('../panels/bafang/can/full/BafangCanBatteryView'),
 );
 const DocumentationView = React.lazy(
     () => import('../panels/common/DocumentationView'),
@@ -249,7 +253,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_motor_settings',
                         icon: <CarOutlined />,
-                        label: 'Motor settings',
+                        label: 'Motor',
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -259,7 +263,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_display_settings',
                         icon: <DesktopOutlined />,
-                        label: 'Display settings',
+                        label: 'Display',
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -269,12 +273,22 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_sensor_settings',
                         icon: <RotateRightOutlined />,
-                        label: 'Sensor settings',
+                        label: 'Sensor',
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
                             !(this.props.connection as BafangCanSystem)
                                 .isSensorAvailable,
+                    },
+                    {
+                        key: 'bafang_can_battery',
+                        icon: <ThunderboltOutlined />,
+                        label: 'Battery',
+                        disabled:
+                            this.props.connection.deviceName ===
+                                DeviceName.BafangCanSystem &&
+                            !(this.props.connection as BafangCanSystem)
+                                .isBatteryAvailable,
                     },
                     {
                         key: 'bafang_can_motor_manual',
@@ -386,6 +400,13 @@ class MainView extends React.Component<MainProps, MainState> {
                     {tab === 'bafang_can_sensor_settings' && (
                         <React.Suspense fallback={loadingElement}>
                             <BafangCanSensorSettingsView
+                                connection={connection as BafangCanSystem}
+                            />
+                        </React.Suspense>
+                    )}
+                    {tab === 'bafang_can_battery' && (
+                        <React.Suspense fallback={loadingElement}>
+                            <BafangCanBatteryView
                                 connection={connection as BafangCanSystem}
                             />
                         </React.Suspense>

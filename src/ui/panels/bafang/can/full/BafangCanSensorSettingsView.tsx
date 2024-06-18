@@ -62,11 +62,10 @@ class BafangCanSensorSettingsView extends React.Component<
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const { sensor_serial_number, sensor_customer_number } = this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                sensor_serial_number,
+                this.state.sensor_serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
@@ -83,7 +82,7 @@ class BafangCanSensorSettingsView extends React.Component<
             ),
             generateEditableStringListItem(
                 'Customer number',
-                sensor_customer_number,
+                this.state.sensor_customer_number,
                 (e) =>
                     this.setState({
                         sensor_customer_number: e,
