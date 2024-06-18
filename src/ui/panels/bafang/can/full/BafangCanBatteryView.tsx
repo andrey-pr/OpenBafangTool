@@ -4,11 +4,15 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
-    generateEditableStringListItem,
     generateSimpleNumberListItem,
     generateSimpleNumberMulticolumnListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import {
+    BafangCanBatteryCapacityData,
+    BafangCanBatteryCodes,
+    BafangCanBatteryStateData,
+} from '../../../../../types/BafangCanSystemTypes';
 
 const { Text } = Typography;
 
@@ -16,7 +20,11 @@ type ViewProps = {
     connection: BafangCanSystem;
 };
 
-type ViewState = {};
+type ViewState = BafangCanBatteryCodes & {
+    cells_voltage: number[];
+    capacity_data: BafangCanBatteryCapacityData;
+    state: BafangCanBatteryStateData;
+};
 
 // TODO add redux
 /* eslint-disable camelcase */
@@ -24,9 +32,26 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
     constructor(props: ViewProps) {
         super(props);
         const { connection } = this.props;
-        this.state = {};
-        this.getOtherItems = this.getOtherItems.bind(this);
+        this.state = {
+            cells_voltage: connection.batteryCellsVoltage,
+            capacity_data: connection.batteryCapacityData,
+            state: connection.batteryStateData,
+            ...connection.batteryCodes,
+        };
         this.updateData = this.updateData.bind(this);
+        connection.emitter.on('battery-codes-data', this.updateData);
+        connection.emitter.on('battery-cells-data', (cells_voltage: number[]) =>
+            this.setState({ cells_voltage }),
+        );
+        connection.emitter.on(
+            'battery-capacity-data',
+            (capacity_data: BafangCanBatteryCapacityData) =>
+                this.setState({ capacity_data }),
+        );
+        connection.emitter.on(
+            'battery-state-data',
+            (state: BafangCanBatteryStateData) => this.setState({ state }),
+        );
     }
 
     updateData(values: any) {
@@ -35,35 +60,48 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
     }
 
     getCellVoltageItems(): DescriptionsProps['items'] {
-        return [
-            generateSimpleNumberMulticolumnListItem('Cell 1', 4.08, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 2', 4.087, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 3', 4.087, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 4', 4.088, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 5', 4.088, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 6', 4.088, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 7', 4.088, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 8', 4.091, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 9', 4.092, 'V'),
-            generateSimpleNumberMulticolumnListItem('Cell 10', 4.093, 'V'),
-        ];
+        let items: DescriptionsProps['items'] = [];
+        this.state.cells_voltage.forEach((voltage, cell) => {
+            items?.push(
+                generateSimpleNumberMulticolumnListItem(
+                    `Cell ${cell + 1}`,
+                    voltage,
+                    'V',
+                ),
+            );
+        });
+        return items;
     }
 
     getCapacityItems(): DescriptionsProps['items'] {
+        const { capacity_data } = this.state;
         return [
-            generateSimpleNumberListItem('Full capacity', 14481, 'mAh'),
-            generateSimpleNumberListItem('Capacity left', 13512, 'mAh'),
-            generateSimpleNumberListItem('RSOC', 93, '%'),
-            generateSimpleNumberListItem('ASOC', 93, '%'),
-            generateSimpleNumberListItem('SOH', 92, '%'),
+            generateSimpleNumberListItem(
+                'Full capacity',
+                capacity_data.full_capacity,
+                'mAh',
+            ),
+            generateSimpleNumberListItem(
+                'Capacity left',
+                capacity_data.capacity_left,
+                'mAh',
+            ),
+            generateSimpleNumberListItem('RSOC', capacity_data.rsoc, '%'),
+            generateSimpleNumberListItem('ASOC', capacity_data.asoc, '%'),
+            generateSimpleNumberListItem('SOH', capacity_data.soh, '%'),
         ];
     }
 
     getCurrentStateItems(): DescriptionsProps['items'] {
+        const { state } = this.state;
         return [
-            generateSimpleNumberListItem('Current', 0, 'A'),
-            generateSimpleNumberListItem('Voltage', 40.88, 'V'),
-            generateSimpleNumberListItem('Temperature', 32, 'C°'),
+            generateSimpleNumberListItem('Voltage', state.voltage, 'V'),
+            generateSimpleNumberListItem('Current', state.current, 'A'),
+            generateSimpleNumberListItem(
+                'Temperature',
+                state.temperature,
+                'C°',
+            ),
         ];
     }
 
@@ -71,12 +109,21 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                '3C5HC20000331',
+                this.state.battery_serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
-            generateSimpleStringListItem('Software version', '2.25'),
-            generateSimpleStringListItem('Hardware version', '1.0'),
-            generateSimpleStringListItem('Model number', 'ZZ1311005'),
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.battery_software_version,
+            ),
+            generateSimpleStringListItem(
+                'Hardware version',
+                this.state.battery_hardware_version,
+            ),
+            generateSimpleStringListItem(
+                'Model number',
+                this.state.battery_model_number,
+            ),
         ];
     }
 

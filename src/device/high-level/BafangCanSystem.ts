@@ -49,6 +49,12 @@ type AvailabilityList = {
         realtime: boolean;
     };
     sensor: { device: boolean; realtime: boolean };
+    battery: {
+        device: boolean;
+        cells_voltage: boolean;
+        capacity_data: boolean;
+        state_data: boolean;
+    };
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -88,11 +94,19 @@ export default class BafangCanSystem implements IConnection {
 
     private _displayErrorCodes: number[];
 
+    private _batteryCellsVoltage: number[];
+
+    private _batteryCapacityData: types.BafangCanBatteryCapacityData;
+
+    private _batteryStateData: types.BafangCanBatteryStateData;
+
     private _controllerCodes: types.BafangCanControllerCodes;
 
     private _displayCodes: types.BafangCanDisplayCodes;
 
     private _sensorCodes: types.BafangCanSensorCodes;
+
+    private _batteryCodes: types.BafangCanBatteryCodes;
 
     private _besstCodes: types.BafangBesstCodes;
 
@@ -115,6 +129,12 @@ export default class BafangCanSystem implements IConnection {
             realtime: false,
         },
         sensor: { device: false, realtime: false },
+        battery: {
+            device: false,
+            cells_voltage: false,
+            capacity_data: false,
+            state_data: false,
+        },
     };
 
     private readingInProgress: boolean = false;
@@ -135,7 +155,11 @@ export default class BafangCanSystem implements IConnection {
         this._displayErrorCodes = [];
         this._controllerCodes = ep.getEmptyControllerCodes();
         this._displayCodes = ep.getEmptyDisplayCodes();
+        this._batteryCellsVoltage = ep.getEmptyBatteryCellsVoltage();
+        this._batteryCapacityData = ep.getEmptyBatteryCapacityData();
+        this._batteryStateData = ep.getEmptyBatteryStateData();
         this._sensorCodes = ep.getEmptySensorCodes();
+        this._batteryCodes = ep.getEmptyBatteryCodes();
         this._besstCodes = ep.getEmptyBesstCodes();
         this.loadData = this.loadData.bind(this);
         this.saveControllerData = this.saveControllerData.bind(this);
@@ -177,6 +201,14 @@ export default class BafangCanSystem implements IConnection {
         this.emitter.emit(
             'sensor-realtime-data',
             deepCopy(this._sensorRealtimeData),
+        );
+        this.emitter.emit(
+            'battery-capacity-data',
+            deepCopy(this._batteryCapacityData),
+        );
+        this.emitter.emit(
+            'battery-state-data',
+            deepCopy(this._batteryStateData),
         );
     }
 
@@ -544,9 +576,13 @@ export default class BafangCanSystem implements IConnection {
             this._displayData2 = dp.getDisplayDemoData2();
             this._displayRealtimeData = dp.getDisplayRealtimeDemoData();
             this._displayErrorCodes = dp.getDisplayErrorCodesDemo();
+            this._batteryCellsVoltage = dp.getBatteryCellsVoltageDemo();
+            this._batteryCapacityData = dp.getBatteryCapacityDemoData();
+            this._batteryStateData = dp.getBatteryStateDemoData();
             this._controllerCodes = dp.getControllerCodesDemo();
             this._displayCodes = dp.getDisplayCodesDemo();
             this._sensorCodes = dp.getSensorCodesDemo();
+            this._batteryCodes = dp.getBatteryCodesDemo();
             this._besstCodes = dp.getBesstCodesDemo();
             setTimeout(() => {
                 this.emitter.emit(
@@ -578,12 +614,20 @@ export default class BafangCanSystem implements IConnection {
                     deepCopy(this._displayRealtimeData),
                 );
                 this.emitter.emit(
+                    'battery-cells-data',
+                    deepCopy(this._batteryCodes),
+                );
+                this.emitter.emit(
                     'display-codes-data',
                     deepCopy(this._displayCodes),
                 );
                 this.emitter.emit(
                     'sensor-codes-data',
                     deepCopy(this._sensorCodes),
+                );
+                this.emitter.emit(
+                    'battery-codes-data',
+                    deepCopy(this._batteryCodes),
                 );
                 this._availabilityList.controller.device = true;
                 this._availabilityList.controller.realtime0 = true;
@@ -598,6 +642,10 @@ export default class BafangCanSystem implements IConnection {
                 this._availabilityList.display.error_codes = true;
                 this._availabilityList.sensor.device = true;
                 this._availabilityList.sensor.realtime = true;
+                this._availabilityList.battery.device = true;
+                this._availabilityList.battery.cells_voltage = true;
+                this._availabilityList.battery.capacity_data = true;
+                this._availabilityList.battery.state_data = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
             console.log('Demo mode: blank data loaded');
@@ -698,8 +746,8 @@ export default class BafangCanSystem implements IConnection {
             display_data2: this._displayData2,
             controller_codes: this._controllerCodes,
             display_codes: this._displayCodes,
-            sensor_codes: this.sensorCodes,
-            display_available: this._availabilityList.display.device,
+            sensor_codes: this._sensorCodes,
+            battery_codes: this._batteryCodes,
             controller_available: this._availabilityList.controller.device,
             controller_parameter1_available:
                 this._availabilityList.controller.parameter1,
@@ -707,7 +755,9 @@ export default class BafangCanSystem implements IConnection {
                 this._availabilityList.controller.parameter2,
             controller_speed_parameter_available:
                 this._availabilityList.controller.speed_parameter,
+            display_available: this._availabilityList.display.device,
             sensor_available: this._availabilityList.sensor.device,
+            batteru_available: this._availabilityList.battery.device,
         });
         let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
         try {
@@ -1050,19 +1100,39 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isBatteryAvailable(): boolean {
-        return true;
+        return this._availabilityList.battery.device;
     }
 
     public get isBatteryCellVoltageReady(): boolean {
-        return true;
+        return this._availabilityList.battery.cells_voltage;
+    }
+
+    public get batteryCellsVoltage(): number[] {
+        return deepCopy(this._batteryCellsVoltage);
     }
 
     public get isBatteryCapacityDataReady(): boolean {
-        return true;
+        return this._availabilityList.battery.capacity_data;
+    }
+
+    public get batteryCapacityData(): types.BafangCanBatteryCapacityData {
+        return deepCopy(this._batteryCapacityData);
     }
 
     public get isBatteryCurrentStateDataReady(): boolean {
+        return this._availabilityList.battery.state_data;
+    }
+
+    public get batteryStateData(): types.BafangCanBatteryStateData {
+        return deepCopy(this._batteryStateData);
+    }
+
+    public get isBatteryCodesAvailable(): boolean {
         return true;
+    }
+
+    public get batteryCodes(): types.BafangCanBatteryCodes {
+        return deepCopy(this._batteryCodes);
     }
 
     public get isControllerRealtimeData0Ready(): boolean {
