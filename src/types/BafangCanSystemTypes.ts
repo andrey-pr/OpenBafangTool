@@ -125,20 +125,10 @@ export type BafangCanControllerCodes = {
     controller_manufacturer: string | NoData;
 };
 
-export type BafangCanDisplayCodes = {
-    display_hardware_version: string | NoData;
-    display_software_version: string | NoData;
-    display_model_number: string | NoData;
-    display_serial_number: string | NoData;
-    display_customer_number: string | NoData;
-    display_manufacturer: string | NoData;
-    display_bootload_version: string | NoData;
-};
-
 export type BafangCanDisplayData1 = {
-    display_total_mileage: number;
-    display_single_mileage: number;
-    display_max_speed: number;
+    total_mileage: number;
+    single_mileage: number;
+    max_speed: number;
 };
 
 export type BafangCanDisplayData2 = {
@@ -167,14 +157,6 @@ export type BafangCanSensorRealtime = {
     cadence: number;
 };
 
-export type BafangCanSensorCodes = {
-    sensor_hardware_version: string | NoData;
-    sensor_software_version: string | NoData;
-    sensor_model_number: string | NoData;
-    sensor_serial_number: string | NoData;
-    sensor_customer_number: string | NoData;
-};
-
 export type BafangCanBatteryCapacityData = {
     full_capacity: number;
     capacity_left: number;
@@ -187,17 +169,4 @@ export type BafangCanBatteryStateData = {
     voltage: number;
     current: number;
     temperature: number;
-};
-
-export type BafangCanBatteryCodes = {
-    battery_hardware_version: string | NoData;
-    battery_software_version: string | NoData;
-    battery_model_number: string | NoData;
-    battery_serial_number: string | NoData;
-};
-
-export type BafangBesstCodes = {
-    besst_hardware_version: string | NoData;
-    besst_software_version: string | NoData;
-    besst_serial_number: string | NoData;
 };

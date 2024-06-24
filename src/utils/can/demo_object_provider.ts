@@ -1,27 +1,22 @@
 import { WheelDiameterTable } from '../../constants/BafangCanConstants';
 import {
-    BafangBesstCodes,
     BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
     BafangCanControllerRealtime0,
     BafangCanControllerRealtime1,
     BafangCanControllerSpeedParameters,
-    BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
     BafangCanDisplayRealtimeData,
     MotorType,
     PedalSensorType,
     BafangCanRideMode,
-    BafangCanSensorCodes,
     BafangCanSensorRealtime,
     TemperatureSensorType,
     BafangCanBatteryCapacityData,
     BafangCanBatteryStateData,
-    BafangCanBatteryCodes,
 } from '../../types/BafangCanSystemTypes';
-import { NotAvailable } from '../../types/no_data';
 
 export function getControllerRealtime0DemoData(): BafangCanControllerRealtime0 {
     return {
@@ -206,9 +201,9 @@ export function getControllerSpeedParametersDemo(): BafangCanControllerSpeedPara
 
 export function getDisplayDemoData1(): BafangCanDisplayData1 {
     return {
-        display_total_mileage: 10000,
-        display_single_mileage: 1000,
-        display_max_speed: 0,
+        total_mileage: 10000,
+        single_mileage: 1000,
+        max_speed: 0,
     };
 }
 
@@ -230,26 +225,48 @@ export function getControllerCodesDemo(): BafangCanControllerCodes {
     };
 }
 
-export function getDisplayCodesDemo(): BafangCanDisplayCodes {
-    return {
-        display_hardware_version: 'DP C221.C 2.0',
-        display_software_version: 'DPC221CE10205.1',
-        display_model_number: 'DP C221.CAN',
-        display_serial_number: 'DPC221.C2.0702F8WC080505',
-        display_customer_number: '0049-0074',
-        display_manufacturer: 'BAFANG',
-        display_bootload_version: 'APM32.DPCAN.V3.0.1',
-    };
+export function getDisplaySNDemo(): string {
+    return 'DPC221.C2.0702F8WC080505';
 }
 
-export function getSensorCodesDemo(): BafangCanSensorCodes {
-    return {
-        sensor_hardware_version: 'SR PA212.32.ST.C 1.0',
-        sensor_software_version: 'SRPA212CF10101.0',
-        sensor_model_number: 'SR PA212.32.ST.C',
-        sensor_serial_number: '0000000000',
-        sensor_customer_number: NotAvailable,
-    };
+export function getDisplaySVDemo(): string {
+    return 'DPC221CE10205.1';
+}
+
+export function getDisplayHVDemo(): string {
+    return 'DP C221.C 2.0';
+}
+
+export function getDisplayMNDemo(): string {
+    return 'DP C221.CAN';
+}
+
+export function getDisplayCNDemo(): string {
+    return '0049-0074';
+}
+
+export function getDisplayManufacturerDemo(): string {
+    return 'BAFANG';
+}
+
+export function getDisplayBVDemo(): string {
+    return 'APM32.DPCAN.V3.0.1';
+}
+
+export function getSensorSNDemo(): string {
+    return '0000000000';
+}
+
+export function getSensorSVDemo(): string {
+    return 'SRPA212CF10101.0';
+}
+
+export function getSensorHVDemo(): string {
+    return 'SR PA212.32.ST.C 1.0';
+}
+
+export function getSensorMNDemo(): string {
+    return 'SR PA212.32.ST.C';
 }
 
 export function getBatteryCellsVoltageDemo(): number[] {
@@ -276,19 +293,30 @@ export function getBatteryStateDemoData(): BafangCanBatteryStateData {
     };
 }
 
-export function getBatteryCodesDemo(): BafangCanBatteryCodes {
-    return {
-        battery_hardware_version: '1.0',
-        battery_software_version: '2.25',
-        battery_model_number: 'ZZ1311005',
-        battery_serial_number: '3C5HC20000331',
-    };
+export function getBatterySNDemo(): string {
+    return '3C5HC20000331';
 }
 
-export function getBesstCodesDemo(): BafangBesstCodes {
-    return {
-        besst_hardware_version: 'BESST.UC 3.0.3',
-        besst_software_version: 'BSF33.05',
-        besst_serial_number: '',
-    };
+export function getBatterySVDemo(): string {
+    return '2.25';
+}
+
+export function getBatteryHVDemo(): string {
+    return '1.0';
+}
+
+export function getBatteryMNDemo(): string {
+    return 'ZZ1311005';
+}
+
+export function getBesstSNDemo(): string {
+    return '';
+}
+
+export function getBesstSVDemo(): string {
+    return 'BSF33.05';
+}
+
+export function getBesstHVDemo(): string {
+    return 'BESST.UC 3.0.3';
 }

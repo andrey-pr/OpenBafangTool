@@ -7,7 +7,6 @@ import log from 'electron-log/renderer';
 import IConnection from './Connection';
 import { DeviceName } from '../../types/DeviceType';
 import * as types from '../../types/BafangCanSystemTypes';
-import * as utils from '../../utils/utils';
 import * as ep from '../../utils/can/empty_object_provider';
 import * as dp from '../../utils/can/demo_object_provider';
 import * as parsers from '../../utils/can/parser';
@@ -24,6 +23,10 @@ import {
     DeviceNetworkId,
 } from '../besst/besst-types';
 import { PromiseControls } from '../../types/common';
+import BafangCanDisplay from './bafang-can-devices/BafangCanDisplay';
+import BafangCanSensor from './bafang-can-devices/BafangCanSensor';
+import BafangCanBattery from './bafang-can-devices/BafangCanBattery';
+import BafangBesstTool from './bafang-can-devices/BafangBesstTool';
 
 type SentRequest = {
     promise: PromiseControls;
@@ -41,20 +44,9 @@ type AvailabilityList = {
         parameter2: boolean;
         speed_parameter: boolean;
     };
-    display: {
-        device: boolean;
-        error_codes: boolean;
-        data1: boolean;
-        data2: boolean;
-        realtime: boolean;
-    };
-    sensor: { device: boolean; realtime: boolean };
-    battery: {
-        device: boolean;
-        cells_voltage: boolean;
-        capacity_data: boolean;
-        state_data: boolean;
-    };
+    display: boolean;
+    sensor: boolean;
+    battery: boolean;
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -70,11 +62,17 @@ export default class BafangCanSystem implements IConnection {
 
     private demoRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
 
+    private _display: BafangCanDisplay;
+
+    private _sensor: BafangCanSensor;
+
+    private _battery: BafangCanBattery;
+
+    private _besst: BafangBesstTool;
+
     private _controllerRealtimeData0: types.BafangCanControllerRealtime0;
 
     private _controllerRealtimeData1: types.BafangCanControllerRealtime1;
-
-    private _sensorRealtimeData: types.BafangCanSensorRealtime;
 
     private _controllerParameter1: types.BafangCanControllerParameter1;
 
@@ -86,29 +84,7 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerSpeedParameters: types.BafangCanControllerSpeedParameters;
 
-    private _displayData1: types.BafangCanDisplayData1;
-
-    private _displayData2: types.BafangCanDisplayData2;
-
-    private _displayRealtimeData: types.BafangCanDisplayRealtimeData;
-
-    private _displayErrorCodes: number[];
-
-    private _batteryCellsVoltage: number[];
-
-    private _batteryCapacityData: types.BafangCanBatteryCapacityData;
-
-    private _batteryStateData: types.BafangCanBatteryStateData;
-
     private _controllerCodes: types.BafangCanControllerCodes;
-
-    private _displayCodes: types.BafangCanDisplayCodes;
-
-    private _sensorCodes: types.BafangCanSensorCodes;
-
-    private _batteryCodes: types.BafangCanBatteryCodes;
-
-    private _besstCodes: types.BafangBesstCodes;
 
     private sentRequests: SentRequest[][][] = [];
 
@@ -121,20 +97,9 @@ export default class BafangCanSystem implements IConnection {
             parameter2: false,
             speed_parameter: false,
         },
-        display: {
-            device: false,
-            error_codes: false,
-            data1: false,
-            data2: false,
-            realtime: false,
-        },
-        sensor: { device: false, realtime: false },
-        battery: {
-            device: false,
-            cells_voltage: false,
-            capacity_data: false,
-            state_data: false,
-        },
+        display: false,
+        sensor: false,
+        battery: false,
     };
 
     private readingInProgress: boolean = false;
@@ -142,29 +107,19 @@ export default class BafangCanSystem implements IConnection {
     constructor(devicePath: string) {
         this.devicePath = devicePath;
         this.emitter = new EventEmitter();
+        this._display = new BafangCanDisplay(false);
+        this._sensor = new BafangCanSensor(devicePath === 'demo');
+        this._battery = new BafangCanBattery(devicePath === 'demo');
+        this._besst = new BafangBesstTool(devicePath === 'demo');
         this._controllerRealtimeData0 = ep.getEmptyControllerRealtime0Data();
         this._controllerRealtimeData1 = ep.getEmptyControllerRealtime1Data();
-        this._sensorRealtimeData = ep.getEmptySensorRealtimeData();
         this._controllerParameter1 = ep.getEmptyControllerParameter1();
         this._controllerParameter2 = ep.getEmptyControllerParameter2();
         this._controllerSpeedParameters =
             ep.getEmptyControllerSpeedParameters();
-        this._displayData1 = ep.getEmptyDisplayData1();
-        this._displayData2 = ep.getEmptyDisplayData2();
-        this._displayRealtimeData = ep.getEmptyDisplayRealtimeData();
-        this._displayErrorCodes = [];
         this._controllerCodes = ep.getEmptyControllerCodes();
-        this._displayCodes = ep.getEmptyDisplayCodes();
-        this._batteryCellsVoltage = ep.getEmptyBatteryCellsVoltage();
-        this._batteryCapacityData = ep.getEmptyBatteryCapacityData();
-        this._batteryStateData = ep.getEmptyBatteryStateData();
-        this._sensorCodes = ep.getEmptySensorCodes();
-        this._batteryCodes = ep.getEmptyBatteryCodes();
-        this._besstCodes = ep.getEmptyBesstCodes();
         this.loadData = this.loadData.bind(this);
         this.saveControllerData = this.saveControllerData.bind(this);
-        this.saveDisplayData = this.saveDisplayData.bind(this);
-        this.saveSensorData = this.saveSensorData.bind(this);
         this.demoDataPublisher = this.demoDataPublisher.bind(this);
         this.demoRealtimeDataGenerator =
             this.demoRealtimeDataGenerator.bind(this);
@@ -196,34 +151,24 @@ export default class BafangCanSystem implements IConnection {
         );
         this.emitter.emit(
             'display-realtime-data',
-            deepCopy(this._displayRealtimeData),
+            deepCopy(this._display.realtimeData),
         );
         this.emitter.emit(
             'sensor-realtime-data',
-            deepCopy(this._sensorRealtimeData),
+            deepCopy(this._sensor.realtimeData),
         );
         this.emitter.emit(
             'battery-capacity-data',
-            deepCopy(this._batteryCapacityData),
+            deepCopy(this._battery.capacityData),
         );
         this.emitter.emit(
             'battery-state-data',
-            deepCopy(this._batteryStateData),
+            deepCopy(this._battery.stateData),
         );
     }
 
     private demoRealtimeDataGenerator(): void {
-        this._displayRealtimeData = {
-            assist_levels: 5,
-            ride_mode: types.BafangCanRideMode.ECO,
-            boost: false,
-            current_assist_level:
-                this._displayRealtimeData.current_assist_level === 'walk'
-                    ? 5
-                    : 'walk',
-            light: !this._displayRealtimeData.light,
-            button: !this._displayRealtimeData.button,
-        };
+        //TODO
     }
 
     private registerRequest(
@@ -357,21 +302,21 @@ export default class BafangCanSystem implements IConnection {
             }
             if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
                 if (response.canCommandSubCode === 0x07) {
-                    this._displayErrorCodes = parsers.parseErrorCodes(response);
-                    this._availabilityList.display.error_codes = true;
+                    this._display.errorCodes =
+                        parsers.parseErrorCodes(response);
                     this.emitter.emit(
                         'display-error-codes',
-                        this._displayErrorCodes,
+                        this._display.errorCodes,
                     );
                 } else {
-                    parsers.processCodeAnswerFromDisplay(
-                        response,
-                        this._displayCodes,
-                    );
-                    this.emitter.emit(
-                        'display-codes-data',
-                        deepCopy(this._displayCodes),
-                    );
+                    // parsers.processCodeAnswerFromDisplay(
+                    //     response,
+                    //     this._displayCodes,
+                    // );
+                    // this.emitter.emit(
+                    //     'display-codes-data',
+                    //     deepCopy(this._displayCodes),
+                    // );TODO
                 }
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
@@ -407,25 +352,24 @@ export default class BafangCanSystem implements IConnection {
             } else if (
                 response.sourceDeviceCode === DeviceNetworkId.TORQUE_SENSOR
             ) {
-                parsers.processCodeAnswerFromSensor(
-                    response,
-                    this._sensorCodes,
-                );
-                this.emitter.emit(
-                    'sensor-codes-data',
-                    deepCopy(this._sensorCodes),
-                );
+                // parsers.processCodeAnswerFromSensor(
+                //     response,
+                //     this._sensorCodes,
+                // );
+                // this.emitter.emit(
+                //     'sensor-codes-data',
+                //     deepCopy(this._sensorCodes),
+                // );
             }
         } else if (response.canCommandCode === 0x63) {
             // code is hmi only
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    this._displayRealtimeData =
+                    this._display.realtimeData =
                         parsers.parseDisplayPackage0(response);
-                    this._availabilityList.display.realtime = true;
                     this.emitter.emit(
                         'display-realtime-data',
-                        deepCopy(this._displayRealtimeData),
+                        deepCopy(this._display.realtimeData),
                     );
                     break;
                 case 0x01:
@@ -434,11 +378,11 @@ export default class BafangCanSystem implements IConnection {
                         this.rereadParameter(response);
                         break;
                     }
-                    this._displayData1 = parsers.parseDisplayPackage1(response);
-                    this._availabilityList.display.data1 = true;
+                    this._display.data1 =
+                        parsers.parseDisplayPackage1(response);
                     this.emitter.emit(
                         'display-data1',
-                        deepCopy(this._displayData1),
+                        deepCopy(this._display.data1),
                     );
                     break;
                 case 0x02:
@@ -447,11 +391,11 @@ export default class BafangCanSystem implements IConnection {
                         this.rereadParameter(response);
                         break;
                     }
-                    this._displayData2 = parsers.parseDisplayPackage2(response);
-                    this._availabilityList.display.data2 = true;
+                    this._display.data2 =
+                        parsers.parseDisplayPackage2(response);
                     this.emitter.emit(
                         'display-data2',
-                        deepCopy(this._displayData2),
+                        deepCopy(this._display.data2),
                     );
                     break;
                 default:
@@ -461,11 +405,10 @@ export default class BafangCanSystem implements IConnection {
             response.canCommandCode === 0x31 &&
             response.canCommandSubCode === 0x00
         ) {
-            this._sensorRealtimeData = parsers.parseSensorPackage(response);
-            this._availabilityList.sensor.realtime = true;
+            this._sensor.realtimeData = parsers.parseSensorPackage(response);
             this.emitter.emit(
                 'sensor-realtime-data',
-                deepCopy(this._sensorRealtimeData),
+                deepCopy(this._sensor.realtimeData),
             );
         } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
@@ -563,7 +506,6 @@ export default class BafangCanSystem implements IConnection {
         if (this.devicePath === 'demo') {
             this._controllerRealtimeData0 = dp.getControllerRealtime0DemoData();
             this._controllerRealtimeData1 = dp.getControllerRealtime1DemoData();
-            this._sensorRealtimeData = dp.getSensorRealtimeDemoData();
             this._controllerParameter1 = dp.getControllerParameter1Demo();
             this._controllerParameter2 = dp.getControllerParameter2Demo();
             this.controllerParameter1Array =
@@ -572,18 +514,7 @@ export default class BafangCanSystem implements IConnection {
                 dp.getControllerParameter2ArrayDemo();
             this._controllerSpeedParameters =
                 dp.getControllerSpeedParametersDemo();
-            this._displayData1 = dp.getDisplayDemoData1();
-            this._displayData2 = dp.getDisplayDemoData2();
-            this._displayRealtimeData = dp.getDisplayRealtimeDemoData();
-            this._displayErrorCodes = dp.getDisplayErrorCodesDemo();
-            this._batteryCellsVoltage = dp.getBatteryCellsVoltageDemo();
-            this._batteryCapacityData = dp.getBatteryCapacityDemoData();
-            this._batteryStateData = dp.getBatteryStateDemoData();
             this._controllerCodes = dp.getControllerCodesDemo();
-            this._displayCodes = dp.getDisplayCodesDemo();
-            this._sensorCodes = dp.getSensorCodesDemo();
-            this._batteryCodes = dp.getBatteryCodesDemo();
-            this._besstCodes = dp.getBesstCodesDemo();
             setTimeout(() => {
                 this.emitter.emit(
                     'controller-codes-data',
@@ -603,49 +534,41 @@ export default class BafangCanSystem implements IConnection {
                 );
                 this.emitter.emit(
                     'display-data1',
-                    deepCopy(this._displayData1),
+                    deepCopy(this._display.data1),
                 );
                 this.emitter.emit(
                     'display-data2',
-                    deepCopy(this._displayData2),
+                    deepCopy(this._display.data2),
                 );
                 this.emitter.emit(
                     'display-realtime-data',
-                    deepCopy(this._displayRealtimeData),
+                    deepCopy(this._display.realtimeData),
                 );
                 this.emitter.emit(
                     'battery-cells-data',
-                    deepCopy(this._batteryCodes),
+                    deepCopy(this._battery.cellsVoltage),
                 );
-                this.emitter.emit(
-                    'display-codes-data',
-                    deepCopy(this._displayCodes),
-                );
-                this.emitter.emit(
-                    'sensor-codes-data',
-                    deepCopy(this._sensorCodes),
-                );
-                this.emitter.emit(
-                    'battery-codes-data',
-                    deepCopy(this._batteryCodes),
-                );
+                // this.emitter.emit(
+                //     'display-codes-data',
+                //     deepCopy(this._displayCodes),
+                // );
+                // this.emitter.emit(
+                //     'sensor-codes-data',
+                //     deepCopy(this._sensorCodes),
+                // );
+                // this.emitter.emit(
+                //     'battery-codes-data',
+                //     deepCopy(this._batteryCodes),
+                // );
                 this._availabilityList.controller.device = true;
                 this._availabilityList.controller.realtime0 = true;
                 this._availabilityList.controller.realtime1 = true;
                 this._availabilityList.controller.speed_parameter = true;
                 this._availabilityList.controller.parameter1 = true;
                 this._availabilityList.controller.parameter2 = true;
-                this._availabilityList.display.device = true;
-                this._availabilityList.display.realtime = true;
-                this._availabilityList.display.data1 = true;
-                this._availabilityList.display.data2 = true;
-                this._availabilityList.display.error_codes = true;
-                this._availabilityList.sensor.device = true;
-                this._availabilityList.sensor.realtime = true;
-                this._availabilityList.battery.device = true;
-                this._availabilityList.battery.cells_voltage = true;
-                this._availabilityList.battery.capacity_data = true;
-                this._availabilityList.battery.state_data = true;
+                this._availabilityList.display = true;
+                this._availabilityList.sensor = true;
+                this._availabilityList.battery = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
             console.log('Demo mode: blank data loaded');
@@ -653,30 +576,30 @@ export default class BafangCanSystem implements IConnection {
         }
         if (this.readingInProgress) return;
         this.readingInProgress = true;
-        this.device
-            ?.getSerialNumber()
-            .then((serial_number: string) => {
-                if (serial_number === undefined) return;
-                this._besstCodes.besst_serial_number = serial_number;
-                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-            })
-            .catch(() => {});
-        this.device
-            ?.getSoftwareVersion()
-            .then((software_version: string) => {
-                if (software_version === undefined) return;
-                this._besstCodes.besst_software_version = software_version;
-                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-            })
-            .catch(() => {});
-        this.device
-            ?.getHardwareVersion()
-            .then((hardware_version: string) => {
-                if (hardware_version === undefined) return;
-                this._besstCodes.besst_hardware_version = hardware_version;
-                this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-            })
-            .catch(() => {});
+        // this.device
+        //     ?.getSerialNumber()
+        //     .then((serial_number: string) => {
+        //         if (serial_number === undefined) return;
+        //         this._besstCodes.besst_serial_number = serial_number;
+        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+        //     })
+        //     .catch(() => {});
+        // this.device
+        //     ?.getSoftwareVersion()
+        //     .then((software_version: string) => {
+        //         if (software_version === undefined) return;
+        //         this._besstCodes.besst_software_version = software_version;
+        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+        //     })
+        //     .catch(() => {});
+        // this.device
+        //     ?.getHardwareVersion()
+        //     .then((hardware_version: string) => {
+        //         if (hardware_version === undefined) return;
+        //         this._besstCodes.besst_hardware_version = hardware_version;
+        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
+        //     })
+        //     .catch(() => {});
         const commands = [
             CanReadCommandsList.HardwareVersion,
             CanReadCommandsList.SoftwareVersion,
@@ -716,11 +639,10 @@ export default class BafangCanSystem implements IConnection {
                     )
                         readedSensor++;
                     if (readedSuccessfully + readedUnsuccessfully >= summ) {
-                        this._availabilityList.display.device =
-                            readedDisplay > 0;
+                        this._availabilityList.display = readedDisplay > 0;
                         this._availabilityList.controller.device =
                             readedController > 0;
-                        this._availabilityList.sensor.device = readedSensor > 0;
+                        this._availabilityList.sensor = readedSensor > 0;
                         this.saveBackup();
                         this.emitter.emit(
                             'reading-finish',
@@ -742,12 +664,24 @@ export default class BafangCanSystem implements IConnection {
             controller_parameter1_array: this.controllerParameter1Array,
             controller_parameter2_array: this.controllerParameter2Array,
             controller_speed_parameters: this._controllerSpeedParameters,
-            display_data1: this._displayData1,
-            display_data2: this._displayData2,
+            display_data1: this._display.data1,
+            display_data2: this._display.data2,
             controller_codes: this._controllerCodes,
-            display_codes: this._displayCodes,
-            sensor_codes: this._sensorCodes,
-            battery_codes: this._batteryCodes,
+            display_serial_number: this._display.serialNumber,
+            display_hardware_version: this._display.hardwareVersion,
+            display_software_version: this._display.softwareVersion,
+            display_model_number: this._display.modelNumber,
+            display_customer_number: this._display.customerNumber,
+            display_manufacturer: this._display.manufacturer,
+            display_bootloader_version: this._display.bootloaderVersion,
+            sensor_serial_number: this._sensor.serialNumber,
+            sensor_hardware_version: this._sensor.hardwareVersion,
+            sensor_software_version: this._sensor.softwareVersion,
+            sensor_model_number: this._sensor.modelNumber,
+            battery_serial_number: this._battery.serialNumber,
+            battery_hardware_version: this._battery.hardwareVersion,
+            battery_software_version: this._battery.softwareVersion,
+            battery_model_number: this._battery.modelNumber,
             controller_available: this._availabilityList.controller.device,
             controller_parameter1_available:
                 this._availabilityList.controller.parameter1,
@@ -755,9 +689,9 @@ export default class BafangCanSystem implements IConnection {
                 this._availabilityList.controller.parameter2,
             controller_speed_parameter_available:
                 this._availabilityList.controller.speed_parameter,
-            display_available: this._availabilityList.display.device,
-            sensor_available: this._availabilityList.sensor.device,
-            batteru_available: this._availabilityList.battery.device,
+            display_available: this._availabilityList.display,
+            sensor_available: this._availabilityList.sensor,
+            battery_available: this._availabilityList.battery,
         });
         let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
         try {
@@ -954,123 +888,123 @@ export default class BafangCanSystem implements IConnection {
         }
     }
 
-    public saveDisplayData(): void {
-        if (this.devicePath === 'demo') {
-            setTimeout(
-                () => this.emitter.emit('display-writing-finish', 10, 0),
-                300,
-            );
-            return;
-        }
-        let wroteSuccessfully = 0,
-            wroteUnsuccessfully = 0;
-        let writePromises: Promise<boolean>[] = [];
-        serializers.prepareStringWritePromise(
-            this._displayCodes.display_manufacturer,
-            DeviceNetworkId.DISPLAY,
-            CanWriteCommandsList.Manufacturer,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareStringWritePromise(
-            this._displayCodes.display_customer_number,
-            DeviceNetworkId.DISPLAY,
-            CanWriteCommandsList.CustomerNumber,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareTotalMileageWritePromise(
-            this._displayData1.display_total_mileage,
-            writePromises,
-            this.writeShortParameter,
-        );
-        serializers.prepareSingleMileageWritePromise(
-            this._displayData1.display_single_mileage,
-            writePromises,
-            this.writeShortParameter,
-        );
-        for (let i = 0; i < writePromises.length; i++) {
-            writePromises[i].then((success) => {
-                if (success) wroteSuccessfully++;
-                else wroteUnsuccessfully++;
-                if (
-                    wroteSuccessfully + wroteUnsuccessfully >=
-                    writePromises.length
-                ) {
-                    this.emitter.emit(
-                        'display-writing-finish',
-                        wroteSuccessfully,
-                        wroteUnsuccessfully,
-                    );
-                }
-            });
-        }
-    }
+    // public saveDisplayData(): void {
+    //     if (this.devicePath === 'demo') {
+    //         setTimeout(
+    //             () => this.emitter.emit('display-writing-finish', 10, 0),
+    //             300,
+    //         );
+    //         return;
+    //     }
+    //     let wroteSuccessfully = 0,
+    //         wroteUnsuccessfully = 0;
+    //     let writePromises: Promise<boolean>[] = [];
+    //     serializers.prepareStringWritePromise(
+    //         this._displayCodes.display_manufacturer,
+    //         DeviceNetworkId.DISPLAY,
+    //         CanWriteCommandsList.Manufacturer,
+    //         writePromises,
+    //         this.writeLongParameter,
+    //     );
+    //     serializers.prepareStringWritePromise(
+    //         this._displayCodes.display_customer_number,
+    //         DeviceNetworkId.DISPLAY,
+    //         CanWriteCommandsList.CustomerNumber,
+    //         writePromises,
+    //         this.writeLongParameter,
+    //     );
+    //     serializers.prepareTotalMileageWritePromise(
+    //         this._displayData1.display_total_mileage,
+    //         writePromises,
+    //         this.writeShortParameter,
+    //     );
+    //     serializers.prepareSingleMileageWritePromise(
+    //         this._displayData1.display_single_mileage,
+    //         writePromises,
+    //         this.writeShortParameter,
+    //     );
+    //     for (let i = 0; i < writePromises.length; i++) {
+    //         writePromises[i].then((success) => {
+    //             if (success) wroteSuccessfully++;
+    //             else wroteUnsuccessfully++;
+    //             if (
+    //                 wroteSuccessfully + wroteUnsuccessfully >=
+    //                 writePromises.length
+    //             ) {
+    //                 this.emitter.emit(
+    //                     'display-writing-finish',
+    //                     wroteSuccessfully,
+    //                     wroteUnsuccessfully,
+    //                 );
+    //             }
+    //         });
+    //     }
+    // }
 
-    public saveSensorData(): void {
-        if (this.devicePath === 'demo') {
-            setTimeout(
-                () => this.emitter.emit('sensor-writing-finish', 10, 0),
-                300,
-            );
-            return;
-        }
-        let writePromises: Promise<boolean>[] = [];
-        serializers.prepareStringWritePromise(
-            this._sensorCodes.sensor_customer_number,
-            DeviceNetworkId.TORQUE_SENSOR,
-            CanWriteCommandsList.CustomerNumber,
-            writePromises,
-            this.writeLongParameter,
-        );
-        if (writePromises.length) {
-            writePromises[0].then((success) => {
-                this.emitter.emit(
-                    'sensor-writing-finish',
-                    success ? 1 : 0,
-                    success ? 0 : 1,
-                );
-            });
-        }
-    }
+    // public saveSensorData(): void {
+    //     if (this.devicePath === 'demo') {
+    //         setTimeout(
+    //             () => this.emitter.emit('sensor-writing-finish', 10, 0),
+    //             300,
+    //         );
+    //         return;
+    //     }
+    //     let writePromises: Promise<boolean>[] = [];
+    //     serializers.prepareStringWritePromise(
+    //         this._sensorCodes.sensor_customer_number,
+    //         DeviceNetworkId.TORQUE_SENSOR,
+    //         CanWriteCommandsList.CustomerNumber,
+    //         writePromises,
+    //         this.writeLongParameter,
+    //     );
+    //     if (writePromises.length) {
+    //         writePromises[0].then((success) => {
+    //             this.emitter.emit(
+    //                 'sensor-writing-finish',
+    //                 success ? 1 : 0,
+    //                 success ? 0 : 1,
+    //             );
+    //         });
+    //     }
+    // }
 
-    public setDisplayTime(
-        hours: number,
-        minutes: number,
-        seconds: number,
-    ): Promise<boolean> {
-        if (!utils.validateTime(hours, minutes, seconds)) {
-            console.log('time is invalid');
-            return new Promise<boolean>((resolve) => resolve(false));
-        }
-        if (this.devicePath === 'demo') {
-            console.log(`New display time is ${hours}:${minutes}:${seconds}`);
-            return new Promise<boolean>((resolve) => resolve(true));
-        }
-        return new Promise<boolean>((resolve, reject) => {
-            this.writeShortParameter(
-                DeviceNetworkId.DISPLAY,
-                CanWriteCommandsList.DisplayTime,
-                [hours, minutes, seconds],
-                { resolve, reject },
-            );
-        });
-    }
+    // public setDisplayTime(
+    //     hours: number,
+    //     minutes: number,
+    //     seconds: number,
+    // ): Promise<boolean> {
+    //     if (!utils.validateTime(hours, minutes, seconds)) {
+    //         console.log('time is invalid');
+    //         return new Promise<boolean>((resolve) => resolve(false));
+    //     }
+    //     if (this.devicePath === 'demo') {
+    //         console.log(`New display time is ${hours}:${minutes}:${seconds}`);
+    //         return new Promise<boolean>((resolve) => resolve(true));
+    //     }
+    //     return new Promise<boolean>((resolve, reject) => {
+    //         this.writeShortParameter(
+    //             DeviceNetworkId.DISPLAY,
+    //             CanWriteCommandsList.DisplayTime,
+    //             [hours, minutes, seconds],
+    //             { resolve, reject },
+    //         );
+    //     });
+    // }
 
-    public cleanDisplayServiceMileage(): Promise<boolean> {
-        if (this.devicePath === 'demo') {
-            console.log('Cleaned display mileage');
-            return new Promise<boolean>((resolve) => resolve(true));
-        }
-        return new Promise<boolean>((resolve, reject) => {
-            this.writeShortParameter(
-                DeviceNetworkId.DISPLAY,
-                CanWriteCommandsList.CleanServiceMileage,
-                [0x00, 0x00, 0x00, 0x00, 0x00],
-                { resolve, reject },
-            );
-        });
-    }
+    // public cleanDisplayServiceMileage(): Promise<boolean> {
+    //     if (this.devicePath === 'demo') {
+    //         console.log('Cleaned display mileage');
+    //         return new Promise<boolean>((resolve) => resolve(true));
+    //     }
+    //     return new Promise<boolean>((resolve, reject) => {
+    //         this.writeShortParameter(
+    //             DeviceNetworkId.DISPLAY,
+    //             CanWriteCommandsList.CleanServiceMileage,
+    //             [0x00, 0x00, 0x00, 0x00, 0x00],
+    //             { resolve, reject },
+    //         );
+    //     });
+    // }
 
     public calibratePositionSensor(): Promise<boolean> {
         if (this.devicePath === 'demo') {
@@ -1092,47 +1026,31 @@ export default class BafangCanSystem implements IConnection {
     }
 
     public get isDisplayAvailable(): boolean {
-        return this._availabilityList.display.device;
+        return this._availabilityList.display;
+    }
+
+    public get display(): BafangCanDisplay {
+        return this._display;
     }
 
     public get isSensorAvailable(): boolean {
-        return this._availabilityList.sensor.device;
+        return this._availabilityList.sensor;
+    }
+
+    public get sensor(): BafangCanSensor {
+        return this._sensor;
     }
 
     public get isBatteryAvailable(): boolean {
-        return this._availabilityList.battery.device;
+        return this._availabilityList.battery;
     }
 
-    public get isBatteryCellVoltageReady(): boolean {
-        return this._availabilityList.battery.cells_voltage;
+    public get battery(): BafangCanBattery {
+        return this._battery;
     }
 
-    public get batteryCellsVoltage(): number[] {
-        return deepCopy(this._batteryCellsVoltage);
-    }
-
-    public get isBatteryCapacityDataReady(): boolean {
-        return this._availabilityList.battery.capacity_data;
-    }
-
-    public get batteryCapacityData(): types.BafangCanBatteryCapacityData {
-        return deepCopy(this._batteryCapacityData);
-    }
-
-    public get isBatteryCurrentStateDataReady(): boolean {
-        return this._availabilityList.battery.state_data;
-    }
-
-    public get batteryStateData(): types.BafangCanBatteryStateData {
-        return deepCopy(this._batteryStateData);
-    }
-
-    public get isBatteryCodesAvailable(): boolean {
-        return true;
-    }
-
-    public get batteryCodes(): types.BafangCanBatteryCodes {
-        return deepCopy(this._batteryCodes);
+    public get besst(): BafangBesstTool {
+        return this._besst;
     }
 
     public get isControllerRealtimeData0Ready(): boolean {
@@ -1199,81 +1117,5 @@ export default class BafangCanSystem implements IConnection {
 
     public set controllerCodes(data: types.BafangCanControllerCodes) {
         this._controllerCodes = deepCopy(data);
-    }
-
-    public get isDisplayData1Available(): boolean {
-        return this._availabilityList.display.data1;
-    }
-
-    public get displayData1(): types.BafangCanDisplayData1 {
-        return deepCopy(this._displayData1);
-    }
-
-    public set displayData1(data: types.BafangCanDisplayData1) {
-        this._displayData1 = deepCopy(data);
-    }
-
-    public get isDisplayData2Available(): boolean {
-        return this._availabilityList.display.data2;
-    }
-
-    public get displayData2(): types.BafangCanDisplayData2 {
-        return deepCopy(this._displayData2);
-    }
-
-    public get isDisplayRealtimeDataReady(): boolean {
-        return this._availabilityList.display.realtime;
-    }
-
-    public get displayRealtimeData(): types.BafangCanDisplayRealtimeData {
-        return deepCopy(this._displayRealtimeData);
-    }
-
-    public get isDisplayErrorCodesAvailable(): boolean {
-        return this._availabilityList.display.error_codes;
-    }
-
-    public get displayErrorCodes(): number[] {
-        return deepCopy(this._displayErrorCodes);
-    }
-
-    public get isDisplayCodesAvailable(): boolean {
-        return true;
-    }
-
-    public get displayCodes(): types.BafangCanDisplayCodes {
-        return deepCopy(this._displayCodes);
-    }
-
-    public set displayCodes(data: types.BafangCanDisplayCodes) {
-        this._displayCodes = deepCopy(data);
-    }
-
-    public get isSensorRealtimeDataReady(): boolean {
-        return this._availabilityList.sensor.realtime;
-    }
-
-    public get sensorRealtimeData(): types.BafangCanSensorRealtime {
-        return deepCopy(this._sensorRealtimeData);
-    }
-
-    public get isSensorCodesAvailable(): boolean {
-        return true;
-    }
-
-    public get sensorCodes(): types.BafangCanSensorCodes {
-        return deepCopy(this._sensorCodes);
-    }
-
-    public set sensorCodes(data: types.BafangCanSensorCodes) {
-        this._sensorCodes = deepCopy(data);
-    }
-
-    public get besstCodes(): types.BafangBesstCodes {
-        return deepCopy(this._besstCodes);
-    }
-
-    public set besstCodes(data: types.BafangBesstCodes) {
-        this._besstCodes = deepCopy(data);
     }
 }
