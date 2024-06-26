@@ -100,19 +100,42 @@ class BafangCanDisplaySettingsView extends React.Component<
         this.getErrorCodeTableItems = this.getErrorCodeTableItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        connection.emitter.on('display-data1', (data1: BafangCanDisplayData1) =>
-            this.setState({ data1 }),
-        );
-        connection.emitter.on('display-data2', (data2: BafangCanDisplayData2) =>
-            this.setState({ data2 }),
-        );
-        connection.emitter.on('display-error-codes', (error_codes: number[]) =>
-            this.setState({ error_codes }),
-        );
-        connection.emitter.on(
-            'display-realtime-data',
+        connection.display.emitter.on(
+            'data-0',
             (realtime_data: BafangCanDisplayRealtimeData) =>
                 this.setState({ realtime_data }),
+        );
+        connection.display.emitter.on(
+            'data-1',
+            (data1: BafangCanDisplayData1) => this.setState({ data1 }),
+        );
+        connection.display.emitter.on(
+            'data-2',
+            (data2: BafangCanDisplayData2) => this.setState({ data2 }),
+        );
+        connection.display.emitter.on('data-ec', (error_codes: number[]) =>
+            this.setState({ error_codes }),
+        );
+        connection.display.emitter.on('data-hv', (hardware_version: string) =>
+            this.setState({ hardware_version }),
+        );
+        connection.display.emitter.on('data-sv', (software_version: string) =>
+            this.setState({ software_version }),
+        );
+        connection.display.emitter.on('data-mn', (model_number: string) =>
+            this.setState({ model_number }),
+        );
+        connection.display.emitter.on('data-sn', (serial_number: string) =>
+            this.setState({ serial_number }),
+        );
+        connection.display.emitter.on('data-cn', (customer_number: string) =>
+            this.setState({ customer_number }),
+        );
+        connection.display.emitter.on('data-m', (manufacturer: string) =>
+            this.setState({ manufacturer }),
+        );
+        connection.display.emitter.on('data-bv', (bootload_version: string) =>
+            this.setState({ bootload_version }),
         );
     }
 
@@ -434,8 +457,8 @@ class BafangCanDisplaySettingsView extends React.Component<
             content: 'Writing...',
             duration: 60,
         });
-        connection.emitter.once(
-            'display-writing-finish',
+        connection.display.emitter.once(
+            'write-finish',
             (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'writing',
@@ -528,8 +551,8 @@ class BafangCanDisplaySettingsView extends React.Component<
                             content: 'Loading...',
                             duration: 60,
                         });
-                        connection.emitter.once(
-                            'reading-finish',
+                        connection.display.emitter.once(
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',

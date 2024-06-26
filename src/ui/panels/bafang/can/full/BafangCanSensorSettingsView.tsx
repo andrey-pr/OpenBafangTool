@@ -40,9 +40,21 @@ class BafangCanSensorSettingsView extends React.Component<
             serial_number: connection.sensor.serialNumber,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
-        connection.emitter.on(
-            'sensor-realtime-data',
+        connection.sensor.emitter.on(
+            'data-0',
             (realtime: BafangCanSensorRealtime) => this.setState({ realtime }),
+        );
+        connection.sensor.emitter.on('data-hv', (hardware_version: string) =>
+            this.setState({ hardware_version }),
+        );
+        connection.sensor.emitter.on('data-sv', (software_version: string) =>
+            this.setState({ software_version }),
+        );
+        connection.sensor.emitter.on('data-mn', (model_number: string) =>
+            this.setState({ model_number }),
+        );
+        connection.sensor.emitter.on('data-sn', (serial_number: string) =>
+            this.setState({ serial_number }),
         );
     }
 

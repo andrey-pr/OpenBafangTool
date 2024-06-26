@@ -9,15 +9,18 @@ import {
     BafangCanControllerParameter2,
     BafangCanControllerSpeedParameters,
 } from '../../types/BafangCanSystemTypes';
-import { NoData } from '../../types/no_data';
 import { intToByteArray } from '../utils';
 import { calculateChecksum } from './utils';
 import { PromiseControls } from '../../types/common';
+import BesstDevice from '../../device/besst/besst';
+import { RequestManager } from './RequestManager';
 
 type WriteFunctionType = (
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
+    device?: BesstDevice,
+    request_manager?: RequestManager,
     promise?: PromiseControls,
 ) => void;
 
@@ -35,28 +38,41 @@ function addWritePromise(
     data: number[],
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
-            write_function(target, command, data, { resolve, reject });
+            write_function(
+                target,
+                command,
+                data,
+                besst_device,
+                request_manager,
+                { resolve, reject },
+            );
         }),
     );
 }
 
 export function prepareStringWritePromise(
-    value: string | NoData,
-    device: DeviceNetworkId,
+    value: string | null | undefined,
+    target_device: DeviceNetworkId,
     can_command: CanCommand,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
-    if (typeof value !== 'string') return;
+    if (!value) return;
     addWritePromise(
-        device,
+        target_device,
         can_command,
         serializeString(value),
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -65,6 +81,8 @@ export function prepareParameter1WritePromise(
     old_pkg: number[] | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     if (!old_pkg) return;
     const new_pkg: number[] = deepCopy(old_pkg);
@@ -97,6 +115,8 @@ export function prepareParameter1WritePromise(
         new_pkg,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -105,6 +125,8 @@ export function prepareParameter2WritePromise(
     old_pkg: number[] | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     if (!old_pkg) return;
     const new_pkg: number[] = deepCopy(old_pkg);
@@ -130,6 +152,8 @@ export function prepareParameter2WritePromise(
         new_pkg,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -137,6 +161,8 @@ export function prepareSpeedPackageWritePromise(
     value: BafangCanControllerSpeedParameters,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     const data = [
         ...intToByteArray(value.controller_speed_limit * 100, 2),
@@ -150,33 +176,45 @@ export function prepareSpeedPackageWritePromise(
         data,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
 export function prepareTotalMileageWritePromise(
-    value: number,
+    value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
+    if (!value) return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplayTotalMileage,
         serializeMileage(value),
         promise_array,
         write_function,
+        device,
+        request_manager,
     );
 }
 
 export function prepareSingleMileageWritePromise(
-    value: number,
+    value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
+    if (!value) return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplaySingleMileage,
         serializeMileage(value * 10),
         promise_array,
         write_function,
+        device,
+        request_manager,
     );
 }

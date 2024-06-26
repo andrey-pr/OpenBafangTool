@@ -10,30 +10,18 @@ import * as types from '../../types/BafangCanSystemTypes';
 import * as ep from '../../utils/can/empty_object_provider';
 import * as dp from '../../utils/can/demo_object_provider';
 import * as parsers from '../../utils/can/parser';
-import * as serializers from '../../utils/can/serializers';
 import BesstDevice from '../besst/besst';
 import {
-    CanCommand,
     CanReadCommandsList,
     CanWriteCommandsList,
 } from '../../constants/BafangCanConstants';
-import {
-    BesstReadedCanFrame,
-    CanOperation,
-    DeviceNetworkId,
-} from '../besst/besst-types';
-import { PromiseControls } from '../../types/common';
+import { BesstReadedCanFrame, DeviceNetworkId } from '../besst/besst-types';
 import BafangCanDisplay from './bafang-can-devices/BafangCanDisplay';
 import BafangCanSensor from './bafang-can-devices/BafangCanSensor';
 import BafangCanBattery from './bafang-can-devices/BafangCanBattery';
 import BafangBesstTool from './bafang-can-devices/BafangBesstTool';
-
-type SentRequest = {
-    promise: PromiseControls;
-    can_operation: CanOperation;
-};
-
-type CommandProcessor = { log: boolean; processWriteAnswer: boolean };
+import { RequestManager } from '../../utils/can/RequestManager';
+import { readParameter, rereadParameter, writeShortParameter } from '../../utils/can/utils';
 
 type AvailabilityList = {
     controller: {
@@ -44,9 +32,6 @@ type AvailabilityList = {
         parameter2: boolean;
         speed_parameter: boolean;
     };
-    display: boolean;
-    sensor: boolean;
-    battery: boolean;
 };
 
 export default class BafangCanSystem implements IConnection {
@@ -58,17 +43,13 @@ export default class BafangCanSystem implements IConnection {
 
     public emitter: EventEmitter;
 
-    private demoDataPublisherInterval: NodeJS.Timeout | undefined;
+    private _display: BafangCanDisplay | null = null;
 
-    private demoRealtimeDataGeneratorInterval: NodeJS.Timeout | undefined;
+    private _sensor: BafangCanSensor | null = null;
 
-    private _display: BafangCanDisplay;
+    private _battery: BafangCanBattery | null = null;
 
-    private _sensor: BafangCanSensor;
-
-    private _battery: BafangCanBattery;
-
-    private _besst: BafangBesstTool;
+    private _besst: BafangBesstTool | null = null;
 
     private _controllerRealtimeData0: types.BafangCanControllerRealtime0;
 
@@ -86,7 +67,7 @@ export default class BafangCanSystem implements IConnection {
 
     private _controllerCodes: types.BafangCanControllerCodes;
 
-    private sentRequests: SentRequest[][][] = [];
+    private requestManager?: RequestManager;
 
     private _availabilityList: AvailabilityList = {
         controller: {
@@ -97,9 +78,6 @@ export default class BafangCanSystem implements IConnection {
             parameter2: false,
             speed_parameter: false,
         },
-        display: false,
-        sensor: false,
-        battery: false,
     };
 
     private readingInProgress: boolean = false;
@@ -107,10 +85,6 @@ export default class BafangCanSystem implements IConnection {
     constructor(devicePath: string) {
         this.devicePath = devicePath;
         this.emitter = new EventEmitter();
-        this._display = new BafangCanDisplay(false);
-        this._sensor = new BafangCanSensor(devicePath === 'demo');
-        this._battery = new BafangCanBattery(devicePath === 'demo');
-        this._besst = new BafangBesstTool(devicePath === 'demo');
         this._controllerRealtimeData0 = ep.getEmptyControllerRealtime0Data();
         this._controllerRealtimeData1 = ep.getEmptyControllerRealtime1Data();
         this._controllerParameter1 = ep.getEmptyControllerParameter1();
@@ -120,16 +94,8 @@ export default class BafangCanSystem implements IConnection {
         this._controllerCodes = ep.getEmptyControllerCodes();
         this.loadData = this.loadData.bind(this);
         this.saveControllerData = this.saveControllerData.bind(this);
-        this.demoDataPublisher = this.demoDataPublisher.bind(this);
-        this.demoRealtimeDataGenerator =
-            this.demoRealtimeDataGenerator.bind(this);
         this.processParsedCanResponse =
             this.processParsedCanResponse.bind(this);
-        this.readParameter = this.readParameter.bind(this);
-        this.writeShortParameter = this.writeShortParameter.bind(this);
-        this.writeLongParameter = this.writeLongParameter.bind(this);
-        this.registerRequest = this.registerRequest.bind(this);
-        this.resolveRequest = this.resolveRequest.bind(this);
         this.disconnect = this.disconnect.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
         this.saveBackup = this.saveBackup.bind(this);
@@ -140,187 +106,15 @@ export default class BafangCanSystem implements IConnection {
         this.emitter.emit('disconnection');
     }
 
-    private demoDataPublisher(): void {
-        this.emitter.emit(
-            'controller-realtime-data-0',
-            deepCopy(this._controllerRealtimeData0),
-        );
-        this.emitter.emit(
-            'controller-realtime-data-1',
-            deepCopy(this._controllerRealtimeData1),
-        );
-        this.emitter.emit(
-            'display-realtime-data',
-            deepCopy(this._display.realtimeData),
-        );
-        this.emitter.emit(
-            'sensor-realtime-data',
-            deepCopy(this._sensor.realtimeData),
-        );
-        this.emitter.emit(
-            'battery-capacity-data',
-            deepCopy(this._battery.capacityData),
-        );
-        this.emitter.emit(
-            'battery-state-data',
-            deepCopy(this._battery.stateData),
-        );
-    }
-
-    private demoRealtimeDataGenerator(): void {
-        //TODO
-    }
-
-    private registerRequest(
-        source: number,
-        target: number,
-        can_operation: CanOperation,
-        code: number,
-        subcode: number,
-        promise?: PromiseControls,
-        attempt = 1,
-    ): void {
-        if (promise) {
-            if (this.sentRequests[target] === undefined)
-                this.sentRequests[target] = [];
-            if (this.sentRequests[target][code] === undefined)
-                this.sentRequests[target][code] = [];
-            this.sentRequests[target][code][subcode] = {
-                promise,
-                can_operation,
-            };
-            setTimeout(() => {
-                if (this.sentRequests[target][code][subcode]) {
-                    if (
-                        this.sentRequests[target][code][subcode]
-                            .can_operation !== CanOperation.READ_CMD ||
-                        attempt >= 3
-                    ) {
-                        promise.resolve(false);
-                        return;
-                    }
-                    this.device
-                        ?.sendCanFrame(
-                            source,
-                            target,
-                            can_operation,
-                            code,
-                            subcode,
-                        )
-                        .then(() =>
-                            this.registerRequest(
-                                source,
-                                target,
-                                can_operation,
-                                code,
-                                subcode,
-                                promise,
-                                ++attempt,
-                            ),
-                        );
-                }
-            }, 5000);
-        }
-    }
-
-    private resolveRequest(
-        response: BesstReadedCanFrame,
-        success = true,
-    ): void {
-        if (
-            this.sentRequests[response.sourceDeviceCode] &&
-            this.sentRequests[response.sourceDeviceCode][
-                response.canCommandCode
-            ] &&
-            this.sentRequests[response.sourceDeviceCode][
-                response.canCommandCode
-            ][response.canCommandSubCode]
-        ) {
-            this.sentRequests[response.sourceDeviceCode][
-                response.canCommandCode
-            ][response.canCommandSubCode].promise.resolve(success);
-            delete this.sentRequests[response.sourceDeviceCode][
-                response.canCommandCode
-            ][response.canCommandSubCode];
-        }
-    }
-
-    private commandProcessingTable: {
-        [key: number]: { [key: number]: { [key: number]: CommandProcessor } };
-    } = {
-        0x01: {
-            0x60: {
-                0x00: { log: true, processWriteAnswer: false },
-                0x01: { log: true, processWriteAnswer: false },
-                0x02: { log: true, processWriteAnswer: false },
-                0x03: { log: true, processWriteAnswer: false },
-                0x04: { log: true, processWriteAnswer: true },
-            },
-            0x31: { 0x00: { log: true, processWriteAnswer: false } },
-        },
-        0x02: {
-            0x60: {
-                0x00: { log: true, processWriteAnswer: false },
-                0x01: { log: true, processWriteAnswer: false },
-                0x02: { log: true, processWriteAnswer: false },
-                0x03: { log: true, processWriteAnswer: false },
-                0x05: { log: true, processWriteAnswer: true },
-            },
-            0x32: {
-                0x00: { log: false, processWriteAnswer: false },
-                0x01: { log: false, processWriteAnswer: false },
-                0x03: { log: true, processWriteAnswer: false },
-            },
-        },
-        0x03: {
-            0x60: {
-                0x00: { log: true, processWriteAnswer: false },
-                0x01: { log: true, processWriteAnswer: false },
-                0x02: { log: true, processWriteAnswer: false },
-                0x03: { log: true, processWriteAnswer: false },
-                0x04: { log: true, processWriteAnswer: true },
-                0x05: { log: true, processWriteAnswer: true },
-                0x07: { log: true, processWriteAnswer: false },
-                0x08: { log: true, processWriteAnswer: false },
-            },
-            0x63: {
-                0x00: { log: false, processWriteAnswer: false },
-                0x01: { log: true, processWriteAnswer: true },
-                0x02: { log: true, processWriteAnswer: true },
-            },
-        },
-        // 0x1f: { 0x63: [], 0x31: { 0x00: [] }, 0x32: {} },
-    };
-
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        this.resolveRequest(response);
+        this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
             log.info('received can package:', response);
             if (response.data.length === 0) {
-                this.rereadParameter(response);
+                rereadParameter(response, this.device);
                 return;
             }
-            if (response.sourceDeviceCode === DeviceNetworkId.DISPLAY) {
-                if (response.canCommandSubCode === 0x07) {
-                    this._display.errorCodes =
-                        parsers.parseErrorCodes(response);
-                    this.emitter.emit(
-                        'display-error-codes',
-                        this._display.errorCodes,
-                    );
-                } else {
-                    // parsers.processCodeAnswerFromDisplay(
-                    //     response,
-                    //     this._displayCodes,
-                    // );
-                    // this.emitter.emit(
-                    //     'display-codes-data',
-                    //     deepCopy(this._displayCodes),
-                    // );TODO
-                }
-            } else if (
-                response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT
-            ) {
+            if (response.sourceDeviceCode === DeviceNetworkId.DRIVE_UNIT) {
                 if (response.canCommandSubCode === 0x11) {
                     this.controllerParameter1Array = response.data;
                     this._controllerParameter1 =
@@ -349,67 +143,7 @@ export default class BafangCanSystem implements IConnection {
                         deepCopy(this._controllerCodes),
                     );
                 }
-            } else if (
-                response.sourceDeviceCode === DeviceNetworkId.TORQUE_SENSOR
-            ) {
-                // parsers.processCodeAnswerFromSensor(
-                //     response,
-                //     this._sensorCodes,
-                // );
-                // this.emitter.emit(
-                //     'sensor-codes-data',
-                //     deepCopy(this._sensorCodes),
-                // );
             }
-        } else if (response.canCommandCode === 0x63) {
-            // code is hmi only
-            switch (response.canCommandSubCode) {
-                case 0x00:
-                    this._display.realtimeData =
-                        parsers.parseDisplayPackage0(response);
-                    this.emitter.emit(
-                        'display-realtime-data',
-                        deepCopy(this._display.realtimeData),
-                    );
-                    break;
-                case 0x01:
-                    log.info('received can package:', response);
-                    if (response.data.length === 0) {
-                        this.rereadParameter(response);
-                        break;
-                    }
-                    this._display.data1 =
-                        parsers.parseDisplayPackage1(response);
-                    this.emitter.emit(
-                        'display-data1',
-                        deepCopy(this._display.data1),
-                    );
-                    break;
-                case 0x02:
-                    log.info('received can package:', response);
-                    if (response.data.length === 0) {
-                        this.rereadParameter(response);
-                        break;
-                    }
-                    this._display.data2 =
-                        parsers.parseDisplayPackage2(response);
-                    this.emitter.emit(
-                        'display-data2',
-                        deepCopy(this._display.data2),
-                    );
-                    break;
-                default:
-                    break;
-            }
-        } else if (
-            response.canCommandCode === 0x31 &&
-            response.canCommandSubCode === 0x00
-        ) {
-            this._sensor.realtimeData = parsers.parseSensorPackage(response);
-            this.emitter.emit(
-                'sensor-realtime-data',
-                deepCopy(this._sensor.realtimeData),
-            );
         } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
@@ -450,24 +184,33 @@ export default class BafangCanSystem implements IConnection {
 
     public connect(): Promise<boolean> {
         if (this.devicePath === 'demo') {
-            this.demoDataPublisherInterval = setInterval(
-                this.demoDataPublisher,
-                1500,
-            );
-            this.demoRealtimeDataGeneratorInterval = setInterval(
-                this.demoRealtimeDataGenerator,
-                5000,
-            );
+            this._display = new BafangCanDisplay(true);
+            this._sensor = new BafangCanSensor(true);
+            this._battery = new BafangCanBattery(true);
+            this._besst = new BafangBesstTool(true);
             console.log('Demo mode: connected');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         this.device = new BesstDevice(this.devicePath);
+        this.requestManager = new RequestManager(this.device);
+        this._display = new BafangCanDisplay(
+            false,
+            this.device,
+            this.requestManager,
+        );
+        this._sensor = new BafangCanSensor(false, this.device);
+        this._battery = new BafangCanBattery(false, this.device);
+        this._besst = new BafangBesstTool(false, this.device);
         this.device?.emitter.on('can', this.processParsedCanResponse);
         this.device?.emitter.on('disconnection', this.onDisconnect);
 
         return new Promise<boolean>(async (resolve) => {
             this.device?.reset().then(() => {
                 this.device?.emitter.removeAllListeners();
+                this._display?.connect();
+                this._sensor?.connect();
+                this._battery?.connect();
+                this._besst?.connect();
                 this.device?.emitter.on('can', this.processParsedCanResponse);
                 this.device?.emitter.on('disconnection', this.onDisconnect);
                 this.device?.activateDriveUnit().then(() => {
@@ -480,8 +223,6 @@ export default class BafangCanSystem implements IConnection {
     public disconnect(): void {
         if (this.devicePath === 'demo') {
             console.log('Demo mode: disconnected');
-            clearInterval(this.demoDataPublisherInterval);
-            clearInterval(this.demoRealtimeDataGeneratorInterval);
             return;
         }
         this.device?.disconnect();
@@ -515,6 +256,10 @@ export default class BafangCanSystem implements IConnection {
             this._controllerSpeedParameters =
                 dp.getControllerSpeedParametersDemo();
             this._controllerCodes = dp.getControllerCodesDemo();
+            this._display?.loadData();
+            this._sensor?.loadData();
+            this._battery?.loadData();
+            this._besst?.loadData();
             setTimeout(() => {
                 this.emitter.emit(
                     'controller-codes-data',
@@ -532,43 +277,12 @@ export default class BafangCanSystem implements IConnection {
                     'controller-data-parameter2',
                     deepCopy(this._controllerParameter2),
                 );
-                this.emitter.emit(
-                    'display-data1',
-                    deepCopy(this._display.data1),
-                );
-                this.emitter.emit(
-                    'display-data2',
-                    deepCopy(this._display.data2),
-                );
-                this.emitter.emit(
-                    'display-realtime-data',
-                    deepCopy(this._display.realtimeData),
-                );
-                this.emitter.emit(
-                    'battery-cells-data',
-                    deepCopy(this._battery.cellsVoltage),
-                );
-                // this.emitter.emit(
-                //     'display-codes-data',
-                //     deepCopy(this._displayCodes),
-                // );
-                // this.emitter.emit(
-                //     'sensor-codes-data',
-                //     deepCopy(this._sensorCodes),
-                // );
-                // this.emitter.emit(
-                //     'battery-codes-data',
-                //     deepCopy(this._batteryCodes),
-                // );
                 this._availabilityList.controller.device = true;
                 this._availabilityList.controller.realtime0 = true;
                 this._availabilityList.controller.realtime1 = true;
                 this._availabilityList.controller.speed_parameter = true;
                 this._availabilityList.controller.parameter1 = true;
                 this._availabilityList.controller.parameter2 = true;
-                this._availabilityList.display = true;
-                this._availabilityList.sensor = true;
-                this._availabilityList.battery = true;
                 this.emitter.emit('reading-finish', 10, 0);
             }, 1500);
             console.log('Demo mode: blank data loaded');
@@ -576,30 +290,10 @@ export default class BafangCanSystem implements IConnection {
         }
         if (this.readingInProgress) return;
         this.readingInProgress = true;
-        // this.device
-        //     ?.getSerialNumber()
-        //     .then((serial_number: string) => {
-        //         if (serial_number === undefined) return;
-        //         this._besstCodes.besst_serial_number = serial_number;
-        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        //     })
-        //     .catch(() => {});
-        // this.device
-        //     ?.getSoftwareVersion()
-        //     .then((software_version: string) => {
-        //         if (software_version === undefined) return;
-        //         this._besstCodes.besst_software_version = software_version;
-        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        //     })
-        //     .catch(() => {});
-        // this.device
-        //     ?.getHardwareVersion()
-        //     .then((hardware_version: string) => {
-        //         if (hardware_version === undefined) return;
-        //         this._besstCodes.besst_hardware_version = hardware_version;
-        //         this.emitter.emit('besst-data', deepCopy(this._besstCodes));
-        //     })
-        //     .catch(() => {});
+        this._display?.loadData();
+        this._sensor?.loadData();
+        this._battery?.loadData();
+        this._besst?.loadData();
         const commands = [
             CanReadCommandsList.HardwareVersion,
             CanReadCommandsList.SoftwareVersion,
@@ -609,49 +303,39 @@ export default class BafangCanSystem implements IConnection {
             CanReadCommandsList.Manufacturer,
             CanReadCommandsList.ErrorCode,
             CanReadCommandsList.BootloaderVersion,
-            CanReadCommandsList.DisplayDataBlock1,
-            CanReadCommandsList.DisplayDataBlock2,
             CanReadCommandsList.MotorSpeedParameters,
             CanReadCommandsList.Parameter1,
             CanReadCommandsList.Parameter2,
         ];
-        const summ = 4 * 3 + 2 * 2 + 7;
         let readedSuccessfully = 0,
-            readedUnsuccessfully = 0,
-            readedDisplay = 0,
-            readedController = 0,
-            readedSensor = 0;
+            readedUnsuccessfully = 0;
 
         commands.forEach((command) => {
-            command.applicableDevices.forEach((device) => {
-                new Promise<boolean>((resolve, reject) => {
-                    this.readParameter(device, command, { resolve, reject });
-                }).then((success) => {
-                    if (success) readedSuccessfully++;
-                    else readedUnsuccessfully++;
-                    if (success && device === DeviceNetworkId.DISPLAY)
-                        readedDisplay++;
-                    else if (success && device === DeviceNetworkId.DRIVE_UNIT)
-                        readedController++;
-                    else if (
-                        success &&
-                        device === DeviceNetworkId.TORQUE_SENSOR
-                    )
-                        readedSensor++;
-                    if (readedSuccessfully + readedUnsuccessfully >= summ) {
-                        this._availabilityList.display = readedDisplay > 0;
-                        this._availabilityList.controller.device =
-                            readedController > 0;
-                        this._availabilityList.sensor = readedSensor > 0;
-                        this.saveBackup();
-                        this.emitter.emit(
-                            'reading-finish',
-                            readedSuccessfully,
-                            readedUnsuccessfully,
-                        );
-                        this.readingInProgress = false;
-                    }
-                });
+            new Promise<boolean>((resolve, reject) => {
+                readParameter(
+                    DeviceNetworkId.DRIVE_UNIT,
+                    command,
+                    this.device,
+                    this.requestManager,
+                    { resolve, reject },
+                );
+            }).then((success) => {
+                if (success) readedSuccessfully++;
+                else readedUnsuccessfully++;
+                if (
+                    readedSuccessfully + readedUnsuccessfully >=
+                    commands.length
+                ) {
+                    this._availabilityList.controller.device =
+                        readedSuccessfully > 0;
+                    this.saveBackup();
+                    this.emitter.emit(
+                        'reading-finish',
+                        readedSuccessfully,
+                        readedUnsuccessfully,
+                    );
+                    this.readingInProgress = false;
+                }
             });
         });
     }
@@ -664,24 +348,24 @@ export default class BafangCanSystem implements IConnection {
             controller_parameter1_array: this.controllerParameter1Array,
             controller_parameter2_array: this.controllerParameter2Array,
             controller_speed_parameters: this._controllerSpeedParameters,
-            display_data1: this._display.data1,
-            display_data2: this._display.data2,
+            display_data1: this._display?.data1,
+            display_data2: this._display?.data2,
             controller_codes: this._controllerCodes,
-            display_serial_number: this._display.serialNumber,
-            display_hardware_version: this._display.hardwareVersion,
-            display_software_version: this._display.softwareVersion,
-            display_model_number: this._display.modelNumber,
-            display_customer_number: this._display.customerNumber,
-            display_manufacturer: this._display.manufacturer,
-            display_bootloader_version: this._display.bootloaderVersion,
-            sensor_serial_number: this._sensor.serialNumber,
-            sensor_hardware_version: this._sensor.hardwareVersion,
-            sensor_software_version: this._sensor.softwareVersion,
-            sensor_model_number: this._sensor.modelNumber,
-            battery_serial_number: this._battery.serialNumber,
-            battery_hardware_version: this._battery.hardwareVersion,
-            battery_software_version: this._battery.softwareVersion,
-            battery_model_number: this._battery.modelNumber,
+            display_serial_number: this._display?.serialNumber,
+            display_hardware_version: this._display?.hardwareVersion,
+            display_software_version: this._display?.softwareVersion,
+            display_model_number: this._display?.modelNumber,
+            display_customer_number: this._display?.customerNumber,
+            display_manufacturer: this._display?.manufacturer,
+            display_bootloader_version: this._display?.bootloaderVersion,
+            sensor_serial_number: this._sensor?.serialNumber,
+            sensor_hardware_version: this._sensor?.hardwareVersion,
+            sensor_software_version: this._sensor?.softwareVersion,
+            sensor_model_number: this._sensor?.modelNumber,
+            battery_serial_number: this._battery?.serialNumber,
+            battery_hardware_version: this._battery?.hardwareVersion,
+            battery_software_version: this._battery?.softwareVersion,
+            battery_model_number: this._battery?.modelNumber,
             controller_available: this._availabilityList.controller.device,
             controller_parameter1_available:
                 this._availabilityList.controller.parameter1,
@@ -689,9 +373,9 @@ export default class BafangCanSystem implements IConnection {
                 this._availabilityList.controller.parameter2,
             controller_speed_parameter_available:
                 this._availabilityList.controller.speed_parameter,
-            display_available: this._availabilityList.display,
-            sensor_available: this._availabilityList.sensor,
-            battery_available: this._availabilityList.battery,
+            display_available: this._display?.available,
+            sensor_available: this._sensor?.available,
+            battery_available: this._battery?.available,
         });
         let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
         try {
@@ -709,125 +393,6 @@ export default class BafangCanSystem implements IConnection {
         }
     }
 
-    private rereadParameter(dto: BesstReadedCanFrame): void {
-        this.device?.sendCanFrame(
-            DeviceNetworkId.BESST,
-            dto.sourceDeviceCode,
-            CanOperation.READ_CMD,
-            dto.canCommandCode,
-            dto.canCommandSubCode,
-        );
-    }
-
-    private readParameter(
-        target: DeviceNetworkId,
-        can_command: CanCommand,
-        promise?: PromiseControls,
-    ): void {
-        this.device
-            ?.sendCanFrame(
-                DeviceNetworkId.BESST,
-                target,
-                CanOperation.READ_CMD,
-                can_command.canCommandCode,
-                can_command.canCommandSubCode,
-            )
-            .then(() =>
-                this.registerRequest(
-                    DeviceNetworkId.BESST,
-                    target,
-                    CanOperation.READ_CMD,
-                    can_command.canCommandCode,
-                    can_command.canCommandSubCode,
-                    promise,
-                ),
-            );
-    }
-
-    private writeShortParameter(
-        target: DeviceNetworkId,
-        can_command: CanCommand,
-        value: number[],
-        promise?: PromiseControls,
-    ): void {
-        this.device
-            ?.sendCanFrame(
-                DeviceNetworkId.BESST,
-                target,
-                CanOperation.WRITE_CMD,
-                can_command.canCommandCode,
-                can_command.canCommandSubCode,
-                value,
-            )
-            .then(() =>
-                this.registerRequest(
-                    DeviceNetworkId.BESST,
-                    target,
-                    CanOperation.WRITE_CMD,
-                    can_command.canCommandCode,
-                    can_command.canCommandSubCode,
-                    promise,
-                ),
-            );
-    }
-
-    private writeLongParameter(
-        target: DeviceNetworkId,
-        can_command: CanCommand,
-        value: number[],
-        promise?: PromiseControls,
-    ): void {
-        let arrayClone = [...value];
-        this.device?.sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.WRITE_CMD,
-            can_command.canCommandCode,
-            can_command.canCommandSubCode,
-            [arrayClone.length],
-        );
-        this.device?.sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.MULTIFRAME_START,
-            can_command.canCommandCode,
-            can_command.canCommandSubCode,
-            arrayClone.slice(0, 8),
-        );
-        arrayClone = arrayClone.slice(8);
-        let packages = 0;
-        do {
-            this.device?.sendCanFrame(
-                DeviceNetworkId.BESST,
-                target,
-                CanOperation.MULTIFRAME,
-                0,
-                packages++,
-                arrayClone.slice(0, 8),
-            );
-            arrayClone = arrayClone.slice(8);
-        } while (arrayClone.length > 8);
-        this.device
-            ?.sendCanFrame(
-                DeviceNetworkId.BESST,
-                target,
-                CanOperation.MULTIFRAME_END,
-                0,
-                packages,
-                arrayClone.slice(0, 8),
-            )
-            .then(() =>
-                this.registerRequest(
-                    DeviceNetworkId.BESST,
-                    target,
-                    CanOperation.WRITE_CMD,
-                    can_command.canCommandCode,
-                    can_command.canCommandSubCode,
-                    promise,
-                ),
-            );
-    }
-
     public saveControllerData(): void {
         if (this.devicePath === 'demo') {
             setTimeout(
@@ -839,37 +404,37 @@ export default class BafangCanSystem implements IConnection {
         let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
         let writePromises: Promise<boolean>[] = [];
-        serializers.prepareStringWritePromise(
-            this._controllerCodes.controller_manufacturer,
-            DeviceNetworkId.DRIVE_UNIT,
-            CanWriteCommandsList.Manufacturer,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareStringWritePromise(
-            this._controllerCodes.controller_customer_number,
-            DeviceNetworkId.DRIVE_UNIT,
-            CanWriteCommandsList.CustomerNumber,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareParameter1WritePromise(
-            this._controllerParameter1,
-            this.controllerParameter1Array,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareParameter2WritePromise(
-            this._controllerParameter2,
-            this.controllerParameter2Array,
-            writePromises,
-            this.writeLongParameter,
-        );
-        serializers.prepareSpeedPackageWritePromise(
-            this._controllerSpeedParameters,
-            writePromises,
-            this.writeShortParameter,
-        );
+        // serializers.prepareStringWritePromise(
+        //     this._controllerCodes.controller_manufacturer,
+        //     DeviceNetworkId.DRIVE_UNIT,
+        //     CanWriteCommandsList.Manufacturer,
+        //     writePromises,
+        //     this.writeLongParameter,
+        // );
+        // serializers.prepareStringWritePromise(
+        //     this._controllerCodes.controller_customer_number,
+        //     DeviceNetworkId.DRIVE_UNIT,
+        //     CanWriteCommandsList.CustomerNumber,
+        //     writePromises,
+        //     this.writeLongParameter,
+        // );
+        // serializers.prepareParameter1WritePromise(
+        //     this._controllerParameter1,
+        //     this.controllerParameter1Array,
+        //     writePromises,
+        //     this.writeLongParameter,
+        // );
+        // serializers.prepareParameter2WritePromise(
+        //     this._controllerParameter2,
+        //     this.controllerParameter2Array,
+        //     writePromises,
+        //     this.writeLongParameter,
+        // );
+        // serializers.prepareSpeedPackageWritePromise(
+        //     this._controllerSpeedParameters,
+        //     writePromises,
+        //     this.writeShortParameter,
+        // );
         for (let i = 0; i < writePromises.length; i++) {
             writePromises[i].then((success) => {
                 if (success) wroteSuccessfully++;
@@ -888,134 +453,18 @@ export default class BafangCanSystem implements IConnection {
         }
     }
 
-    // public saveDisplayData(): void {
-    //     if (this.devicePath === 'demo') {
-    //         setTimeout(
-    //             () => this.emitter.emit('display-writing-finish', 10, 0),
-    //             300,
-    //         );
-    //         return;
-    //     }
-    //     let wroteSuccessfully = 0,
-    //         wroteUnsuccessfully = 0;
-    //     let writePromises: Promise<boolean>[] = [];
-    //     serializers.prepareStringWritePromise(
-    //         this._displayCodes.display_manufacturer,
-    //         DeviceNetworkId.DISPLAY,
-    //         CanWriteCommandsList.Manufacturer,
-    //         writePromises,
-    //         this.writeLongParameter,
-    //     );
-    //     serializers.prepareStringWritePromise(
-    //         this._displayCodes.display_customer_number,
-    //         DeviceNetworkId.DISPLAY,
-    //         CanWriteCommandsList.CustomerNumber,
-    //         writePromises,
-    //         this.writeLongParameter,
-    //     );
-    //     serializers.prepareTotalMileageWritePromise(
-    //         this._displayData1.display_total_mileage,
-    //         writePromises,
-    //         this.writeShortParameter,
-    //     );
-    //     serializers.prepareSingleMileageWritePromise(
-    //         this._displayData1.display_single_mileage,
-    //         writePromises,
-    //         this.writeShortParameter,
-    //     );
-    //     for (let i = 0; i < writePromises.length; i++) {
-    //         writePromises[i].then((success) => {
-    //             if (success) wroteSuccessfully++;
-    //             else wroteUnsuccessfully++;
-    //             if (
-    //                 wroteSuccessfully + wroteUnsuccessfully >=
-    //                 writePromises.length
-    //             ) {
-    //                 this.emitter.emit(
-    //                     'display-writing-finish',
-    //                     wroteSuccessfully,
-    //                     wroteUnsuccessfully,
-    //                 );
-    //             }
-    //         });
-    //     }
-    // }
-
-    // public saveSensorData(): void {
-    //     if (this.devicePath === 'demo') {
-    //         setTimeout(
-    //             () => this.emitter.emit('sensor-writing-finish', 10, 0),
-    //             300,
-    //         );
-    //         return;
-    //     }
-    //     let writePromises: Promise<boolean>[] = [];
-    //     serializers.prepareStringWritePromise(
-    //         this._sensorCodes.sensor_customer_number,
-    //         DeviceNetworkId.TORQUE_SENSOR,
-    //         CanWriteCommandsList.CustomerNumber,
-    //         writePromises,
-    //         this.writeLongParameter,
-    //     );
-    //     if (writePromises.length) {
-    //         writePromises[0].then((success) => {
-    //             this.emitter.emit(
-    //                 'sensor-writing-finish',
-    //                 success ? 1 : 0,
-    //                 success ? 0 : 1,
-    //             );
-    //         });
-    //     }
-    // }
-
-    // public setDisplayTime(
-    //     hours: number,
-    //     minutes: number,
-    //     seconds: number,
-    // ): Promise<boolean> {
-    //     if (!utils.validateTime(hours, minutes, seconds)) {
-    //         console.log('time is invalid');
-    //         return new Promise<boolean>((resolve) => resolve(false));
-    //     }
-    //     if (this.devicePath === 'demo') {
-    //         console.log(`New display time is ${hours}:${minutes}:${seconds}`);
-    //         return new Promise<boolean>((resolve) => resolve(true));
-    //     }
-    //     return new Promise<boolean>((resolve, reject) => {
-    //         this.writeShortParameter(
-    //             DeviceNetworkId.DISPLAY,
-    //             CanWriteCommandsList.DisplayTime,
-    //             [hours, minutes, seconds],
-    //             { resolve, reject },
-    //         );
-    //     });
-    // }
-
-    // public cleanDisplayServiceMileage(): Promise<boolean> {
-    //     if (this.devicePath === 'demo') {
-    //         console.log('Cleaned display mileage');
-    //         return new Promise<boolean>((resolve) => resolve(true));
-    //     }
-    //     return new Promise<boolean>((resolve, reject) => {
-    //         this.writeShortParameter(
-    //             DeviceNetworkId.DISPLAY,
-    //             CanWriteCommandsList.CleanServiceMileage,
-    //             [0x00, 0x00, 0x00, 0x00, 0x00],
-    //             { resolve, reject },
-    //         );
-    //     });
-    // }
-
     public calibratePositionSensor(): Promise<boolean> {
         if (this.devicePath === 'demo') {
             console.log('Calibrated position sensor');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
-            this.writeShortParameter(
+            writeShortParameter(
                 DeviceNetworkId.DRIVE_UNIT,
                 CanWriteCommandsList.CalibratePositionSensor,
                 [0x00, 0x00, 0x00, 0x00, 0x00],
+                this.device,
+                this.requestManager,
                 { resolve, reject },
             );
         });
@@ -1025,32 +474,24 @@ export default class BafangCanSystem implements IConnection {
         return this._availabilityList.controller.device;
     }
 
-    public get isDisplayAvailable(): boolean {
-        return this._availabilityList.display;
-    }
-
     public get display(): BafangCanDisplay {
-        return this._display;
-    }
-
-    public get isSensorAvailable(): boolean {
-        return this._availabilityList.sensor;
+        if (this._display) return this._display;
+        else throw new ReferenceError();
     }
 
     public get sensor(): BafangCanSensor {
-        return this._sensor;
-    }
-
-    public get isBatteryAvailable(): boolean {
-        return this._availabilityList.battery;
+        if (this._sensor) return this._sensor;
+        else throw new ReferenceError();
     }
 
     public get battery(): BafangCanBattery {
-        return this._battery;
+        if (this._battery) return this._battery;
+        else throw new ReferenceError();
     }
 
     public get besst(): BafangBesstTool {
-        return this._besst;
+        if (this._besst) return this._besst;
+        else throw new ReferenceError();
     }
 
     public get isControllerRealtimeData0Ready(): boolean {
@@ -1105,10 +546,6 @@ export default class BafangCanSystem implements IConnection {
         data: types.BafangCanControllerSpeedParameters,
     ) {
         this._controllerSpeedParameters = deepCopy(data);
-    }
-
-    public get isControllerCodesAvailable(): boolean {
-        return true;
     }
 
     public get controllerCodes(): types.BafangCanControllerCodes {

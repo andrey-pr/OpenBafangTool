@@ -7,6 +7,10 @@ export function intToByteArray(integer: number, bytes: number): number[] {
     return array;
 }
 
+export function charsToString(char_arr: number[]): string {
+    return String.fromCharCode.apply(null, char_arr);
+}
+
 export function validateTime(
     hours: number,
     minutes: number,

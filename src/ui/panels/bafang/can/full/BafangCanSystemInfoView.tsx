@@ -77,42 +77,82 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             besst_hardware_version: connection.besst.hardwareVersion,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        this.updateData = this.updateData.bind(this);
-        connection.emitter.on(
-            'display-data1',
-            (display_data1: BafangCanDisplayData1) =>
-                this.setState({ display_data1 }),
+        connection.besst.emitter.on('data-sn', (besst_serial_number: string) =>
+            this.setState({ besst_serial_number }),
         );
-        connection.emitter.on(
-            'controller-realtime-data-0',
-            (controller_realtime0: BafangCanControllerRealtime0) =>
-                this.setState({ controller_realtime0 }),
+        connection.besst.emitter.on(
+            'data-sv',
+            (besst_software_version: string) =>
+                this.setState({ besst_software_version }),
         );
-        connection.emitter.on(
-            'controller-realtime-data-1',
-            (controller_realtime1: BafangCanControllerRealtime1) =>
-                this.setState({ controller_realtime1 }),
+        connection.besst.emitter.on(
+            'data-hv',
+            (besst_hardware_version: string) =>
+                this.setState({ besst_hardware_version }),
         );
-        connection.emitter.on(
-            'display-realtime-data',
+        connection.display.emitter.on(
+            'data-0',
             (display_realtime: BafangCanDisplayRealtimeData) =>
                 this.setState({ display_realtime }),
         );
-        connection.emitter.on(
-            'sensor-realtime-data',
-            (sensor_realtime: BafangCanSensorRealtime) =>
-                this.setState({ sensor_realtime }),
+        connection.display.emitter.on(
+            'data-1',
+            (display_data1: BafangCanDisplayData1) => this.setState({ display_data1 }),
         );
-        connection.emitter.on(
-            'display-data2',
-            (display_data2: BafangCanDisplayData2) =>
-                this.setState({ display_data2 }),
+        connection.display.emitter.on(
+            'data-2',
+            (display_data2: BafangCanDisplayData2) => this.setState({ display_data2 }),
         );
-    }
-
-    updateData(values: any) {
-        // TODO add property check
-        this.setState(values);
+        connection.display.emitter.on(
+            'data-hv',
+            (display_hardware_version: string) =>
+                this.setState({ display_hardware_version }),
+        );
+        connection.display.emitter.on(
+            'data-sv',
+            (display_software_version: string) =>
+                this.setState({ display_software_version }),
+        );
+        connection.display.emitter.on(
+            'data-mn',
+            (display_model_number: string) =>
+                this.setState({ display_model_number }),
+        );
+        connection.display.emitter.on(
+            'data-sn',
+            (display_serial_number: string) =>
+                this.setState({ display_serial_number }),
+        );
+        connection.display.emitter.on(
+            'data-cn',
+            (display_customer_number: string) =>
+                this.setState({ display_customer_number }),
+        );
+        connection.display.emitter.on(
+            'data-m',
+            (display_manufacturer: string) =>
+                this.setState({ display_manufacturer }),
+        );
+        connection.display.emitter.on(
+            'data-bv',
+            (display_bootload_version: string) =>
+                this.setState({ display_bootload_version }),
+        );
+        // connection.emitter.on(
+        //     'controller-realtime-data-0',
+        //     (controller_realtime0: BafangCanControllerRealtime0) =>
+        //         this.setState({ controller_realtime0 }),
+        // );
+        // connection.emitter.on(
+        //     'controller-realtime-data-1',
+        //     (controller_realtime1: BafangCanControllerRealtime1) =>
+        //         this.setState({ controller_realtime1 }),
+        // );
+        // connection.emitter.on(
+        //     'sensor-realtime-data',
+        //     (sensor_realtime: BafangCanSensorRealtime) =>
+        //         this.setState({ sensor_realtime }),
+        // );
     }
 
     getControllerItems(): DescriptionsProps['items'] {
@@ -476,7 +516,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {!connection.isDisplayAvailable && (
+                {!connection.display?.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">Display is not connected</Text>
@@ -484,7 +524,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {!connection.isSensorAvailable && (
+                {!connection.sensor.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">Sensor is not connected</Text>
@@ -492,7 +532,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {!connection.isBatteryAvailable && (
+                {!connection.battery?.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">Battery is not digital</Text>
@@ -509,7 +549,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         style={{ marginBottom: '20px' }}
                     />
                 )}
-                {connection.isDisplayAvailable && (
+                {connection.display?.available && (
                     <Descriptions
                         bordered
                         title="Display"
@@ -518,7 +558,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         style={{ marginBottom: '20px' }}
                     />
                 )}
-                {connection.isSensorAvailable && (
+                {connection.sensor.available && (
                     <Descriptions
                         bordered
                         title="Sensor"

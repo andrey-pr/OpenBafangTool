@@ -39,10 +39,10 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
             cells_voltage: connection.battery.cellsVoltage,
             capacity_data: connection.battery.capacityData,
             state: connection.battery.stateData,
-            hardware_version: connection.sensor.hardwareVersion,
-            software_version: connection.sensor.softwareVersion,
-            model_number: connection.sensor.modelNumber,
-            serial_number: connection.sensor.serialNumber,
+            hardware_version: connection.battery.hardwareVersion,
+            software_version: connection.battery.softwareVersion,
+            model_number: connection.battery.modelNumber,
+            serial_number: connection.battery.serialNumber,
         };
         connection.emitter.on('battery-cells-data', (cells_voltage: number[]) =>
             this.setState({ cells_voltage }),

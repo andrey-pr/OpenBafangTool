@@ -16,6 +16,7 @@ import {
     SpeedSensorChannelNumber,
     SystemVoltage,
 } from '../../types/BafangCanSystemTypes';
+import { charsToString } from '../utils';
 
 function decodeCurrentAssistLevel(
     currentAssistLevelCode: number,
@@ -50,9 +51,9 @@ function decodeCurrentAssistLevel(
     return assistLevelTable[totalAssistLevels][currentAssistLevelCode];
 }
 
-export function parseErrorCodes(answer: BesstReadedCanFrame): number[] {
+export function parseErrorCodes(data: number[]): number[] {
     const errors: number[] = [];
-    let errorString = String.fromCharCode.apply(null, answer.data);
+    let errorString = charsToString(data);
     while (errorString.length >= 2) {
         errors.push(parseInt(errorString.substring(0, 2), 10));
         errorString = errorString.substring(2);
@@ -232,128 +233,21 @@ export function processCodeAnswerFromController(
 ): void {
     switch (answer.canCommandSubCode) {
         case 0x00:
-            dto.controller_hardware_version = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
+            dto.controller_hardware_version = charsToString(answer.data);
             break;
         case 0x01:
-            dto.controller_software_version = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
+            dto.controller_software_version = charsToString(answer.data);
             break;
         case 0x02:
-            dto.controller_model_number = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
+            dto.controller_model_number = charsToString(answer.data);
             break;
         case 0x03:
-            dto.controller_serial_number = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
+            dto.controller_serial_number = charsToString(answer.data);
             break;
         case 0x05:
-            dto.controller_manufacturer = String.fromCharCode.apply(
-                null,
-                answer.data,
-            );
+            dto.controller_manufacturer = charsToString(answer.data);
             break;
         default:
             break;
     }
 }
-
-// export function processCodeAnswerFromDisplay(
-//     answer: BesstReadedCanFrame,
-//     dto: BafangCanDisplayCodes,
-// ): void {
-//     switch (answer.canCommandSubCode) {
-//         case 0x00:
-//             dto.display_hardware_version = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x01:
-//             dto.display_software_version = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x02:
-//             dto.display_model_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x03:
-//             dto.display_serial_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x04:
-//             dto.display_customer_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x05:
-//             dto.display_manufacturer = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x08:
-//             dto.display_bootload_version = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         default:
-//             break;
-//     }
-// }
-
-// export function processCodeAnswerFromSensor(
-//     answer: BesstReadedCanFrame,
-//     dto: BafangCanSensorCodes,
-// ): void {
-//     switch (answer.canCommandSubCode) {
-//         case 0x00:
-//             dto.sensor_hardware_version = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x01:
-//             dto.sensor_software_version = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x02:
-//             dto.sensor_model_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x03:
-//             dto.sensor_serial_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         case 0x04:
-//             dto.sensor_customer_number = String.fromCharCode.apply(
-//                 null,
-//                 answer.data,
-//             );
-//             break;
-//         default:
-//             break;
-//     }
-// }
