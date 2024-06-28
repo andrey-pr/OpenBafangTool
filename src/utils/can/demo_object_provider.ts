@@ -1,6 +1,5 @@
 import { WheelDiameterTable } from '../../constants/BafangCanConstants';
 import {
-    BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
     BafangCanControllerRealtime0,
@@ -58,35 +57,35 @@ export function getSensorRealtimeDemoData(): BafangCanSensorRealtime {
 
 export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
     return {
-        controller_system_voltage: 36,
-        controller_current_limit: 18,
-        controller_overvoltage: 47,
-        controller_undervoltage: 128,
-        controller_undervoltage_under_load: 12,
-        controller_battery_recovery_voltage: 172,
-        controller_battery_capacity: 10000,
-        controller_max_current_on_low_charge: 3,
-        controller_full_capacity_range: 45,
-        controller_pedal_sensor_type: PedalSensorType.TorqueSensor,
-        controller_coaster_brake: false,
-        controller_pedal_sensor_signals_per_rotation: 24,
-        controller_speed_sensor_channel_number: 2,
-        controller_motor_type: MotorType.MidDriveMotor,
-        controller_motor_pole_pair_number: 4,
-        controller_speedmeter_magnets_number: 1,
-        controller_temperature_sensor_type: TemperatureSensorType.K10,
-        controller_deceleration_ratio: 36.5,
-        controller_motor_max_rotor_rpm: 4300,
-        controller_motor_d_axis_inductance: 0,
-        controller_motor_q_axis_inductance: 0,
-        controller_motor_phase_resistance: 0,
-        controller_motor_reverse_potential_coefficient: 0,
-        controller_throttle_start_voltage: 1.2,
-        controller_throttle_max_voltage: 3.6,
-        controller_start_current: 25,
-        controller_current_loading_time: 0.2,
-        controller_current_shedding_time: 0.5,
-        controller_assist_levels: [
+        system_voltage: 36,
+        current_limit: 18,
+        overvoltage: 47,
+        undervoltage: 128,
+        undervoltage_under_load: 12,
+        battery_recovery_voltage: 172,
+        battery_capacity: 10000,
+        max_current_on_low_charge: 3,
+        full_capacity_range: 45,
+        pedal_sensor_type: PedalSensorType.TorqueSensor,
+        coaster_brake: false,
+        pedal_sensor_signals_per_rotation: 24,
+        speed_sensor_channel_number: 2,
+        motor_type: MotorType.MidDriveMotor,
+        motor_pole_pair_number: 4,
+        speedmeter_magnets_number: 1,
+        temperature_sensor_type: TemperatureSensorType.K10,
+        deceleration_ratio: 36.5,
+        motor_max_rotor_rpm: 4300,
+        motor_d_axis_inductance: 0,
+        motor_q_axis_inductance: 0,
+        motor_phase_resistance: 0,
+        motor_reverse_potential_coefficient: 0,
+        throttle_start_voltage: 1.2,
+        throttle_max_voltage: 3.6,
+        start_current: 25,
+        current_loading_time: 0.2,
+        current_shedding_time: 0.5,
+        assist_levels: [
             { current_limit: 25, speed_limit: 100 },
             { current_limit: 30, speed_limit: 100 },
             { current_limit: 37, speed_limit: 100 },
@@ -97,8 +96,8 @@ export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
             { current_limit: 80, speed_limit: 100 },
             { current_limit: 100, speed_limit: 100 },
         ],
-        controller_displayless_mode: false,
-        controller_lamps_always_on: false,
+        displayless_mode: false,
+        lamps_always_on: false,
     };
 }
 
@@ -113,7 +112,7 @@ export function getControllerParameter1ArrayDemo(): number[] {
 
 export function getControllerParameter2Demo(): BafangCanControllerParameter2 {
     return {
-        controller_torque_profiles: [
+        torque_profiles: [
             {
                 start_torque_value: 8,
                 max_torque_value: 50,
@@ -193,9 +192,9 @@ export function getDisplayErrorCodesDemo(): number[] {
 
 export function getControllerSpeedParametersDemo(): BafangCanControllerSpeedParameters {
     return {
-        controller_wheel_diameter: WheelDiameterTable[14],
-        controller_speed_limit: 25,
-        controller_circumference: 2224,
+        wheel_diameter: WheelDiameterTable[14],
+        speed_limit: 25,
+        circumference: 2224,
     };
 }
 
@@ -214,15 +213,24 @@ export function getDisplayDemoData2(): BafangCanDisplayData2 {
     };
 }
 
-export function getControllerCodesDemo(): BafangCanControllerCodes {
-    return {
-        controller_hardware_version: 'CR X10V.350.FC 2.1',
-        controller_software_version: 'CRX10VC3615E101004.0',
-        controller_model_number: 'CR X10V.350.FC',
-        controller_serial_number: 'CRX10V.350.FC2.1A42F5TB045999',
-        controller_customer_number: '',
-        controller_manufacturer: 'BAFANG',
-    };
+export function getControllerSNDemo(): string {
+    return 'CRX10V.350.FC2.1A42F5TB045999';
+}
+
+export function getControllerSVDemo(): string {
+    return 'CRX10VC3615E101004.0';
+}
+
+export function getControllerHVDemo(): string {
+    return 'CR X10V.350.FC 2.1';
+}
+
+export function getControllerMNDemo(): string {
+    return 'CR X10V.350.FC';
+}
+
+export function getControllerManufacturerDemo(): string {
+    return 'BAFANG';
 }
 
 export function getDisplaySNDemo(): string {

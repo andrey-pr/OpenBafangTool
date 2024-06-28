@@ -14,7 +14,6 @@ type ParameterInputProps = {
     disabled?: boolean;
     decimalPlaces?: number;
     direct?: boolean;
-    noDataType?: boolean;
 };
 
 type ParameterInputState = {
@@ -36,7 +35,6 @@ class ParameterInputComponent extends React.Component<
         decimalPlaces: 0,
         min: undefined,
         max: undefined,
-        noDataType: true,
     };
 
     constructor(props: any) {
@@ -70,7 +68,6 @@ class ParameterInputComponent extends React.Component<
             checkValue,
             disabled,
             decimalPlaces,
-            noDataType,
         } = this.props;
         return (
             <Tooltip title={warningText} trigger="click" open={warning}>

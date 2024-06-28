@@ -97,7 +97,7 @@ class MainView extends React.Component<MainProps, MainState> {
         });
         setTimeout(() => this.setState({ loading: false }), 60000);
         connection.emitter.once(
-            'reading-finish',
+            'read-finish',
             (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'loading',
@@ -258,7 +258,7 @@ class MainView extends React.Component<MainProps, MainState> {
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
                             !(this.props.connection as BafangCanSystem)
-                                .isControllerAvailable,
+                                .controller.available,
                     },
                     {
                         key: 'bafang_can_display_settings',

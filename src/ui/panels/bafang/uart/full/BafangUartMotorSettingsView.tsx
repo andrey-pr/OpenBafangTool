@@ -303,7 +303,6 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
-                        noDataType={false}
                     />
                 ),
             },
@@ -355,7 +354,6 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
-                        noDataType={false}
                     />
                 ),
             },
@@ -590,7 +588,6 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
-                        noDataType={false}
                     />
                 ),
             },
@@ -801,7 +798,6 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
-                        noDataType={false}
                     />
                 ),
             },

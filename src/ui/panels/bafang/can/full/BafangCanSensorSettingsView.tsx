@@ -145,8 +145,8 @@ class BafangCanSensorSettingsView extends React.Component<
                             content: 'Loading...',
                             duration: 60,
                         });
-                        connection.emitter.once(
-                            'reading-finish',
+                        connection.sensor.emitter.once(
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',

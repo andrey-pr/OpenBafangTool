@@ -2,7 +2,6 @@ import { WheelDiameterTable } from '../../constants/BafangCanConstants';
 import { BesstReadedCanFrame } from '../../device/besst/besst-types';
 import {
     AssistLevel,
-    BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
     BafangCanControllerRealtime0,
@@ -131,65 +130,60 @@ export function parseControllerPackage1(
 
 export function parseControllerPackage3(
     packet: BesstReadedCanFrame,
-): BafangCanControllerSpeedParameters {
+): BafangCanControllerSpeedParameters | null {
     const diameter = WheelDiameterTable.find(
         (item) =>
             item.code[0] === packet.data[2] && item.code[1] === packet.data[3],
     );
     if (diameter)
         return {
-            controller_speed_limit:
-                ((packet.data[1] << 8) + packet.data[0]) / 100,
-            controller_wheel_diameter: diameter,
-            controller_circumference: (packet.data[5] << 8) + packet.data[4],
+            speed_limit: ((packet.data[1] << 8) + packet.data[0]) / 100,
+            wheel_diameter: diameter,
+            circumference: (packet.data[5] << 8) + packet.data[4],
         };
+    return null;
 }
 
-export function parseControllerParameter1(
+export function parseControllerParameter1( // TODO add checksum
     packet: BesstReadedCanFrame,
-): BafangCanControllerParameter1 {
+): BafangCanControllerParameter1 | null {
     const pkg: BafangCanControllerParameter1 = {
-        controller_system_voltage: packet.data[0] as SystemVoltage,
-        controller_current_limit: packet.data[1],
-        controller_overvoltage: packet.data[2],
-        controller_undervoltage: packet.data[3],
-        controller_undervoltage_under_load: packet.data[4],
-        controller_battery_recovery_voltage: packet.data[5],
-        controller_battery_capacity: (packet.data[8] << 8) + packet.data[7],
-        controller_max_current_on_low_charge: packet.data[9],
-        controller_full_capacity_range: packet.data[12],
-        controller_pedal_sensor_type: packet.data[13],
-        controller_coaster_brake: packet.data[14] === 1,
-        controller_pedal_sensor_signals_per_rotation: packet.data[15],
-        controller_speed_sensor_channel_number: packet
+        system_voltage: packet.data[0] as SystemVoltage,
+        current_limit: packet.data[1],
+        overvoltage: packet.data[2],
+        undervoltage: packet.data[3],
+        undervoltage_under_load: packet.data[4],
+        battery_recovery_voltage: packet.data[5],
+        battery_capacity: (packet.data[8] << 8) + packet.data[7],
+        max_current_on_low_charge: packet.data[9],
+        full_capacity_range: packet.data[12],
+        pedal_sensor_type: packet.data[13],
+        coaster_brake: packet.data[14] === 1,
+        pedal_sensor_signals_per_rotation: packet.data[15],
+        speed_sensor_channel_number: packet
             .data[16] as SpeedSensorChannelNumber,
-        controller_motor_type: packet.data[18],
-        controller_motor_pole_pair_number: packet.data[19],
-        controller_speedmeter_magnets_number: packet.data[20],
-        controller_temperature_sensor_type: packet.data[21],
-        controller_deceleration_ratio:
-            ((packet.data[23] << 8) + packet.data[22]) / 100,
-        controller_motor_max_rotor_rpm:
-            (packet.data[25] << 8) + packet.data[24],
-        controller_motor_d_axis_inductance:
-            (packet.data[27] << 8) + packet.data[26],
-        controller_motor_q_axis_inductance:
-            (packet.data[29] << 8) + packet.data[28],
-        controller_motor_phase_resistance:
-            (packet.data[31] << 8) + packet.data[30],
-        controller_motor_reverse_potential_coefficient:
+        motor_type: packet.data[18],
+        motor_pole_pair_number: packet.data[19],
+        speedmeter_magnets_number: packet.data[20],
+        temperature_sensor_type: packet.data[21],
+        deceleration_ratio: ((packet.data[23] << 8) + packet.data[22]) / 100,
+        motor_max_rotor_rpm: (packet.data[25] << 8) + packet.data[24],
+        motor_d_axis_inductance: (packet.data[27] << 8) + packet.data[26],
+        motor_q_axis_inductance: (packet.data[29] << 8) + packet.data[28],
+        motor_phase_resistance: (packet.data[31] << 8) + packet.data[30],
+        motor_reverse_potential_coefficient:
             (packet.data[33] << 8) + packet.data[32],
-        controller_throttle_start_voltage: packet.data[34] / 10,
-        controller_throttle_max_voltage: packet.data[35] / 10,
-        controller_start_current: packet.data[37],
-        controller_current_loading_time: packet.data[38] / 10,
-        controller_current_shedding_time: packet.data[39] / 10,
-        controller_assist_levels: [],
-        controller_displayless_mode: packet.data[58] === 1,
-        controller_lamps_always_on: packet.data[59] === 1,
+        throttle_start_voltage: packet.data[34] / 10,
+        throttle_max_voltage: packet.data[35] / 10,
+        start_current: packet.data[37],
+        current_loading_time: packet.data[38] / 10,
+        current_shedding_time: packet.data[39] / 10,
+        assist_levels: [],
+        displayless_mode: packet.data[58] === 1,
+        lamps_always_on: packet.data[59] === 1,
     };
     for (let i = 0; i < 9; i++) {
-        pkg.controller_assist_levels.push({
+        pkg.assist_levels.push({
             current_limit: packet.data[40 + i],
             speed_limit: packet.data[49 + i],
         });
@@ -197,14 +191,14 @@ export function parseControllerParameter1(
     return pkg;
 }
 
-export function parseControllerParameter2(
+export function parseControllerParameter2( // TODO add checksum
     packet: BesstReadedCanFrame,
-): BafangCanControllerParameter2 {
+): BafangCanControllerParameter2 | null {
     const pkg: BafangCanControllerParameter2 = {
-        controller_torque_profiles: [],
+        torque_profiles: [],
     };
     for (let i = 0; i <= 5; i++) {
-        pkg.controller_torque_profiles.push({
+        pkg.torque_profiles.push({
             start_torque_value: packet.data[0 + i],
             max_torque_value: packet.data[6 + i],
             return_torque_value: packet.data[12 + i],
@@ -225,29 +219,4 @@ export function parseSensorPackage(
         torque: (packet.data[1] << 8) + packet.data[0],
         cadence: packet.data[2],
     };
-}
-
-export function processCodeAnswerFromController(
-    answer: BesstReadedCanFrame,
-    dto: BafangCanControllerCodes,
-): void {
-    switch (answer.canCommandSubCode) {
-        case 0x00:
-            dto.controller_hardware_version = charsToString(answer.data);
-            break;
-        case 0x01:
-            dto.controller_software_version = charsToString(answer.data);
-            break;
-        case 0x02:
-            dto.controller_model_number = charsToString(answer.data);
-            break;
-        case 0x03:
-            dto.controller_serial_number = charsToString(answer.data);
-            break;
-        case 0x05:
-            dto.controller_manufacturer = charsToString(answer.data);
-            break;
-        default:
-            break;
-    }
 }

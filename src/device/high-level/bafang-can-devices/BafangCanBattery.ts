@@ -93,10 +93,12 @@ export default class BafangCanBattery {
                 this.emitter.emit('data-mn', this.model_number);
                 this.emitter.emit('data-sn', this.serial_number);
                 this.device_available = true;
+                this.emitter.emit('read-finish', 7, 0);
             }, 1500);
             console.log('Demo mode: blank data loaded');
             return;
         }
+        this.emitter.emit('read-finish', 0, 0);
         // TODO
     }
 

@@ -48,6 +48,7 @@ export default class BafangBesstTool {
     public loadData(): void {
         if (this.demo) {
             console.log('Demo mode: blank data loaded');
+            this.emitter.emit('read-finish', 3, 0);
             return;
         }
         if (this.readingInProgress) return;
@@ -70,7 +71,6 @@ export default class BafangBesstTool {
             ?.getSerialNumber()
             .then((serial_number: string) => {
                 if (serial_number === undefined) return;
-                console.log(serial_number);
                 this.serial_number = serial_number;
                 this.emitter.emit('data-sn', serial_number);
                 finish(true);
@@ -82,7 +82,6 @@ export default class BafangBesstTool {
             ?.getSoftwareVersion()
             .then((software_version: string) => {
                 if (software_version === undefined) return;
-                console.log(software_version);
                 this.software_version = software_version;
                 this.emitter.emit('data-sv', software_version);
                 finish(true);
@@ -94,7 +93,6 @@ export default class BafangBesstTool {
             ?.getHardwareVersion()
             .then((hardware_version: string) => {
                 if (hardware_version === undefined) return;
-                console.log(hardware_version);
                 this.hardware_version = hardware_version;
                 this.emitter.emit('data-hv', hardware_version);
                 finish(true);

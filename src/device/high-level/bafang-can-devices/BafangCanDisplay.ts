@@ -133,42 +133,34 @@ export default class BafangCanDisplay {
                 case 0x00:
                     this.hardware_version = charsToString(response.data);
                     this.emitter.emit('data-hv', this.hardware_version);
-                    console.log(this.hardware_version);
                     break;
                 case 0x01:
                     this.software_version = charsToString(response.data);
                     this.emitter.emit('data-sv', this.software_version);
-                    console.log(this.software_version);
                     break;
                 case 0x02:
                     this.model_number = charsToString(response.data);
                     this.emitter.emit('data-mn', this.model_number);
-                    console.log(this.model_number);
                     break;
                 case 0x03:
                     this.serial_number = charsToString(response.data);
                     this.emitter.emit('data-sn', this.serial_number);
-                    console.log(this.serial_number);
                     break;
                 case 0x04:
                     this.customer_number = charsToString(response.data);
                     this.emitter.emit('data-cn', this.customer_number);
-                    console.log(this.customer_number);
                     break;
                 case 0x05:
-                    this.manufacturer = charsToString(response.data);
-                    this.emitter.emit('data-m', this.manufacturer);
-                    console.log(this.manufacturer);
+                    this._manufacturer = charsToString(response.data);
+                    this.emitter.emit('data-m', this._manufacturer);
                     break;
                 case 0x07:
                     this._errorCodes = parseErrorCodes(response.data);
                     this.emitter.emit('data-ec', deepCopy(this._errorCodes));
-                    console.log(this._errorCodes);
                     break;
                 case 0x08:
                     this.bootload_version = charsToString(response.data);
                     this.emitter.emit('data-bv', this.bootload_version);
-                    console.log(this.bootload_version);
                     break;
                 default:
                     break;
@@ -178,7 +170,6 @@ export default class BafangCanDisplay {
                 case 0x00:
                     this.realtime_data = parseDisplayPackage0(response);
                     this.emitter.emit('data-0', deepCopy(this.realtime_data));
-                    console.log(this.realtime_data);
                     break;
                 case 0x01:
                     log.info('received can package:', response);
@@ -188,7 +179,6 @@ export default class BafangCanDisplay {
                     }
                     this._data1 = parseDisplayPackage1(response);
                     this.emitter.emit('data-1', deepCopy(this._data1));
-                    console.log(this._data1);
                     break;
                 case 0x02:
                     log.info('received can package:', response);
@@ -198,7 +188,6 @@ export default class BafangCanDisplay {
                     }
                     this._data2 = parseDisplayPackage2(response);
                     this.emitter.emit('data-2', deepCopy(this._data2));
-                    console.log(this._data2);
                     break;
                 default:
                     break;
@@ -240,7 +229,6 @@ export default class BafangCanDisplay {
             CanReadCommandsList.DisplayDataBlock1,
             CanReadCommandsList.DisplayDataBlock2,
         ];
-        const summ = 10;
         let readedSuccessfully = 0,
             readedUnsuccessfully = 0;
 
@@ -259,7 +247,10 @@ export default class BafangCanDisplay {
             }).then((success) => {
                 if (success) readedSuccessfully++;
                 else readedUnsuccessfully++;
-                if (readedSuccessfully + readedUnsuccessfully >= summ) {
+                if (
+                    readedSuccessfully + readedUnsuccessfully >=
+                    commands.length
+                ) {
                     this.emitter.emit(
                         'read-finish',
                         readedSuccessfully,
