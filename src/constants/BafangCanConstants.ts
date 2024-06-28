@@ -17,6 +17,7 @@ export const CanReadCommandsList: {
             DeviceNetworkId.TORQUE_SENSOR,
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.BATTERY,
         ],
     },
     SoftwareVersion: {
@@ -26,6 +27,7 @@ export const CanReadCommandsList: {
             DeviceNetworkId.TORQUE_SENSOR,
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.BATTERY,
         ],
     },
     ModelNumber: {
@@ -35,6 +37,7 @@ export const CanReadCommandsList: {
             DeviceNetworkId.TORQUE_SENSOR,
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.BATTERY,
         ],
     },
     SerialNumber: {
@@ -44,6 +47,7 @@ export const CanReadCommandsList: {
             DeviceNetworkId.TORQUE_SENSOR,
             DeviceNetworkId.DRIVE_UNIT,
             DeviceNetworkId.DISPLAY,
+            DeviceNetworkId.BATTERY,
         ],
     },
     CustomerNumber: {
@@ -96,6 +100,26 @@ export const CanReadCommandsList: {
         canCommandCode: 0x63,
         canCommandSubCode: 0x02,
         applicableDevices: [DeviceNetworkId.DISPLAY],
+    },
+    CellsVoltage0: {
+        canCommandCode: 0x64,
+        canCommandSubCode: 0x02,
+        applicableDevices: [DeviceNetworkId.BATTERY],
+    },
+    CellsVoltage1: {
+        canCommandCode: 0x64,
+        canCommandSubCode: 0x03,
+        applicableDevices: [DeviceNetworkId.BATTERY],
+    },
+    CellsVoltage2: {
+        canCommandCode: 0x64,
+        canCommandSubCode: 0x04,
+        applicableDevices: [DeviceNetworkId.BATTERY],
+    },
+    CellsVoltage3: {
+        canCommandCode: 0x64,
+        canCommandSubCode: 0x05,
+        applicableDevices: [DeviceNetworkId.BATTERY],
     },
 };
 

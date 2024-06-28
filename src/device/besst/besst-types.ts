@@ -27,6 +27,7 @@ export enum DeviceNetworkId {
     TORQUE_SENSOR = 0x01,
     DRIVE_UNIT = 0x02,
     DISPLAY = 0x03,
+    BATTERY = 0x04,
     BESST = 0x05,
     BROADCAST = 0x1f,
 }

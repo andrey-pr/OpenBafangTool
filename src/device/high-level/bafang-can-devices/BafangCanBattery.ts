@@ -16,6 +16,15 @@ import BesstDevice from '../../besst/besst';
 import EventEmitter from 'events';
 import { RequestManager } from '../../../utils/can/RequestManager';
 import { BesstReadedCanFrame, DeviceNetworkId } from '../../besst/besst-types';
+import log from 'electron-log/renderer';
+import { readParameter, rereadParameter } from '../../../utils/can/utils';
+import { charsToString } from '../../../utils/utils';
+import {
+    parseCapacityPackage,
+    parseCellsPackage,
+    parseStatePackage,
+} from '../../../utils/can/parser';
+import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
 
 export default class BafangCanBattery {
     private besstDevice?: BesstDevice;
@@ -23,6 +32,8 @@ export default class BafangCanBattery {
     private requestManager?: RequestManager;
 
     public emitter: EventEmitter;
+
+    private readingInProgress: boolean = false;
 
     private device_available: boolean = false;
 
@@ -78,8 +89,49 @@ export default class BafangCanBattery {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR) return;
-        // TODO
+        if (response.sourceDeviceCode !== DeviceNetworkId.BATTERY) return;
+        this.device_available = true;
+        this.requestManager?.resolveRequest(response);
+        if (response.canCommandCode === 0x60) {
+            log.info('received can package:', response);
+            if (response.data.length === 0) {
+                rereadParameter(response, this.besstDevice);
+                return;
+            }
+            switch (response.canCommandSubCode) {
+                case 0x00:
+                    this.hardware_version = charsToString(response.data);
+                    this.emitter.emit('data-hv', this.hardware_version);
+                    break;
+                case 0x01:
+                    this.software_version = charsToString(response.data);
+                    this.emitter.emit('data-sv', this.software_version);
+                    break;
+                case 0x02:
+                    this.model_number = charsToString(response.data);
+                    this.emitter.emit('data-mn', this.model_number);
+                    break;
+                case 0x03:
+                    this.serial_number = charsToString(response.data);
+                    this.emitter.emit('data-sn', this.serial_number);
+                    break;
+                default:
+                    break;
+            }
+        } else if (response.canCommandCode === 0x34) {
+            if (response.canCommandSubCode == 0x00) {
+                this.capacity_data = parseCapacityPackage(response);
+                this.emitter.emit('data-0', deepCopy(this.capacity_data));
+            }
+            if (response.canCommandSubCode == 0x01) {
+                this.state_data = parseStatePackage(response);
+                this.emitter.emit('data-1', deepCopy(this.state_data));
+            }
+        } else if (response.canCommandCode === 0x64) {
+            if (!this.cells_voltage) this.cells_voltage = [];
+            parseCellsPackage(response, this.cells_voltage);
+            this.emitter.emit('data-cells', deepCopy(this.state_data));
+        }
     }
 
     public loadData(): void {
@@ -99,7 +151,46 @@ export default class BafangCanBattery {
             return;
         }
         this.emitter.emit('read-finish', 0, 0);
-        // TODO
+        if (this.readingInProgress) return;
+        this.readingInProgress = true;
+        const commands = [
+            CanReadCommandsList.HardwareVersion,
+            CanReadCommandsList.SoftwareVersion,
+            CanReadCommandsList.ModelNumber,
+            CanReadCommandsList.SerialNumber,
+            CanReadCommandsList.CellsVoltage0,
+            CanReadCommandsList.CellsVoltage1,
+            CanReadCommandsList.CellsVoltage2,
+            CanReadCommandsList.CellsVoltage3,
+        ];
+        let readedSuccessfully = 0,
+            readedNonSuccessfully = 0;
+
+        commands.forEach((command) => {
+            new Promise<boolean>((resolve, reject) => {
+                readParameter(
+                    DeviceNetworkId.BATTERY,
+                    command,
+                    this.besstDevice,
+                    this.requestManager,
+                    { resolve, reject },
+                );
+            }).then((success) => {
+                if (success) readedSuccessfully++;
+                else readedNonSuccessfully++;
+                if (
+                    readedSuccessfully + readedNonSuccessfully >=
+                    commands.length
+                ) {
+                    this.emitter.emit(
+                        'read-finish',
+                        readedSuccessfully,
+                        readedNonSuccessfully,
+                    );
+                    this.readingInProgress = false;
+                }
+            });
+        });
     }
 
     public get available(): boolean {
