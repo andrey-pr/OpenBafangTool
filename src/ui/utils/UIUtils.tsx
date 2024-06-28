@@ -2,7 +2,6 @@ import { ReactNode } from 'react';
 import { Typography } from 'antd';
 import { DescriptionsItemType } from 'antd/es/descriptions';
 import StringValueComponent from '../components/StringValueComponent';
-import { NoData } from '../../types/no_data';
 import NumberValueComponent from '../components/NumberValueComponent';
 import BooleanValueComponent from '../components/BooleanValueComponent';
 import StringInputComponent from '../components/StringInput';
@@ -13,7 +12,7 @@ const { Text } = Typography;
 
 export function generateSimpleStringListItem(
     text: string,
-    content: string | number | NoData,
+    content: string | number | null,
     note?: string,
 ): DescriptionsItemType {
     return {
@@ -34,7 +33,7 @@ export function generateSimpleStringListItem(
 
 export function generateEditableStringListItem(
     text: string,
-    content: string | NoData,
+    content: string | null,
     onNewValue: (value: string) => void,
     maxLength = 40,
     note?: string,

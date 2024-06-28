@@ -97,7 +97,7 @@ class MainView extends React.Component<MainProps, MainState> {
         });
         setTimeout(() => this.setState({ loading: false }), 60000);
         connection.emitter.once(
-            'reading-finish',
+            'read-finish',
             (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'loading',
@@ -258,7 +258,7 @@ class MainView extends React.Component<MainProps, MainState> {
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
                             !(this.props.connection as BafangCanSystem)
-                                .isControllerAvailable,
+                                .controller.available,
                     },
                     {
                         key: 'bafang_can_display_settings',
@@ -267,8 +267,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !(this.props.connection as BafangCanSystem)
-                                .isDisplayAvailable,
+                            !(this.props.connection as BafangCanSystem).display
+                                .available,
                     },
                     {
                         key: 'bafang_can_sensor_settings',
@@ -277,8 +277,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !(this.props.connection as BafangCanSystem)
-                                .isSensorAvailable,
+                            !(this.props.connection as BafangCanSystem).sensor
+                                .available,
                     },
                     {
                         key: 'bafang_can_battery',
@@ -287,8 +287,8 @@ class MainView extends React.Component<MainProps, MainState> {
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
-                            !(this.props.connection as BafangCanSystem)
-                                .isBatteryAvailable,
+                            !(this.props.connection as BafangCanSystem).battery
+                                ?.available,
                     },
                     {
                         key: 'bafang_can_motor_manual',

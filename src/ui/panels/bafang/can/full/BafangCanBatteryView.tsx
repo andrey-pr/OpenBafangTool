@@ -10,7 +10,6 @@ import {
 } from '../../../../utils/UIUtils';
 import {
     BafangCanBatteryCapacityData,
-    BafangCanBatteryCodes,
     BafangCanBatteryStateData,
 } from '../../../../../types/BafangCanSystemTypes';
 
@@ -20,10 +19,14 @@ type ViewProps = {
     connection: BafangCanSystem;
 };
 
-type ViewState = BafangCanBatteryCodes & {
-    cells_voltage: number[];
-    capacity_data: BafangCanBatteryCapacityData;
-    state: BafangCanBatteryStateData;
+type ViewState = {
+    cells_voltage: number[] | null;
+    capacity_data: BafangCanBatteryCapacityData | null;
+    state: BafangCanBatteryStateData | null;
+    hardware_version: string | null;
+    software_version: string | null;
+    model_number: string | null;
+    serial_number: string | null;
 };
 
 // TODO add redux
@@ -33,13 +36,14 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         super(props);
         const { connection } = this.props;
         this.state = {
-            cells_voltage: connection.batteryCellsVoltage,
-            capacity_data: connection.batteryCapacityData,
-            state: connection.batteryStateData,
-            ...connection.batteryCodes,
+            cells_voltage: connection.battery.cellsVoltage,
+            capacity_data: connection.battery.capacityData,
+            state: connection.battery.stateData,
+            hardware_version: connection.battery.hardwareVersion,
+            software_version: connection.battery.softwareVersion,
+            model_number: connection.battery.modelNumber,
+            serial_number: connection.battery.serialNumber,
         };
-        this.updateData = this.updateData.bind(this);
-        connection.emitter.on('battery-codes-data', this.updateData);
         connection.emitter.on('battery-cells-data', (cells_voltage: number[]) =>
             this.setState({ cells_voltage }),
         );
@@ -54,12 +58,8 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         );
     }
 
-    updateData(values: any) {
-        // TODO add property check
-        this.setState(values);
-    }
-
     getCellVoltageItems(): DescriptionsProps['items'] {
+        if (!this.state.cells_voltage) return [];
         let items: DescriptionsProps['items'] = [];
         this.state.cells_voltage.forEach((voltage, cell) => {
             items?.push(
@@ -75,54 +75,58 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
 
     getCapacityItems(): DescriptionsProps['items'] {
         const { capacity_data } = this.state;
-        return [
-            generateSimpleNumberListItem(
-                'Full capacity',
-                capacity_data.full_capacity,
-                'mAh',
-            ),
-            generateSimpleNumberListItem(
-                'Capacity left',
-                capacity_data.capacity_left,
-                'mAh',
-            ),
-            generateSimpleNumberListItem('RSOC', capacity_data.rsoc, '%'),
-            generateSimpleNumberListItem('ASOC', capacity_data.asoc, '%'),
-            generateSimpleNumberListItem('SOH', capacity_data.soh, '%'),
-        ];
+        if (capacity_data) {
+            return [
+                generateSimpleNumberListItem(
+                    'Full capacity',
+                    capacity_data.full_capacity,
+                    'mAh',
+                ),
+                generateSimpleNumberListItem(
+                    'Capacity left',
+                    capacity_data.capacity_left,
+                    'mAh',
+                ),
+                generateSimpleNumberListItem('RSOC', capacity_data.rsoc, '%'),
+                generateSimpleNumberListItem('ASOC', capacity_data.asoc, '%'),
+                generateSimpleNumberListItem('SOH', capacity_data.soh, '%'),
+            ];
+        }
     }
 
     getCurrentStateItems(): DescriptionsProps['items'] {
         const { state } = this.state;
-        return [
-            generateSimpleNumberListItem('Voltage', state.voltage, 'V'),
-            generateSimpleNumberListItem('Current', state.current, 'A'),
-            generateSimpleNumberListItem(
-                'Temperature',
-                state.temperature,
-                'C°',
-            ),
-        ];
+        if (state) {
+            return [
+                generateSimpleNumberListItem('Voltage', state.voltage, 'V'),
+                generateSimpleNumberListItem('Current', state.current, 'A'),
+                generateSimpleNumberListItem(
+                    'Temperature',
+                    state.temperature,
+                    'C°',
+                ),
+            ];
+        }
     }
 
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                this.state.battery_serial_number,
+                this.state.serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',
-                this.state.battery_software_version,
+                this.state.software_version,
             ),
             generateSimpleStringListItem(
                 'Hardware version',
-                this.state.battery_hardware_version,
+                this.state.hardware_version,
             ),
             generateSimpleStringListItem(
                 'Model number',
-                this.state.battery_model_number,
+                this.state.model_number,
             ),
         ];
     }
@@ -134,7 +138,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                 <Typography.Title level={2} style={{ margin: 0 }}>
                     Battery
                 </Typography.Title>
-                {connection.isBatteryCellVoltageReady && (
+                {this.state.cells_voltage && (
                     <>
                         <br />
                         <Descriptions
@@ -145,7 +149,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         />
                     </>
                 )}
-                {!connection.isBatteryCellVoltageReady && (
+                {!this.state.cells_voltage && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -156,7 +160,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         </div>
                     </>
                 )}
-                {connection.isBatteryCapacityDataReady && (
+                {this.state.capacity_data && (
                     <>
                         <br />
                         <Descriptions
@@ -167,7 +171,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         />
                     </>
                 )}
-                {!connection.isBatteryCapacityDataReady && (
+                {!this.state.capacity_data && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -177,7 +181,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         </div>
                     </>
                 )}
-                {connection.isBatteryCurrentStateDataReady && (
+                {this.state.state && (
                     <>
                         <br />
                         <Descriptions
@@ -188,7 +192,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         />
                     </>
                 )}
-                {!connection.isBatteryCurrentStateDataReady && (
+                {!this.state.state && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -209,9 +213,9 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                 <FloatButton
                     icon={<SyncOutlined />}
                     type="primary"
-                    style={{ right: 94 }}
+                    style={{ right: 24 }}
                     onClick={() => {
-                        connection.loadData();
+                        connection.battery.loadData();
                         message.open({
                             key: 'loading',
                             type: 'loading',
