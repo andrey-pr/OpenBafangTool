@@ -44,17 +44,29 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
             model_number: connection.battery.modelNumber,
             serial_number: connection.battery.serialNumber,
         };
-        connection.emitter.on('battery-cells-data', (cells_voltage: number[]) =>
+        connection.battery.emitter.on('data-cells', (cells_voltage: number[]) =>
             this.setState({ cells_voltage }),
         );
-        connection.emitter.on(
-            'battery-capacity-data',
+        connection.battery.emitter.on(
+            'data-0',
             (capacity_data: BafangCanBatteryCapacityData) =>
                 this.setState({ capacity_data }),
         );
-        connection.emitter.on(
-            'battery-state-data',
+        connection.battery.emitter.on(
+            'data-1',
             (state: BafangCanBatteryStateData) => this.setState({ state }),
+        );
+        connection.battery.emitter.on('data-hv', (hardware_version: string) =>
+            this.setState({ hardware_version }),
+        );
+        connection.battery.emitter.on('data-sv', (software_version: string) =>
+            this.setState({ software_version }),
+        );
+        connection.battery.emitter.on('data-mn', (model_number: string) =>
+            this.setState({ model_number }),
+        );
+        connection.battery.emitter.on('data-sn', (serial_number: string) =>
+            this.setState({ serial_number }),
         );
     }
 
@@ -222,8 +234,8 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                             content: 'Loading...',
                             duration: 60,
                         });
-                        connection.emitter.once(
-                            'reading-finish',
+                        connection.battery.emitter.once(
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
