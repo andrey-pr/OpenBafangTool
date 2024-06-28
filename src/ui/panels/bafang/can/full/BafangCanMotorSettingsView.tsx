@@ -60,10 +60,10 @@ type SettingsState = {
     position_sensor_calibration_dialog: boolean;
 };
 
-// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanMotorSettingsView extends React.Component<
     // TODO add torque calibration button
+    // TODO fix parameter changing
     SettingsProps,
     SettingsState
 > {
@@ -92,7 +92,6 @@ class BafangCanMotorSettingsView extends React.Component<
         this.getThrottleItems = this.getThrottleItems.bind(this);
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
-        this.updateData = this.updateData.bind(this);
         connection.controller.emitter.on(
             'data-hv',
             (hardware_version: string) => this.setState({ hardware_version }),
@@ -135,11 +134,6 @@ class BafangCanMotorSettingsView extends React.Component<
             (realtime1: BafangCanControllerRealtime1) =>
                 this.setState({ realtime1 }),
         );
-    }
-
-    updateData(values: any) {
-        // TODO add property check
-        this.setState(values);
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {

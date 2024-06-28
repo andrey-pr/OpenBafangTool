@@ -215,26 +215,26 @@ export default class BafangCanSystem implements IConnection {
 
     public get controller(): BafangCanController {
         if (this._controller) return this._controller;
-        else throw new ReferenceError();
+        throw new ReferenceError();
     }
 
     public get display(): BafangCanDisplay {
         if (this._display) return this._display;
-        else throw new ReferenceError();
+        throw new ReferenceError();
     }
 
     public get sensor(): BafangCanSensor {
         if (this._sensor) return this._sensor;
-        else throw new ReferenceError();
+        throw new ReferenceError();
     }
 
     public get battery(): BafangCanBattery {
         if (this._battery) return this._battery;
-        else throw new ReferenceError();
+        throw new ReferenceError();
     }
 
     public get besst(): BafangBesstTool {
         if (this._besst) return this._besst;
-        else throw new ReferenceError();
+        throw new ReferenceError();
     }
 }

@@ -29,7 +29,6 @@ type ViewState = {
     serial_number: string | null;
 };
 
-// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
     constructor(props: ViewProps) {

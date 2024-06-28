@@ -119,11 +119,11 @@ export default class BafangCanBattery {
                     break;
             }
         } else if (response.canCommandCode === 0x34) {
-            if (response.canCommandSubCode == 0x00) {
+            if (response.canCommandSubCode === 0x00) {
                 this.capacity_data = parseCapacityPackage(response);
                 this.emitter.emit('data-0', deepCopy(this.capacity_data));
             }
-            if (response.canCommandSubCode == 0x01) {
+            if (response.canCommandSubCode === 0x01) {
                 this.state_data = parseStatePackage(response);
                 this.emitter.emit('data-1', deepCopy(this.state_data));
             }

@@ -198,7 +198,7 @@ export default class BafangCanController {
                     break;
             }
         }
-    } // TODO
+    }
 
     public loadData(): void {
         if (this.demo) {

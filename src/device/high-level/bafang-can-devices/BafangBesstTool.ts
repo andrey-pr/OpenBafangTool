@@ -7,8 +7,6 @@ import {
 import BesstDevice from '../../besst/besst';
 
 export default class BafangBesstTool {
-    //TODO replace setters with inner parser
-
     private besstDevice?: BesstDevice;
 
     public emitter: EventEmitter;

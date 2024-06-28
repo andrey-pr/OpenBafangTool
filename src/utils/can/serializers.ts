@@ -133,17 +133,14 @@ export function prepareParameter2WritePromise(
     for (let i = 0; i <= 5; i++) {
         new_pkg[0 + i] = value.torque_profiles[i].start_torque_value;
         new_pkg[6 + i] = value.torque_profiles[i].max_torque_value;
-        new_pkg[12 + i] =
-            value.torque_profiles[i].return_torque_value;
+        new_pkg[12 + i] = value.torque_profiles[i].return_torque_value;
         new_pkg[24 + i] = value.torque_profiles[i].min_current;
         new_pkg[18 + i] = value.torque_profiles[i].max_current;
         new_pkg[36 + i] = value.torque_profiles[i].start_pulse;
         new_pkg[42 + i] = Math.floor(
             value.torque_profiles[i].current_decay_time / 5,
         );
-        new_pkg[48 + i] = Math.floor(
-            value.torque_profiles[i].stop_delay / 2,
-        );
+        new_pkg[48 + i] = Math.floor(value.torque_profiles[i].stop_delay / 2);
     }
     new_pkg[63] = calculateChecksum(new_pkg.slice(0, 63));
     addWritePromise(

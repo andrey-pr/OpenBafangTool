@@ -23,7 +23,6 @@ type SettingsState = {
     serial_number: string | null;
 };
 
-// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
     SettingsProps,

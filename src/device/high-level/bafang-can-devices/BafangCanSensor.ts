@@ -111,7 +111,7 @@ export default class BafangCanSensor {
             this.realtime_data = parseSensorPackage(response);
             this.emitter.emit('data-0', deepCopy(this.realtime_data));
         }
-    } // TODO
+    }
 
     public loadData(): void {
         if (this.demo) {

@@ -70,7 +70,6 @@ const errorCodesTableLayout = [
     },
 ];
 
-// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanDisplaySettingsView extends React.Component<
     SettingsProps,
