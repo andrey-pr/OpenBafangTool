@@ -35,14 +35,8 @@ import {
     getControllerSVDemo,
     getControllerSpeedParametersDemo,
 } from '../../../utils/can/demo_object_provider';
-import {
-    parseControllerPackage0,
-    parseControllerPackage1,
-    parseControllerPackage3,
-    parseControllerParameter1,
-    parseControllerParameter2,
-} from '../../../utils/can/parser';
 import { charsToString } from '../../../utils/utils';
+import { BafangCanControllerParser } from '../../../parser/bafang/can/parser/Controller';
 
 export default class BafangCanController {
     private besstDevice?: BesstDevice;
@@ -159,12 +153,14 @@ export default class BafangCanController {
                     break;
                 case 0x11:
                     this.parameter_1_array = response.data;
-                    this.parameter_1 = parseControllerParameter1(response);
+                    this.parameter_1 =
+                        BafangCanControllerParser.parameter1(response);
                     this.emitter.emit('data-p1', deepCopy(this.parameter_1));
                     break;
                 case 0x12:
                     this.parameter_2_array = response.data;
-                    this.parameter_2 = parseControllerParameter2(response);
+                    this.parameter_2 =
+                        BafangCanControllerParser.parameter2(response);
                     this.emitter.emit('data-p2', deepCopy(this.parameter_2));
                     break;
                 default:
@@ -173,14 +169,16 @@ export default class BafangCanController {
         } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    this.realtime_data_0 = parseControllerPackage0(response);
+                    this.realtime_data_0 =
+                        BafangCanControllerParser.package0(response);
                     this.emitter.emit(
                         'data-r0',
                         deepCopy(this.realtime_data_0),
                     );
                     break;
                 case 0x01:
-                    this.realtime_data_1 = parseControllerPackage1(response);
+                    this.realtime_data_1 =
+                        BafangCanControllerParser.package1(response);
                     this.emitter.emit(
                         'data-r1',
                         deepCopy(this.realtime_data_1),
@@ -188,7 +186,8 @@ export default class BafangCanController {
                     break;
                 case 0x03:
                     log.info('received can package:', response);
-                    this.speed_parameter = parseControllerPackage3(response);
+                    this.speed_parameter =
+                        BafangCanControllerParser.parameter3(response);
                     this.emitter.emit(
                         'data-p3',
                         deepCopy(this.speed_parameter),

@@ -1,80 +1,12 @@
-import { deepCopy } from 'deep-copy-ts';
-import {
-    CanCommand,
-    CanWriteCommandsList,
-} from '../../constants/BafangCanConstants';
-import { DeviceNetworkId } from '../../device/besst/besst-types';
-import {
-    BafangCanControllerParameter1,
-    BafangCanControllerParameter2,
-    BafangCanControllerSpeedParameters,
-} from '../../types/BafangCanSystemTypes';
-import { intToByteArray } from '../utils';
-import { calculateChecksum } from './utils';
-import { PromiseControls } from '../../types/common';
-import BesstDevice from '../../device/besst/besst';
-import { RequestManager } from './RequestManager';
-
-type WriteFunctionType = (
-    target: DeviceNetworkId,
-    can_command: CanCommand,
-    value: number[],
-    device?: BesstDevice,
-    request_manager?: RequestManager,
-    promise?: PromiseControls,
-) => void;
-
-function serializeMileage(mileage: number): number[] {
-    return intToByteArray(mileage, 3);
-}
-
-function serializeString(value: string): number[] {
-    return [...Buffer.from(value), 0];
-}
-
-function addWritePromise(
-    target: DeviceNetworkId,
-    command: CanCommand,
-    data: number[],
-    promise_array: Promise<boolean>[],
-    write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
-): void {
-    promise_array.push(
-        new Promise<boolean>((resolve, reject) => {
-            write_function(
-                target,
-                command,
-                data,
-                besst_device,
-                request_manager,
-                { resolve, reject },
-            );
-        }),
-    );
-}
-
-export function prepareStringWritePromise(
-    value: string | null | undefined,
-    target_device: DeviceNetworkId,
-    can_command: CanCommand,
-    promise_array: Promise<boolean>[],
-    write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
-): void {
-    if (!value) return;
-    addWritePromise(
-        target_device,
-        can_command,
-        serializeString(value),
-        promise_array,
-        write_function,
-        besst_device,
-        request_manager,
-    );
-}
+import { deepCopy } from "deep-copy-ts";
+import { CanCommand, CanWriteCommandsList } from "../../../../constants/BafangCanConstants";
+import BesstDevice from "../../../../device/besst/besst";
+import { DeviceNetworkId } from "../../../../device/besst/besst-types";
+import { BafangCanControllerParameter1, BafangCanControllerParameter2, BafangCanControllerSpeedParameters } from "../../../../types/BafangCanSystemTypes";
+import { RequestManager } from "../../../../utils/can/RequestManager";
+import { WriteFunctionType, addWritePromise } from "./common";
+import { calculateChecksum } from "../../../../utils/can/utils";
+import { intToByteArray } from "../../../../utils/utils";
 
 export function prepareParameter1WritePromise(
     value: BafangCanControllerParameter1,
@@ -174,44 +106,6 @@ export function prepareSpeedPackageWritePromise(
         promise_array,
         write_function,
         besst_device,
-        request_manager,
-    );
-}
-
-export function prepareTotalMileageWritePromise(
-    value: number | null | undefined,
-    promise_array: Promise<boolean>[],
-    write_function: WriteFunctionType,
-    device?: BesstDevice,
-    request_manager?: RequestManager,
-): void {
-    if (!value) return;
-    addWritePromise(
-        DeviceNetworkId.DISPLAY,
-        CanWriteCommandsList.DisplayTotalMileage,
-        serializeMileage(value),
-        promise_array,
-        write_function,
-        device,
-        request_manager,
-    );
-}
-
-export function prepareSingleMileageWritePromise(
-    value: number | null | undefined,
-    promise_array: Promise<boolean>[],
-    write_function: WriteFunctionType,
-    device?: BesstDevice,
-    request_manager?: RequestManager,
-): void {
-    if (!value) return;
-    addWritePromise(
-        DeviceNetworkId.DISPLAY,
-        CanWriteCommandsList.DisplaySingleMileage,
-        serializeMileage(value * 10),
-        promise_array,
-        write_function,
-        device,
         request_manager,
     );
 }

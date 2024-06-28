@@ -19,12 +19,8 @@ import { BesstReadedCanFrame, DeviceNetworkId } from '../../besst/besst-types';
 import log from 'electron-log/renderer';
 import { readParameter, rereadParameter } from '../../../utils/can/utils';
 import { charsToString } from '../../../utils/utils';
-import {
-    parseCapacityPackage,
-    parseCellsPackage,
-    parseStatePackage,
-} from '../../../utils/can/parser';
 import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
+import { BafangCanBatteryParser } from '../../../parser/bafang/can/parser/Battery';
 
 export default class BafangCanBattery {
     private besstDevice?: BesstDevice;
@@ -120,16 +116,16 @@ export default class BafangCanBattery {
             }
         } else if (response.canCommandCode === 0x34) {
             if (response.canCommandSubCode === 0x00) {
-                this.capacity_data = parseCapacityPackage(response);
+                this.capacity_data = BafangCanBatteryParser.capacity(response);
                 this.emitter.emit('data-0', deepCopy(this.capacity_data));
             }
             if (response.canCommandSubCode === 0x01) {
-                this.state_data = parseStatePackage(response);
+                this.state_data = BafangCanBatteryParser.state(response);
                 this.emitter.emit('data-1', deepCopy(this.state_data));
             }
         } else if (response.canCommandCode === 0x64) {
             if (!this.cells_voltage) this.cells_voltage = [];
-            parseCellsPackage(response, this.cells_voltage);
+            BafangCanBatteryParser.cells(response, this.cells_voltage);
             this.emitter.emit('data-cells', deepCopy(this.state_data));
         }
     }

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Spin } from 'antd';
 import IConnection from '../device/high-level/Connection';
-import InterfaceType from './models/InterfaceType';
+import InterfaceType from '../types/InterfaceType';
 
 const DeviceSelectionView = React.lazy(
     () => import('./views/DeviceSelectionView'),

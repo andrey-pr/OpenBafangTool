@@ -13,7 +13,7 @@ import { Layout, Menu, Modal, Spin, message } from 'antd';
 import IConnection from '../../device/high-level/Connection';
 import BafangUartMotor from '../../device/high-level/BafangUartMotor';
 import { DocPages } from '../../docs/document_resolver';
-import InterfaceType from '../models/InterfaceType';
+import InterfaceType from '../../types/InterfaceType';
 import BafangCanSystem from '../../device/high-level/BafangCanSystem';
 import { DeviceName } from '../../types/DeviceType';
 

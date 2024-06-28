@@ -1,20 +1,15 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
-import path from 'path';
-import getAppDataPath from 'appdata-path';
-import log from 'electron-log/renderer';
 import IConnection from './Connection';
 import { DeviceName } from '../../types/DeviceType';
 import BesstDevice from '../besst/besst';
-import { CanReadCommandsList } from '../../constants/BafangCanConstants';
-import { DeviceNetworkId } from '../besst/besst-types';
 import BafangCanDisplay from './bafang-can-devices/BafangCanDisplay';
 import BafangCanSensor from './bafang-can-devices/BafangCanSensor';
 import BafangCanBattery from './bafang-can-devices/BafangCanBattery';
 import BafangBesstTool from './bafang-can-devices/BafangBesstTool';
 import { RequestManager } from '../../utils/can/RequestManager';
-import { readParameter, writeShortParameter } from '../../utils/can/utils';
 import BafangCanController from './bafang-can-devices/BafangCanController';
+import { BafangCanBackup } from '../../logging/BafangCanBackup';
 
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
@@ -45,7 +40,6 @@ export default class BafangCanSystem implements IConnection {
         this.loadData = this.loadData.bind(this);
         this.disconnect = this.disconnect.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
-        this.saveBackup = this.saveBackup.bind(this);
     }
 
     onDisconnect() {
@@ -138,7 +132,12 @@ export default class BafangCanSystem implements IConnection {
             readedUnsuccessfully + nonsucessful;
             readedDevices++;
             if (readedDevices >= 5) {
-                this.saveBackup();
+                BafangCanBackup.saveBackup(
+                    this._controller,
+                    this._display,
+                    this._sensor,
+                    this._battery,
+                );
                 this.emitter.emit(
                     'read-finish',
                     readedSuccessfully,
@@ -157,60 +156,6 @@ export default class BafangCanSystem implements IConnection {
         this._sensor?.loadData();
         this._battery?.loadData();
         this._besst?.loadData();
-    }
-
-    private saveBackup(): void {
-        const fs = require('fs');
-        let backup_text = JSON.stringify({
-            controller: {
-                available: this._controller?.available,
-                parameter1: this._controller?.parameter1,
-                parameter2: this._controller?.parameter2,
-                speed_parameters: this._controller?.parameter3,
-                parameter1_array: this._controller?.parameter1Array,
-                parameter2_array: this._controller?.parameter2Array,
-            },
-            display: {
-                available: this._display?.available,
-                data1: this._display?.data1,
-                data2: this._display?.data2,
-                serial_number: this._display?.serialNumber,
-                hardware_version: this._display?.hardwareVersion,
-                software_version: this._display?.softwareVersion,
-                model_number: this._display?.modelNumber,
-                customer_number: this._display?.customerNumber,
-                manufacturer: this._display?.manufacturer,
-                bootloader_version: this._display?.bootloaderVersion,
-            },
-            sensor: {
-                available: this._sensor?.available,
-                serial_number: this._sensor?.serialNumber,
-                hardware_version: this._sensor?.hardwareVersion,
-                software_version: this._sensor?.softwareVersion,
-                model_number: this._sensor?.modelNumber,
-            },
-            battery: {
-                available: this._battery?.available,
-                serial_number: this._battery?.serialNumber,
-                hardware_version: this._battery?.hardwareVersion,
-                software_version: this._battery?.softwareVersion,
-                model_number: this._battery?.modelNumber,
-            },
-        });
-        let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
-        try {
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, true);
-            }
-            fs.writeFileSync(
-                path.join(dir, `backup-${new Date().toISOString()}.json`),
-                backup_text,
-                'utf-8',
-            );
-        } catch (e) {
-            log.error('Failed to save the backup file! Backuping to logs:');
-            log.error(backup_text);
-        }
     }
 
     public get controller(): BafangCanController {
