@@ -22,6 +22,15 @@
   </p>
 </div>
 
+<!-- SUPPORTED HARDWARE -->
+## Supported Hardware
+
+![Display connector](docs/assets/readme/uart_can_connectors.png)
+
+All kinds of modern bafang hardware with CAN bus are supported: all mid-drive motors, all hub motors with bafang controller, all displays and all digital torque sensors, as well as all kinds of motors with UART (but not displays with UART). But some devices have firmware with limited configurable parameters, and it does not depends on model. For example, I tested 3 absolutely same M420 mid-drives, and two of them have all configurable paramters available, and one of them does not have most of parameters.
+
+Also, you may encount bafang electrics with label of other brand: I tested motors branded for Qwic and AEG, also there is information about bafangs branded for Prophete, E-Novation and Blaupunkt (but I not tested them). Important notice: these brands can have branded motors from other manufacturers; some of their models non-bafang, so you need to search information right for model of your device.
+
 <!-- RELEASE NOTES -->
 ## Release Notes
 
