@@ -118,8 +118,7 @@ export default class BafangCanBattery {
             if (response.canCommandSubCode === 0x00) {
                 this.capacity_data = BafangCanBatteryParser.capacity(response);
                 this.emitter.emit('data-0', deepCopy(this.capacity_data));
-            }
-            if (response.canCommandSubCode === 0x01) {
+            } else if (response.canCommandSubCode === 0x01) {
                 this.state_data = BafangCanBatteryParser.state(response);
                 this.emitter.emit('data-1', deepCopy(this.state_data));
             }

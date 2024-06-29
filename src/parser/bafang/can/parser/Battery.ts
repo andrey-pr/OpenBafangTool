@@ -35,8 +35,8 @@ export class BafangCanBatteryParser {
             tmp = 65536 - tmp;
         }
         return {
-            current: tmp,
-            voltage: ((packet.data[3] << 8) + packet.data[2]) * 10,
+            current: tmp / 100,
+            voltage: ((packet.data[3] << 8) + packet.data[2]) / 100,
             temperature: packet.data[4] - 40,
         };
     }
