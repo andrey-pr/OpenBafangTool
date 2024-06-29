@@ -9,14 +9,14 @@ import { calculateChecksum } from "../../../../utils/can/utils";
 import { intToByteArray } from "../../../../utils/utils";
 
 export function prepareParameter1WritePromise(
-    value: BafangCanControllerParameter1,
-    old_pkg: number[] | undefined,
+    value: BafangCanControllerParameter1 | null,
+    old_pkg: number[] | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
+    besst_device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
-    if (!old_pkg) return;
+    if (!old_pkg || !value) return;
     const new_pkg: number[] = deepCopy(old_pkg);
     new_pkg[1] = value.current_limit;
     new_pkg[2] = value.overvoltage;
@@ -53,14 +53,14 @@ export function prepareParameter1WritePromise(
 }
 
 export function prepareParameter2WritePromise(
-    value: BafangCanControllerParameter2,
-    old_pkg: number[] | undefined,
+    value: BafangCanControllerParameter2 | null,
+    old_pkg: number[] | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
+    besst_device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
-    if (!old_pkg) return;
+    if (!old_pkg || !value) return;
     const new_pkg: number[] = deepCopy(old_pkg);
     for (let i = 0; i <= 5; i++) {
         new_pkg[0 + i] = value.torque_profiles[i].start_torque_value;
@@ -87,12 +87,13 @@ export function prepareParameter2WritePromise(
 }
 
 export function prepareSpeedPackageWritePromise(
-    value: BafangCanControllerSpeedParameters,
+    value: BafangCanControllerSpeedParameters | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
+    besst_device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
+    if(!value) return;
     const data = [
         ...intToByteArray(value.speed_limit * 100, 2),
         value.wheel_diameter.code[0],

@@ -39,6 +39,7 @@ import AssistLevelTableComponent from '../../../../components/AssistLevelTableCo
 import { BooleanOptions } from '../../../../../types/common';
 import TorqueTableComponent from '../../../../components/TorqueTableComponent';
 import { WheelDiameterTable } from '../../../../../constants/BafangCanConstants';
+import { updateField } from '../../../../../utils/utils';
 
 const { Text } = Typography;
 
@@ -239,8 +240,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'Current limit',
                 parameter1.current_limit,
-                (controller_current_limit: number) =>
-                    this.setState({ controller_current_limit }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'current_limit',
+                            e,
+                        ),
+                    }),
                 'Be very careful with this parameter! Too big value may burn engine!',
                 'A',
                 1,
@@ -249,8 +256,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'High voltage limit',
                 parameter1.overvoltage,
-                (controller_overvoltage: number) =>
-                    this.setState({ controller_overvoltage }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'overvoltage',
+                            e,
+                        ),
+                    }),
                 'Controller will show overvoltage error when this limit is reached',
                 'V',
                 0,
@@ -259,8 +272,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'Low voltage limit under load',
                 parameter1.undervoltage_under_load,
-                (controller_undervoltage_under_load: number) =>
-                    this.setState({ controller_undervoltage_under_load }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'undervoltage_under_load',
+                            e,
+                        ),
+                    }),
                 'Controller will stop motor when this limit is reached under load (during riding) to protect battery from overdischarge',
                 'V',
                 0,
@@ -269,8 +288,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'Idle low voltage limit',
                 parameter1.undervoltage,
-                (controller_undervoltage: number) =>
-                    this.setState({ controller_undervoltage }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'undervoltage',
+                            e,
+                        ),
+                    }),
                 'Controller will not launch motor motor when this limit is reached without load to protect battery from overdischarge',
                 'V',
                 0,
@@ -286,8 +311,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateEditableNumberListItem(
                 'Expected battery capacity',
                 parameter1.battery_capacity,
-                (controller_battery_capacity: number) =>
-                    this.setState({ controller_battery_capacity }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'battery_capacity',
+                            e,
+                        ),
+                    }),
                 'mAh',
                 1,
                 65000,
@@ -295,17 +326,23 @@ class BafangCanMotorSettingsView extends React.Component<
             generateEditableNumberListItem(
                 'Expected range on full charge',
                 parameter1.full_capacity_range,
-                (controller_full_capacity_range: number) =>
-                    this.setState({ controller_full_capacity_range }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'full_capacity_range',
+                            e,
+                        ),
+                    }),
                 'Km',
                 1,
                 255,
             ),
             // generateEditableNumberListItem(
             //     'Max current on low capacity',
-            //     parameter1.controller_max_current_on_low_charge,
-            //     (controller_max_current_on_low_charge: number) =>
-            //         this.setState({ controller_max_current_on_low_charge }),
+            //     parameter1.max_current_on_low_charge,
+            //     (max_current_on_low_charge: number) =>
+            //         this.setState({ max_current_on_low_charge }),
             //     'A',
             //     1,
             //     100,
@@ -352,8 +389,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateEditableNumberListItem(
                 'Number of magnets on speedmeter',
                 parameter1.speedmeter_magnets_number,
-                (controller_speedmeter_magnets_number: number) =>
-                    this.setState({ controller_speedmeter_magnets_number }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'speedmeter_magnets_number',
+                            e,
+                        ),
+                    }),
                 '',
                 1,
                 10,
@@ -365,10 +408,10 @@ class BafangCanMotorSettingsView extends React.Component<
             // generateEditableSelectListItem(
             //     'Displayless mode',
             //     BooleanOptions,
-            //     parameter1.controller_displayless_mode,
+            //     parameter1.displayless_mode,
             //     (e) =>
             //         this.setState({
-            //             controller_displayless_mode: e as boolean,
+            //             displayless_mode: e as boolean,
             //         }),
             // ),
             generateEditableSelectListItem(
@@ -377,7 +420,11 @@ class BafangCanMotorSettingsView extends React.Component<
                 parameter1.lamps_always_on,
                 (e) =>
                     this.setState({
-                        controller_lamps_always_on: e as boolean,
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'lamps_always_on',
+                            e,
+                        ),
                     }),
             ),
         ];
@@ -391,8 +438,14 @@ class BafangCanMotorSettingsView extends React.Component<
                 // TODO
                 'Start current',
                 parameter1.start_current,
-                (controller_start_current: number) =>
-                    this.setState({ controller_start_current }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'start_current',
+                            e,
+                        ),
+                    }),
                 '%',
                 1,
                 100,
@@ -401,8 +454,14 @@ class BafangCanMotorSettingsView extends React.Component<
                 // TODO
                 'Current loading time',
                 parameter1.current_loading_time,
-                (controller_current_loading_time: number) =>
-                    this.setState({ controller_current_loading_time }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'current_loading_time',
+                            e,
+                        ),
+                    }),
                 'S',
                 0.1,
                 20,
@@ -412,8 +471,14 @@ class BafangCanMotorSettingsView extends React.Component<
                 // TODO
                 'Current shedding time',
                 parameter1.current_shedding_time,
-                (controller_current_shedding_time: number) =>
-                    this.setState({ controller_current_shedding_time }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'current_shedding_time',
+                            e,
+                        ),
+                    }),
                 'S',
                 0.1,
                 20,
@@ -425,7 +490,11 @@ class BafangCanMotorSettingsView extends React.Component<
                 parameter1.pedal_sensor_type,
                 (e) =>
                     this.setState({
-                        controller_pedal_sensor_type: e as PedalSensorType,
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'pedal_sensor_type',
+                            e,
+                        ),
                     }),
             ),
         ];
@@ -438,8 +507,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'Throttle lever start voltage',
                 parameter1.throttle_start_voltage,
-                (controller_throttle_start_voltage: number) =>
-                    this.setState({ controller_throttle_start_voltage }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'throttle_start_voltage',
+                            e,
+                        ),
+                    }),
                 'Voltage from throttle lever on minimum power (not on zero power! on this level engine starts to work)',
                 'V',
                 1,
@@ -449,8 +524,14 @@ class BafangCanMotorSettingsView extends React.Component<
             generateAnnotatedEditableNumberListItem(
                 'Throttle lever max voltage',
                 parameter1.throttle_max_voltage,
-                (controller_throttle_max_voltage: number) =>
-                    this.setState({ controller_throttle_max_voltage }),
+                (e: number) =>
+                    this.setState({
+                        parameter1: updateField(
+                            this.state.parameter1,
+                            'throttle_max_voltage',
+                            e,
+                        ),
+                    }),
                 'Voltage from throttle lever on maximum power',
                 'V',
                 1,
@@ -483,7 +564,13 @@ class BafangCanMotorSettingsView extends React.Component<
                         max={25}
                         disabled={parameter3.speed_limit > 25}
                         onNewValue={(e) => {
-                            this.setState({ speed_limit: e });
+                            this.setState({
+                                parameter3: updateField(
+                                    this.state.parameter3,
+                                    'speed_limit',
+                                    e,
+                                ),
+                            });
                         }}
                     />
                 ),
@@ -510,7 +597,11 @@ class BafangCanMotorSettingsView extends React.Component<
                             );
                             if (wheel_diameter)
                                 this.setState({
-                                    wheel_diameter,
+                                    parameter3: updateField(
+                                        this.state.parameter3,
+                                        'wheel_diameter',
+                                        wheel_diameter,
+                                    ),
                                 });
                         }}
                     />
@@ -526,7 +617,13 @@ class BafangCanMotorSettingsView extends React.Component<
                         min={parameter3.wheel_diameter.minimalCircumference}
                         max={parameter3.wheel_diameter.maximalCircumference}
                         onNewValue={(e) => {
-                            this.setState({ circumference: e });
+                            this.setState({
+                                parameter3: updateField(
+                                    this.state.parameter3,
+                                    'circumference',
+                                    e,
+                                ),
+                            });
                         }}
                     />
                 ),
@@ -582,7 +679,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 this.state.manufacturer,
                 (e) =>
                     this.setState({
-                        controller_manufacturer: e,
+                        manufacturer: e,
                     }),
             ),
         ];
@@ -714,9 +811,13 @@ class BafangCanMotorSettingsView extends React.Component<
                             assist_profiles={
                                 this.state.parameter1.assist_levels
                             }
-                            onChange={(controller_assist_levels) =>
+                            onChange={(e) =>
                                 this.setState({
-                                    controller_assist_levels,
+                                    parameter1: updateField(
+                                        this.state.parameter1,
+                                        'assist_levels',
+                                        e,
+                                    ),
                                 })
                             }
                         />
@@ -741,9 +842,13 @@ class BafangCanMotorSettingsView extends React.Component<
                             torque_profiles={
                                 this.state.parameter2.torque_profiles
                             }
-                            onChange={(torque_profiles) => {
+                            onChange={(e) => {
                                 this.setState({
-                                    torque_profiles,
+                                    parameter2: updateField(
+                                        this.state.parameter2,
+                                        'torque_profiles',
+                                        e,
+                                    ),
                                 });
                             }}
                         />

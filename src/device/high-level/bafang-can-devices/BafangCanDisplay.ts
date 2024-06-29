@@ -35,7 +35,10 @@ import {
 } from '../../../utils/can/utils';
 import { BafangCanDisplayParser } from '../../../parser/bafang/can/parser/Display';
 import { prepareStringWritePromise } from '../../../parser/bafang/can/serializer/common';
-import { prepareSingleMileageWritePromise, prepareTotalMileageWritePromise } from '../../../parser/bafang/can/serializer/Display';
+import {
+    prepareSingleMileageWritePromise,
+    prepareTotalMileageWritePromise,
+} from '../../../parser/bafang/can/serializer/Display';
 
 export default class BafangCanDisplay {
     private besstDevice?: BesstDevice;
@@ -112,7 +115,11 @@ export default class BafangCanDisplay {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.DISPLAY) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.DISPLAY
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -229,6 +236,7 @@ export default class BafangCanDisplay {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.DISPLAY,
                     command,
@@ -262,6 +270,7 @@ export default class BafangCanDisplay {
             setTimeout(() => this.emitter.emit('write-finish', 4, 0), 300);
             return;
         }
+        if (!this.besstDevice || !this.requestManager) return;
         let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
         let writePromises: Promise<boolean>[] = [];
@@ -329,6 +338,7 @@ export default class BafangCanDisplay {
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
+            if (!this.besstDevice || !this.requestManager) return;
             writeShortParameter(
                 DeviceNetworkId.DISPLAY,
                 CanWriteCommandsList.DisplayTime,
@@ -346,6 +356,7 @@ export default class BafangCanDisplay {
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
+            if (!this.besstDevice || !this.requestManager) return;
             writeShortParameter(
                 DeviceNetworkId.DISPLAY,
                 CanWriteCommandsList.CleanServiceMileage,

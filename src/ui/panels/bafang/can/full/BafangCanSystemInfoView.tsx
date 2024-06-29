@@ -639,7 +639,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                             duration: 60,
                         });
                         connection.emitter.once(
-                            'reading-finish',
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',

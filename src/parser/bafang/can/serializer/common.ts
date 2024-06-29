@@ -8,8 +8,8 @@ export type WriteFunctionType = (
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device?: BesstDevice,
-    request_manager?: RequestManager,
+    device: BesstDevice,
+    request_manager: RequestManager,
     promise?: PromiseControls,
 ) => void;
 
@@ -23,8 +23,8 @@ export function addWritePromise(
     data: number[],
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
+    besst_device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
@@ -46,8 +46,8 @@ export function prepareStringWritePromise(
     can_command: CanCommand,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device?: BesstDevice,
-    request_manager?: RequestManager,
+    besst_device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
     if (!value) return;
     addWritePromise(

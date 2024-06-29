@@ -85,7 +85,11 @@ export default class BafangCanBattery {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.BATTERY) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.BATTERY
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -163,6 +167,7 @@ export default class BafangCanBattery {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.BATTERY,
                     command,

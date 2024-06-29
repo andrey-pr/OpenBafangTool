@@ -25,3 +25,8 @@ export function validateTime(
         seconds <= 59
     );
 }
+
+export function updateField<T>(obj: T, field_name: string, field_value: any): T {
+    obj[field_name] = field_value;
+    return obj;
+}

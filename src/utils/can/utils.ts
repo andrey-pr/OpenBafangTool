@@ -18,10 +18,10 @@ export function calculateChecksum(bytes: number[]): number {
 
 export function rereadParameter(
     dto: BesstReadedCanFrame,
-    device?: BesstDevice,
+    device: BesstDevice,
 ): void {
     //TODO
-    device?.sendCanFrame(
+    device.sendCanFrame(
         DeviceNetworkId.BESST,
         dto.sourceDeviceCode,
         CanOperation.READ_CMD,
@@ -33,12 +33,12 @@ export function rereadParameter(
 export function readParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
-    device?: BesstDevice,
-    requestManager?: RequestManager,
+    device: BesstDevice,
+    requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
     device
-        ?.sendCanFrame(
+        .sendCanFrame(
             DeviceNetworkId.BESST,
             target,
             CanOperation.READ_CMD,
@@ -46,7 +46,7 @@ export function readParameter(
             can_command.canCommandSubCode,
         )
         .then(() =>
-            requestManager?.registerRequest(
+            requestManager.registerRequest(
                 DeviceNetworkId.BESST,
                 target,
                 CanOperation.READ_CMD,
@@ -61,12 +61,12 @@ export function writeShortParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device?: BesstDevice,
-    requestManager?: RequestManager,
+    device: BesstDevice,
+    requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
     device
-        ?.sendCanFrame(
+        .sendCanFrame(
             DeviceNetworkId.BESST,
             target,
             CanOperation.WRITE_CMD,
@@ -75,7 +75,7 @@ export function writeShortParameter(
             value,
         )
         .then(() =>
-            requestManager?.registerRequest(
+            requestManager.registerRequest(
                 DeviceNetworkId.BESST,
                 target,
                 CanOperation.WRITE_CMD,
@@ -90,12 +90,12 @@ export function writeLongParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device?: BesstDevice,
-    requestManager?: RequestManager,
+    device: BesstDevice,
+    requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
     let arrayClone = [...value];
-    device?.sendCanFrame(
+    device.sendCanFrame(
         DeviceNetworkId.BESST,
         target,
         CanOperation.WRITE_CMD,
@@ -103,7 +103,7 @@ export function writeLongParameter(
         can_command.canCommandSubCode,
         [arrayClone.length],
     );
-    device?.sendCanFrame(
+    device.sendCanFrame(
         DeviceNetworkId.BESST,
         target,
         CanOperation.MULTIFRAME_START,
@@ -114,7 +114,7 @@ export function writeLongParameter(
     arrayClone = arrayClone.slice(8);
     let packages = 0;
     do {
-        device?.sendCanFrame(
+        device.sendCanFrame(
             DeviceNetworkId.BESST,
             target,
             CanOperation.MULTIFRAME,
@@ -125,7 +125,7 @@ export function writeLongParameter(
         arrayClone = arrayClone.slice(8);
     } while (arrayClone.length > 8);
     device
-        ?.sendCanFrame(
+        .sendCanFrame(
             DeviceNetworkId.BESST,
             target,
             CanOperation.MULTIFRAME_END,
@@ -134,7 +134,7 @@ export function writeLongParameter(
             arrayClone.slice(0, 8),
         )
         .then(() =>
-            requestManager?.registerRequest(
+            requestManager.registerRequest(
                 DeviceNetworkId.BESST,
                 target,
                 CanOperation.WRITE_CMD,

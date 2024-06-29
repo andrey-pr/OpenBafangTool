@@ -13,8 +13,8 @@ export function prepareTotalMileageWritePromise(
     value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    device?: BesstDevice,
-    request_manager?: RequestManager,
+    device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
     if (!value) return;
     addWritePromise(
@@ -32,8 +32,8 @@ export function prepareSingleMileageWritePromise(
     value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    device?: BesstDevice,
-    request_manager?: RequestManager,
+    device: BesstDevice,
+    request_manager: RequestManager,
 ): void {
     if (!value) return;
     addWritePromise(

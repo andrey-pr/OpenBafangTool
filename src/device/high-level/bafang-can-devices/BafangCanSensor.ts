@@ -75,7 +75,11 @@ export default class BafangCanSensor {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -140,6 +144,7 @@ export default class BafangCanSensor {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.TORQUE_SENSOR,
                     command,

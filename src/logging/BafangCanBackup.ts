@@ -23,6 +23,11 @@ export class BafangCanBackup {
                 parameter3: controller.parameter3,
                 parameter1_array: controller.parameter1Array,
                 parameter2_array: controller.parameter2Array,
+                serial_number: controller.serialNumber,
+                hardware_version: controller.hardwareVersion,
+                software_version: controller.softwareVersion,
+                model_number: controller.modelNumber,
+                manufacturer: controller.manufacturer,
             };
         } else backup_obj['controller'] = 'Not available';
         if (display && display.available) {
