@@ -25,7 +25,7 @@
 <!-- SUPPORTED HARDWARE -->
 ## Supported Hardware
 
-![Programming cable](docs/assets/readme/uart_can_connectors.png)
+![Display connector](docs/assets/readme/uart_can_connectors.png)
 
 All kinds of modern bafang hardware with CAN bus are supported: all mid-drive motors, all hub motors with bafang controller, all displays and all digital torque sensors, as well as all kinds of motors with UART (but not displays with UART). But some devices have firmware with limited configurable parameters, and it does not depends on model. For example, I tested 3 absolutely same M420 mid-drives, and two of them have all configurable paramters available, and one of them does not have most of parameters.
 
