@@ -3,6 +3,7 @@ import {
     BesstReadedCanFrame,
     BesstPacketType,
     DeviceNetworkId,
+    CanOperation,
 } from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
@@ -13,7 +14,7 @@ export function hexMsgDecoder(msg: number[]) {
 }
 
 export function generateBesstWritePacket(
-    actionCode: number,
+    actionCode: BesstPacketType,
     cmd: number[],
     promise?: PromiseControls,
     data: number[] = [0],
@@ -58,7 +59,7 @@ export function generateBesstWritePacket(
 export function buildBesstCanCommandPacket(
     source: DeviceNetworkId,
     target: DeviceNetworkId,
-    canOperationCode: number,
+    canOperationCode: CanOperation,
     canCommandCode: number,
     canCommandSubCode: number,
     promise?: PromiseControls,

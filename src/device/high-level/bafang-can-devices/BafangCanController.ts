@@ -140,27 +140,22 @@ export default class BafangCanController {
                 case 0x00:
                     this.hardware_version = charsToString(response.data);
                     this.emitter.emit('data-hv', this.hardware_version);
-                    console.log(this.hardware_version);
                     break;
                 case 0x01:
                     this.software_version = charsToString(response.data);
                     this.emitter.emit('data-sv', this.software_version);
-                    console.log(this.software_version);
                     break;
                 case 0x02:
                     this.model_number = charsToString(response.data);
                     this.emitter.emit('data-mn', this.model_number);
-                    console.log(this.model_number);
                     break;
                 case 0x03:
                     this.serial_number = charsToString(response.data);
                     this.emitter.emit('data-sn', this.serial_number);
-                    console.log(this.serial_number);
                     break;
                 case 0x05:
                     this._manufacturer = charsToString(response.data);
                     this.emitter.emit('data-m', this._manufacturer);
-                    console.log(this._manufacturer);
                     break;
                 case 0x11:
                     this.parameter_1_array = response.data;
@@ -275,6 +270,7 @@ export default class BafangCanController {
     public saveData(): void {
         if (this.demo) {
             setTimeout(() => this.emitter.emit('write-finish', 5, 0), 300);
+            console.log('Demo mode: writing finished');
             return;
         }
         if (!this.besstDevice || !this.requestManager) return;
@@ -334,7 +330,7 @@ export default class BafangCanController {
 
     public calibratePositionSensor(): Promise<boolean> {
         if (this.demo) {
-            console.log('Calibrated position sensor');
+            console.log('Demo mode: calibrated position sensor');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {

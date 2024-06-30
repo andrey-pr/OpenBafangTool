@@ -2,13 +2,13 @@ import { Select } from 'antd';
 import React from 'react';
 
 type SelectParameterProps = {
-    value: string | number | boolean;
+    value: string | number | boolean | null;
     options: { value: string | number | boolean; label: string }[];
     onChange: (e: string | number | boolean) => void;
 };
 
 type SelectParameterState = {
-    value: string | number | boolean;
+    value: string | number | boolean | null;
 };
 
 class SelectParameterComponent extends React.Component<
@@ -26,6 +26,7 @@ class SelectParameterComponent extends React.Component<
 
     render() {
         const { value, options } = this.props;
+        if (value === null) return 'Value not available';
         return (
             <Select
                 value={value}

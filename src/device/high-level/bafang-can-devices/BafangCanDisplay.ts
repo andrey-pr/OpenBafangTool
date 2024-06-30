@@ -268,6 +268,7 @@ export default class BafangCanDisplay {
     public saveData(): void {
         if (this.demo) {
             setTimeout(() => this.emitter.emit('write-finish', 4, 0), 300);
+            console.log('Demo mode: writing finished');
             return;
         }
         if (!this.besstDevice || !this.requestManager) return;
@@ -330,11 +331,11 @@ export default class BafangCanDisplay {
         seconds: number,
     ): Promise<boolean> {
         if (!validateTime(hours, minutes, seconds)) {
-            console.log('time is invalid');
+            console.log('Time is invalid');
             return new Promise<boolean>((resolve) => resolve(false));
         }
         if (this.demo) {
-            console.log(`New display time is ${hours}:${minutes}:${seconds}`);
+            console.log(`Demo mode: new display time is ${hours}:${minutes}:${seconds}`);
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
@@ -352,7 +353,7 @@ export default class BafangCanDisplay {
 
     public cleanServiceMileage(): Promise<boolean> {
         if (this.demo) {
-            console.log('Cleaned display mileage');
+            console.log('Demo mode: cleaned display mileage');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {

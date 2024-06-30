@@ -119,7 +119,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     private processBuffer(): void {
-        console.log(this.portBuffer);
+        log.info(this.portBuffer);
         if (this.portBuffer.length <= 2) {
             return;
         }
