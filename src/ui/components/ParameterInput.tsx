@@ -69,6 +69,7 @@ class ParameterInputComponent extends React.Component<
             disabled,
             decimalPlaces,
         } = this.props;
+        if(!value) return 'Value is not available';
         return (
             <Tooltip title={warningText} trigger="click" open={warning}>
                 <InputNumber

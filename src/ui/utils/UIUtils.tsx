@@ -85,7 +85,7 @@ export function generateSimpleNumberMulticolumnListItem(
 
 export function generateEditableNumberListItem(
     text: string,
-    content: number,
+    content: number | null,
     onNewValue: (e: number) => void,
     content_unit?: ReactNode,
     min?: number,
@@ -110,7 +110,7 @@ export function generateEditableNumberListItem(
 
 export function generateAnnotatedEditableNumberListItem(
     text: string,
-    content: number,
+    content: number | null,
     onNewValue: (e: number) => void,
     note: string,
     content_unit?: ReactNode,
@@ -196,7 +196,7 @@ export function generateSimpleBooleanListItem(
 export function generateEditableSelectListItem(
     text: string,
     options: { value: string | number | boolean; label: string }[],
-    value: string | number | boolean,
+    value: string | number | boolean | null,
     onChange: (e: string | number | boolean) => void,
 ): DescriptionsItemType {
     return {

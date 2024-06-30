@@ -51,7 +51,6 @@ type InfoState = {
     besst_hardware_version: string | null;
 };
 
-// TODO add redux
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     // TODO redesign as a dashboard and remove version fields
     constructor(props: any) {
@@ -113,10 +112,8 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             (sensor_software_version: string) =>
                 this.setState({ sensor_software_version }),
         );
-        connection.sensor.emitter.on(
-            'data-mn',
-            (sensor_model_number: string) =>
-                this.setState({ sensor_model_number }),
+        connection.sensor.emitter.on('data-mn', (sensor_model_number: string) =>
+            this.setState({ sensor_model_number }),
         );
         connection.sensor.emitter.on(
             'data-sn',
@@ -172,7 +169,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             'data-bv',
             (display_bootload_version: string) =>
                 this.setState({ display_bootload_version }),
-        ); //TODO add sensor
+        );
         connection.controller.emitter.on(
             'data-hv',
             (controller_hardware_version: string) =>
@@ -642,7 +639,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                             duration: 60,
                         });
                         connection.emitter.once(
-                            'reading-finish',
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',

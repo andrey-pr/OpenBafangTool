@@ -19,7 +19,7 @@ import {
     DeviceInterface,
     DeviceType,
 } from '../../types/DeviceType';
-import InterfaceType from '../models/InterfaceType';
+import InterfaceType from '../../types/InterfaceType';
 import filterPorts from '../../device/serial/serial-patcher';
 import { listBesstDevices } from '../../device/besst/besst';
 

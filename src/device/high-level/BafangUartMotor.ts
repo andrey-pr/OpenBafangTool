@@ -119,7 +119,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     private processBuffer(): void {
-        console.log(this.portBuffer);
+        log.info(this.portBuffer);
         if (this.portBuffer.length <= 2) {
             return;
         }
@@ -243,7 +243,7 @@ export default class BafangUartMotor implements IConnection {
                 break;
         }
         this.emitter.emit('data');
-        this.emitter.emit('reading-finish', 7, 0);
+        this.emitter.emit('read-finish', 7, 0);
     }
 
     connect(): Promise<boolean> {
@@ -366,7 +366,7 @@ export default class BafangUartMotor implements IConnection {
             };
             setTimeout(() => {
                 this.emitter.emit('data');
-                this.emitter.emit('reading-finish', 7, 0);
+                this.emitter.emit('read-finish', 7, 0);
             }, 300);
             console.log('Demo mode: blank data loaded');
             return;

@@ -73,10 +73,7 @@ export class RequestManager {
         }
     }
 
-    public resolveRequest(
-        response: BesstReadedCanFrame,
-        success = true,
-    ): void {
+    public resolveRequest(response: BesstReadedCanFrame, success = true): void {
         if (
             this.sentRequests[response.sourceDeviceCode] &&
             this.sentRequests[response.sourceDeviceCode][

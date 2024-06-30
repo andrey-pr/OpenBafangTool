@@ -8,6 +8,7 @@ import EventEmitter from 'events';
 import {
     readParameter,
     rereadParameter,
+    writeLongParameter,
     writeShortParameter,
 } from '../../../utils/can/utils';
 import {
@@ -35,14 +36,14 @@ import {
     getControllerSVDemo,
     getControllerSpeedParametersDemo,
 } from '../../../utils/can/demo_object_provider';
-import {
-    parseControllerPackage0,
-    parseControllerPackage1,
-    parseControllerPackage3,
-    parseControllerParameter1,
-    parseControllerParameter2,
-} from '../../../utils/can/parser';
 import { charsToString } from '../../../utils/utils';
+import { BafangCanControllerParser } from '../../../parser/bafang/can/parser/Controller';
+import { prepareStringWritePromise } from '../../../parser/bafang/can/serializer/common';
+import {
+    prepareParameter1WritePromise,
+    prepareParameter2WritePromise,
+    prepareSpeedPackageWritePromise,
+} from '../../../parser/bafang/can/serializer/Controller';
 
 export default class BafangCanController {
     private besstDevice?: BesstDevice;
@@ -122,7 +123,11 @@ export default class BafangCanController {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.DRIVE_UNIT) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.DRIVE_UNIT
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -135,36 +140,33 @@ export default class BafangCanController {
                 case 0x00:
                     this.hardware_version = charsToString(response.data);
                     this.emitter.emit('data-hv', this.hardware_version);
-                    console.log(this.hardware_version);
                     break;
                 case 0x01:
                     this.software_version = charsToString(response.data);
                     this.emitter.emit('data-sv', this.software_version);
-                    console.log(this.software_version);
                     break;
                 case 0x02:
                     this.model_number = charsToString(response.data);
                     this.emitter.emit('data-mn', this.model_number);
-                    console.log(this.model_number);
                     break;
                 case 0x03:
                     this.serial_number = charsToString(response.data);
                     this.emitter.emit('data-sn', this.serial_number);
-                    console.log(this.serial_number);
                     break;
                 case 0x05:
                     this._manufacturer = charsToString(response.data);
                     this.emitter.emit('data-m', this._manufacturer);
-                    console.log(this._manufacturer);
                     break;
                 case 0x11:
                     this.parameter_1_array = response.data;
-                    this.parameter_1 = parseControllerParameter1(response);
+                    this.parameter_1 =
+                        BafangCanControllerParser.parameter1(response);
                     this.emitter.emit('data-p1', deepCopy(this.parameter_1));
                     break;
                 case 0x12:
                     this.parameter_2_array = response.data;
-                    this.parameter_2 = parseControllerParameter2(response);
+                    this.parameter_2 =
+                        BafangCanControllerParser.parameter2(response);
                     this.emitter.emit('data-p2', deepCopy(this.parameter_2));
                     break;
                 default:
@@ -173,14 +175,16 @@ export default class BafangCanController {
         } else if (response.canCommandCode === 0x32) {
             switch (response.canCommandSubCode) {
                 case 0x00:
-                    this.realtime_data_0 = parseControllerPackage0(response);
+                    this.realtime_data_0 =
+                        BafangCanControllerParser.package0(response);
                     this.emitter.emit(
                         'data-r0',
                         deepCopy(this.realtime_data_0),
                     );
                     break;
                 case 0x01:
-                    this.realtime_data_1 = parseControllerPackage1(response);
+                    this.realtime_data_1 =
+                        BafangCanControllerParser.package1(response);
                     this.emitter.emit(
                         'data-r1',
                         deepCopy(this.realtime_data_1),
@@ -188,7 +192,8 @@ export default class BafangCanController {
                     break;
                 case 0x03:
                     log.info('received can package:', response);
-                    this.speed_parameter = parseControllerPackage3(response);
+                    this.speed_parameter =
+                        BafangCanControllerParser.parameter3(response);
                     this.emitter.emit(
                         'data-p3',
                         deepCopy(this.speed_parameter),
@@ -198,7 +203,7 @@ export default class BafangCanController {
                     break;
             }
         }
-    } // TODO
+    }
 
     public loadData(): void {
         if (this.demo) {
@@ -236,6 +241,7 @@ export default class BafangCanController {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.DRIVE_UNIT,
                     command,
@@ -264,42 +270,46 @@ export default class BafangCanController {
     public saveData(): void {
         if (this.demo) {
             setTimeout(() => this.emitter.emit('write-finish', 5, 0), 300);
+            console.log('Demo mode: writing finished');
             return;
         }
+        if (!this.besstDevice || !this.requestManager) return;
         let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
         let writePromises: Promise<boolean>[] = [];
-        // serializers.prepareStringWritePromise(
-        //     this._controllerCodes.controller_manufacturer,
-        //     DeviceNetworkId.DRIVE_UNIT,
-        //     CanWriteCommandsList.Manufacturer,
-        //     writePromises,
-        //     this.writeLongParameter,
-        // );
-        // serializers.prepareStringWritePromise(
-        //     this._controllerCodes.controller_customer_number,
-        //     DeviceNetworkId.DRIVE_UNIT,
-        //     CanWriteCommandsList.CustomerNumber,
-        //     writePromises,
-        //     this.writeLongParameter,
-        // );
-        // serializers.prepareParameter1WritePromise(
-        //     this._controllerParameter1,
-        //     this.controllerParameter1Array,
-        //     writePromises,
-        //     this.writeLongParameter,
-        // );
-        // serializers.prepareParameter2WritePromise(
-        //     this._controllerParameter2,
-        //     this.controllerParameter2Array,
-        //     writePromises,
-        //     this.writeLongParameter,
-        // );
-        // serializers.prepareSpeedPackageWritePromise(
-        //     this._controllerSpeedParameters,
-        //     writePromises,
-        //     this.writeShortParameter,
-        // );
+        prepareStringWritePromise(
+            //TODO check
+            this._manufacturer,
+            DeviceNetworkId.DRIVE_UNIT,
+            CanWriteCommandsList.Manufacturer,
+            writePromises,
+            writeLongParameter,
+            this.besstDevice,
+            this.requestManager,
+        );
+        prepareParameter1WritePromise(
+            this.parameter_1,
+            this.parameter_1_array,
+            writePromises,
+            writeLongParameter,
+            this.besstDevice,
+            this.requestManager,
+        );
+        prepareParameter2WritePromise(
+            this.parameter_2,
+            this.parameter_2_array,
+            writePromises,
+            writeLongParameter,
+            this.besstDevice,
+            this.requestManager,
+        );
+        prepareSpeedPackageWritePromise(
+            this.speed_parameter,
+            writePromises,
+            writeShortParameter,
+            this.besstDevice,
+            this.requestManager,
+        );
         for (let i = 0; i < writePromises.length; i++) {
             writePromises[i].then((success) => {
                 if (success) wroteSuccessfully++;
@@ -320,10 +330,11 @@ export default class BafangCanController {
 
     public calibratePositionSensor(): Promise<boolean> {
         if (this.demo) {
-            console.log('Calibrated position sensor');
+            console.log('Demo mode: calibrated position sensor');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
+            if (!this.besstDevice || !this.requestManager) return;
             writeShortParameter(
                 DeviceNetworkId.DRIVE_UNIT,
                 CanWriteCommandsList.CalibratePositionSensor,

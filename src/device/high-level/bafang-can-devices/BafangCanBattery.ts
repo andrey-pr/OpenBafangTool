@@ -19,12 +19,8 @@ import { BesstReadedCanFrame, DeviceNetworkId } from '../../besst/besst-types';
 import log from 'electron-log/renderer';
 import { readParameter, rereadParameter } from '../../../utils/can/utils';
 import { charsToString } from '../../../utils/utils';
-import {
-    parseCapacityPackage,
-    parseCellsPackage,
-    parseStatePackage,
-} from '../../../utils/can/parser';
 import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
+import { BafangCanBatteryParser } from '../../../parser/bafang/can/parser/Battery';
 
 export default class BafangCanBattery {
     private besstDevice?: BesstDevice;
@@ -89,7 +85,11 @@ export default class BafangCanBattery {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.BATTERY) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.BATTERY
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -119,17 +119,16 @@ export default class BafangCanBattery {
                     break;
             }
         } else if (response.canCommandCode === 0x34) {
-            if (response.canCommandSubCode == 0x00) {
-                this.capacity_data = parseCapacityPackage(response);
+            if (response.canCommandSubCode === 0x00) {
+                this.capacity_data = BafangCanBatteryParser.capacity(response);
                 this.emitter.emit('data-0', deepCopy(this.capacity_data));
-            }
-            if (response.canCommandSubCode == 0x01) {
-                this.state_data = parseStatePackage(response);
+            } else if (response.canCommandSubCode === 0x01) {
+                this.state_data = BafangCanBatteryParser.state(response);
                 this.emitter.emit('data-1', deepCopy(this.state_data));
             }
         } else if (response.canCommandCode === 0x64) {
             if (!this.cells_voltage) this.cells_voltage = [];
-            parseCellsPackage(response, this.cells_voltage);
+            BafangCanBatteryParser.cells(response, this.cells_voltage);
             this.emitter.emit('data-cells', deepCopy(this.state_data));
         }
     }
@@ -168,6 +167,7 @@ export default class BafangCanBattery {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.BATTERY,
                     command,

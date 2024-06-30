@@ -10,13 +10,13 @@ import {
 import BesstDevice from '../../besst/besst';
 import { BesstReadedCanFrame } from '../../besst/besst-types';
 import { DeviceNetworkId } from '../../besst/besst-types';
-import { parseSensorPackage } from '../../../utils/can/parser';
 import { charsToString } from '../../../utils/utils';
 import log from 'electron-log/renderer';
 import { RequestManager } from '../../../utils/can/RequestManager';
 import EventEmitter from 'events';
 import { readParameter, rereadParameter } from '../../../utils/can/utils';
 import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
+import { BafangCanSensorParser } from '../../../parser/bafang/can/parser/Sensor';
 
 export default class BafangCanSensor {
     private besstDevice?: BesstDevice;
@@ -75,7 +75,11 @@ export default class BafangCanSensor {
     }
 
     private processParsedCanResponse(response: BesstReadedCanFrame) {
-        if (response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR) return;
+        if (
+            !this.besstDevice ||
+            response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR
+        )
+            return;
         this.device_available = true;
         this.requestManager?.resolveRequest(response);
         if (response.canCommandCode === 0x60) {
@@ -108,10 +112,10 @@ export default class BafangCanSensor {
             response.canCommandCode === 0x31 &&
             response.canCommandSubCode === 0x00
         ) {
-            this.realtime_data = parseSensorPackage(response);
+            this.realtime_data = BafangCanSensorParser.package0(response);
             this.emitter.emit('data-0', deepCopy(this.realtime_data));
         }
-    } // TODO
+    }
 
     public loadData(): void {
         if (this.demo) {
@@ -140,6 +144,7 @@ export default class BafangCanSensor {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
+                if (!this.besstDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.TORQUE_SENSOR,
                     command,
