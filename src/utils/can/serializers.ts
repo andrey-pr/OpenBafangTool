@@ -9,16 +9,19 @@ import {
     BafangCanControllerParameter2,
     BafangCanControllerSpeedParameters,
 } from '../../types/BafangCanSystemTypes';
-import { NoData } from '../../types/no_data';
 import { intToByteArray } from '../utils';
 import { calculateChecksum } from './utils';
+import { PromiseControls } from '../../types/common';
+import BesstDevice from '../../device/besst/besst';
+import { RequestManager } from './RequestManager';
 
 type WriteFunctionType = (
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    resolve?: (...args: any[]) => void,
-    reject?: (...args: any[]) => void,
+    device?: BesstDevice,
+    request_manager?: RequestManager,
+    promise?: PromiseControls,
 ) => void;
 
 function serializeMileage(mileage: number): number[] {
@@ -35,28 +38,41 @@ function addWritePromise(
     data: number[],
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     promise_array.push(
         new Promise<boolean>((resolve, reject) => {
-            write_function(target, command, data, resolve, reject);
+            write_function(
+                target,
+                command,
+                data,
+                besst_device,
+                request_manager,
+                { resolve, reject },
+            );
         }),
     );
 }
 
 export function prepareStringWritePromise(
-    value: string | NoData,
-    device: DeviceNetworkId,
+    value: string | null | undefined,
+    target_device: DeviceNetworkId,
     can_command: CanCommand,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
-    if (typeof value !== 'string') return;
+    if (!value) return;
     addWritePromise(
-        device,
+        target_device,
         can_command,
         serializeString(value),
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -65,31 +81,33 @@ export function prepareParameter1WritePromise(
     old_pkg: number[] | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     if (!old_pkg) return;
     const new_pkg: number[] = deepCopy(old_pkg);
-    new_pkg[1] = value.controller_current_limit;
-    new_pkg[2] = value.controller_overvoltage;
-    new_pkg[3] = value.controller_undervoltage;
-    new_pkg[4] = value.controller_undervoltage_under_load;
-    new_pkg[7] = value.controller_battery_capacity & 0b11111111;
-    new_pkg[8] = value.controller_battery_capacity >> 8;
-    new_pkg[9] = value.controller_max_current_on_low_charge;
-    new_pkg[12] = value.controller_full_capacity_range;
-    new_pkg[13] = value.controller_pedal_sensor_type;
-    new_pkg[20] = value.controller_speedmeter_magnets_number;
-    new_pkg[34] = value.controller_throttle_start_voltage * 10;
-    new_pkg[35] = value.controller_throttle_max_voltage * 10;
-    new_pkg[37] = value.controller_start_current;
-    new_pkg[38] = value.controller_current_loading_time * 10;
-    new_pkg[39] = value.controller_current_shedding_time * 10;
-    if (value.controller_assist_levels.length !== 9) return;
-    value.controller_assist_levels.forEach((profile, index) => {
+    new_pkg[1] = value.current_limit;
+    new_pkg[2] = value.overvoltage;
+    new_pkg[3] = value.undervoltage;
+    new_pkg[4] = value.undervoltage_under_load;
+    new_pkg[7] = value.battery_capacity & 0b11111111;
+    new_pkg[8] = value.battery_capacity >> 8;
+    new_pkg[9] = value.max_current_on_low_charge;
+    new_pkg[12] = value.full_capacity_range;
+    new_pkg[13] = value.pedal_sensor_type;
+    new_pkg[20] = value.speedmeter_magnets_number;
+    new_pkg[34] = value.throttle_start_voltage * 10;
+    new_pkg[35] = value.throttle_max_voltage * 10;
+    new_pkg[37] = value.start_current;
+    new_pkg[38] = value.current_loading_time * 10;
+    new_pkg[39] = value.current_shedding_time * 10;
+    if (value.assist_levels.length !== 9) return;
+    value.assist_levels.forEach((profile, index) => {
         new_pkg[40 + index] = profile.current_limit;
         new_pkg[48 + index] = profile.speed_limit;
     });
-    new_pkg[58] = value.controller_displayless_mode ? 1 : 0;
-    new_pkg[59] = value.controller_lamps_always_on ? 1 : 0;
+    new_pkg[58] = value.displayless_mode ? 1 : 0;
+    new_pkg[59] = value.lamps_always_on ? 1 : 0;
     new_pkg[63] = calculateChecksum(new_pkg.slice(0, 63));
     addWritePromise(
         DeviceNetworkId.DRIVE_UNIT,
@@ -97,6 +115,8 @@ export function prepareParameter1WritePromise(
         new_pkg,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -105,22 +125,24 @@ export function prepareParameter2WritePromise(
     old_pkg: number[] | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
     if (!old_pkg) return;
     const new_pkg: number[] = deepCopy(old_pkg);
     for (let i = 0; i <= 5; i++) {
-        new_pkg[0 + i] = value.controller_torque_profiles[i].start_torque_value;
-        new_pkg[6 + i] = value.controller_torque_profiles[i].max_torque_value;
+        new_pkg[0 + i] = value.torque_profiles[i].start_torque_value;
+        new_pkg[6 + i] = value.torque_profiles[i].max_torque_value;
         new_pkg[12 + i] =
-            value.controller_torque_profiles[i].return_torque_value;
-        new_pkg[24 + i] = value.controller_torque_profiles[i].min_current;
-        new_pkg[18 + i] = value.controller_torque_profiles[i].max_current;
-        new_pkg[36 + i] = value.controller_torque_profiles[i].start_pulse;
+            value.torque_profiles[i].return_torque_value;
+        new_pkg[24 + i] = value.torque_profiles[i].min_current;
+        new_pkg[18 + i] = value.torque_profiles[i].max_current;
+        new_pkg[36 + i] = value.torque_profiles[i].start_pulse;
         new_pkg[42 + i] = Math.floor(
-            value.controller_torque_profiles[i].current_decay_time / 5,
+            value.torque_profiles[i].current_decay_time / 5,
         );
         new_pkg[48 + i] = Math.floor(
-            value.controller_torque_profiles[i].stop_delay / 2,
+            value.torque_profiles[i].stop_delay / 2,
         );
     }
     new_pkg[63] = calculateChecksum(new_pkg.slice(0, 63));
@@ -130,6 +152,8 @@ export function prepareParameter2WritePromise(
         new_pkg,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
@@ -137,20 +161,14 @@ export function prepareSpeedPackageWritePromise(
     value: BafangCanControllerSpeedParameters,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    besst_device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
-    if (
-        !value.controller_circumference ||
-        typeof value.controller_speed_limit !== 'number' ||
-        typeof value.controller_circumference !== 'number' ||
-        !value.controller_wheel_diameter ||
-        !value.controller_wheel_diameter.code
-    )
-        return;
     const data = [
-        ...intToByteArray(value.controller_speed_limit * 100, 2),
-        value.controller_wheel_diameter.code[0],
-        value.controller_wheel_diameter.code[1],
-        ...intToByteArray(value.controller_circumference as number, 2),
+        ...intToByteArray(value.speed_limit * 100, 2),
+        value.wheel_diameter.code[0],
+        value.wheel_diameter.code[1],
+        ...intToByteArray(value.circumference as number, 2),
     ];
     addWritePromise(
         DeviceNetworkId.DRIVE_UNIT,
@@ -158,35 +176,45 @@ export function prepareSpeedPackageWritePromise(
         data,
         promise_array,
         write_function,
+        besst_device,
+        request_manager,
     );
 }
 
 export function prepareTotalMileageWritePromise(
-    value: number | NoData,
+    value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
-    if (typeof value !== 'number') return;
+    if (!value) return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplayTotalMileage,
         serializeMileage(value),
         promise_array,
         write_function,
+        device,
+        request_manager,
     );
 }
 
 export function prepareSingleMileageWritePromise(
-    value: number | NoData,
+    value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
+    device?: BesstDevice,
+    request_manager?: RequestManager,
 ): void {
-    if (typeof value !== 'number') return;
+    if (!value) return;
     addWritePromise(
         DeviceNetworkId.DISPLAY,
         CanWriteCommandsList.DisplaySingleMileage,
         serializeMileage(value * 10),
         promise_array,
         write_function,
+        device,
+        request_manager,
     );
 }

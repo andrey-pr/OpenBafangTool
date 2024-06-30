@@ -1,5 +1,6 @@
 import HID from 'node-hid';
 import { EventEmitter } from 'stream';
+import log from 'electron-log/renderer';
 import {
     buildBesstCanCommandPacket,
     generateBesstWritePacket,
@@ -14,7 +15,7 @@ import {
     CanOperation,
     BesstReadedCanFrame,
 } from './besst-types';
-import log from 'electron-log/renderer';
+import { PromiseControls } from '../../types/common';
 
 export function listBesstDevices(): HID.Device[] {
     return HID.devices().filter((device) => device.product === 'BaFang Besst');
@@ -25,20 +26,11 @@ class BesstDevice {
 
     public readonly emitter: EventEmitter;
 
-    private serialNumberPromise?: {
-        resolve: (...args: any[]) => void;
-        reject: (...args: any[]) => void;
-    } = undefined;
+    private serialNumberPromise?: PromiseControls = undefined;
 
-    private softwareVersionPromise?: {
-        resolve: (...args: any[]) => void;
-        reject: (...args: any[]) => void;
-    } = undefined;
+    private softwareVersionPromise?: PromiseControls = undefined;
 
-    private hardwareVersionPromise?: {
-        resolve: (...args: any[]) => void;
-        reject: (...args: any[]) => void;
-    } = undefined;
+    private hardwareVersionPromise?: PromiseControls = undefined;
 
     private packetQueue: BesstWritePacket[] = [];
 
@@ -269,10 +261,10 @@ class BesstDevice {
     }
 
     public reset(): Promise<void> {
-        let pid = 0,
-            vid = 0;
+        let pid = 0;
+        let vid = 0;
         try {
-            vid = this.device?.getDeviceInfo().vendorId; // its okay. There is mistake in node-hid's class type file, actually this function exists
+            vid = this.device?.getDeviceInfo().vendorId;
             pid = this.device?.getDeviceInfo().productId;
             this.device?.removeAllListeners();
         } catch (e) {
@@ -303,8 +295,7 @@ class BesstDevice {
                 generateBesstWritePacket(
                     BesstPacketType.BESST_ACTIVATE,
                     BesstActivationCode,
-                    resolve,
-                    reject,
+                    { resolve, reject },
                 ),
             );
         });
@@ -326,8 +317,7 @@ class BesstDevice {
                     canOperationCode,
                     canCommandCode,
                     canCommandSubCode,
-                    resolve,
-                    reject,
+                    { resolve, reject },
                     data,
                 ),
             );
@@ -350,8 +340,7 @@ class BesstDevice {
                     canOperationCode,
                     canCommandCode,
                     canCommandSubCode,
-                    resolve,
-                    reject,
+                    { resolve, reject },
                     data,
                 ),
             );

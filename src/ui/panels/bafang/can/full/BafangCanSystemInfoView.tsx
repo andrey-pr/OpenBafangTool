@@ -4,15 +4,11 @@ import type { DescriptionsProps } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
-    BafangBesstCodes,
-    BafangCanControllerCodes,
     BafangCanControllerRealtime0,
     BafangCanControllerRealtime1,
-    BafangCanDisplayCodes,
     BafangCanDisplayData1,
     BafangCanDisplayData2,
-    BafangCanDisplayState,
-    BafangCanSensorCodes,
+    BafangCanDisplayRealtimeData,
     BafangCanSensorRealtime,
 } from '../../../../../types/BafangCanSystemTypes';
 import {
@@ -27,16 +23,33 @@ type InfoProps = {
     connection: BafangCanSystem;
 };
 
-type InfoState = BafangCanControllerRealtime0 &
-    BafangCanControllerRealtime1 &
-    BafangCanSensorRealtime &
-    BafangCanDisplayState &
-    BafangCanDisplayData1 &
-    BafangCanDisplayData2 &
-    BafangCanControllerCodes &
-    BafangCanDisplayCodes &
-    BafangCanSensorCodes &
-    BafangBesstCodes;
+type InfoState = {
+    controller_realtime0: BafangCanControllerRealtime0 | null;
+    controller_realtime1: BafangCanControllerRealtime1 | null;
+    controller_hardware_version: string | null;
+    controller_software_version: string | null;
+    controller_model_number: string | null;
+    controller_serial_number: string | null;
+    controller_manufacturer: string | null;
+    display_realtime: BafangCanDisplayRealtimeData | null;
+    display_data1: BafangCanDisplayData1 | null;
+    display_data2: BafangCanDisplayData2 | null;
+    display_hardware_version: string | null;
+    display_software_version: string | null;
+    display_model_number: string | null;
+    display_serial_number: string | null;
+    display_customer_number: string | null;
+    display_manufacturer: string | null;
+    display_bootload_version: string | null;
+    sensor_realtime: BafangCanSensorRealtime | null;
+    sensor_hardware_version: string | null;
+    sensor_software_version: string | null;
+    sensor_model_number: string | null;
+    sensor_serial_number: string | null;
+    besst_serial_number: string | null;
+    besst_software_version: string | null;
+    besst_hardware_version: string | null;
+};
 
 // TODO add redux
 class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
@@ -45,62 +58,187 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.controllerCodes,
-            ...connection.displayData1,
-            ...connection.displayData2,
-            ...connection.displayCodes,
-            ...connection.sensorCodes,
-            ...connection.besstCodes,
-            ...connection.controllerRealtimeData0,
-            ...connection.controllerRealtimeData1,
-            ...connection.displayRealtimeData,
-            ...connection.sensorRealtimeData,
+            controller_realtime0: connection.controller.realtimeData0,
+            controller_realtime1: connection.controller.realtimeData1,
+            controller_hardware_version: connection.controller.hardwareVersion,
+            controller_software_version: connection.controller.softwareVersion,
+            controller_model_number: connection.controller.modelNumber,
+            controller_serial_number: connection.controller.serialNumber,
+            controller_manufacturer: connection.controller.manufacturer,
+            display_realtime: connection.display.realtimeData,
+            sensor_realtime: connection.sensor.realtimeData,
+            display_data1: connection.display.data1,
+            display_data2: connection.display.data2,
+            display_hardware_version: connection.display.hardwareVersion,
+            display_software_version: connection.display.softwareVersion,
+            display_model_number: connection.display.modelNumber,
+            display_serial_number: connection.display.serialNumber,
+            display_customer_number: connection.display.customerNumber,
+            display_manufacturer: connection.display.manufacturer,
+            display_bootload_version: connection.display.bootloaderVersion,
+            sensor_hardware_version: connection.sensor.hardwareVersion,
+            sensor_software_version: connection.sensor.softwareVersion,
+            sensor_model_number: connection.sensor.modelNumber,
+            sensor_serial_number: connection.sensor.serialNumber,
+            besst_serial_number: connection.besst.serialNumber,
+            besst_software_version: connection.besst.softwareVersion,
+            besst_hardware_version: connection.besst.hardwareVersion,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        this.updateData = this.updateData.bind(this);
-        connection.emitter.on('controller-codes-data', this.updateData);
-        connection.emitter.on('display-general-data', this.updateData);
-        connection.emitter.on('display-codes-data', this.updateData);
-        connection.emitter.on('sensor-codes-data', this.updateData);
-        connection.emitter.on('besst-data', this.updateData);
-        connection.emitter.on('broadcast-data-controller', this.updateData);
-        connection.emitter.on('broadcast-data-display', this.updateData);
-        connection.emitter.on('broadcast-data-sensor', this.updateData);
-    }
-
-    updateData(values: any) {
-        // TODO add property check
-        this.setState(values);
+        connection.besst.emitter.on('data-sn', (besst_serial_number: string) =>
+            this.setState({ besst_serial_number }),
+        );
+        connection.besst.emitter.on(
+            'data-sv',
+            (besst_software_version: string) =>
+                this.setState({ besst_software_version }),
+        );
+        connection.besst.emitter.on(
+            'data-hv',
+            (besst_hardware_version: string) =>
+                this.setState({ besst_hardware_version }),
+        );
+        connection.sensor.emitter.on(
+            'data-0',
+            (sensor_realtime: BafangCanSensorRealtime) =>
+                this.setState({ sensor_realtime }),
+        );
+        connection.sensor.emitter.on(
+            'data-hv',
+            (sensor_hardware_version: string) =>
+                this.setState({ sensor_hardware_version }),
+        );
+        connection.sensor.emitter.on(
+            'data-sv',
+            (sensor_software_version: string) =>
+                this.setState({ sensor_software_version }),
+        );
+        connection.sensor.emitter.on(
+            'data-mn',
+            (sensor_model_number: string) =>
+                this.setState({ sensor_model_number }),
+        );
+        connection.sensor.emitter.on(
+            'data-sn',
+            (sensor_serial_number: string) =>
+                this.setState({ sensor_serial_number }),
+        );
+        connection.display.emitter.on(
+            'data-0',
+            (display_realtime: BafangCanDisplayRealtimeData) =>
+                this.setState({ display_realtime }),
+        );
+        connection.display.emitter.on(
+            'data-1',
+            (display_data1: BafangCanDisplayData1) =>
+                this.setState({ display_data1 }),
+        );
+        connection.display.emitter.on(
+            'data-2',
+            (display_data2: BafangCanDisplayData2) =>
+                this.setState({ display_data2 }),
+        );
+        connection.display.emitter.on(
+            'data-hv',
+            (display_hardware_version: string) =>
+                this.setState({ display_hardware_version }),
+        );
+        connection.display.emitter.on(
+            'data-sv',
+            (display_software_version: string) =>
+                this.setState({ display_software_version }),
+        );
+        connection.display.emitter.on(
+            'data-mn',
+            (display_model_number: string) =>
+                this.setState({ display_model_number }),
+        );
+        connection.display.emitter.on(
+            'data-sn',
+            (display_serial_number: string) =>
+                this.setState({ display_serial_number }),
+        );
+        connection.display.emitter.on(
+            'data-cn',
+            (display_customer_number: string) =>
+                this.setState({ display_customer_number }),
+        );
+        connection.display.emitter.on(
+            'data-m',
+            (display_manufacturer: string) =>
+                this.setState({ display_manufacturer }),
+        );
+        connection.display.emitter.on(
+            'data-bv',
+            (display_bootload_version: string) =>
+                this.setState({ display_bootload_version }),
+        ); //TODO add sensor
+        connection.controller.emitter.on(
+            'data-hv',
+            (controller_hardware_version: string) =>
+                this.setState({ controller_hardware_version }),
+        );
+        connection.controller.emitter.on(
+            'data-sv',
+            (controller_software_version: string) =>
+                this.setState({ controller_software_version }),
+        );
+        connection.controller.emitter.on(
+            'data-mn',
+            (controller_model_number: string) =>
+                this.setState({ controller_model_number }),
+        );
+        connection.controller.emitter.on(
+            'data-sn',
+            (controller_serial_number: string) =>
+                this.setState({ controller_serial_number }),
+        );
+        connection.controller.emitter.on(
+            'data-m',
+            (controller_manufacturer: string) =>
+                this.setState({ controller_manufacturer }),
+        );
+        connection.controller.emitter.on(
+            'data-r0',
+            (controller_realtime0: BafangCanControllerRealtime0) =>
+                this.setState({ controller_realtime0 }),
+        );
+        connection.controller.emitter.on(
+            'data-r1',
+            (controller_realtime1: BafangCanControllerRealtime1) =>
+                this.setState({ controller_realtime1 }),
+        );
     }
 
     getControllerItems(): DescriptionsProps['items'] {
         let items: DescriptionsProps['items'] = [];
-        if (this.props.connection.isControllerRealtimeData0Ready) {
+        const { controller_realtime0, controller_realtime1 } = this.state;
+        if (controller_realtime0) {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Remaining capacity',
-                    this.state.controller_remaining_capacity,
+                    controller_realtime0.remaining_capacity,
                     '%',
                 ),
                 generateSimpleNumberListItem(
                     'Remaining trip distance',
-                    this.state.controller_remaining_distance,
+                    controller_realtime0.remaining_distance,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Last trip distance',
-                    this.state.controller_single_trip,
+                    controller_realtime0.single_trip,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Cadence',
-                    this.state.controller_cadence,
+                    controller_realtime0.cadence,
                     'RPM',
                 ),
                 generateSimpleNumberListItem(
                     'Torque value',
-                    this.state.controller_torque,
+                    controller_realtime0.torque,
                     'mV',
                 ),
             ];
@@ -126,32 +264,32 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ),
             ];
         }
-        if (this.props.connection.isControllerRealtimeData1Ready) {
+        if (controller_realtime1) {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Voltage',
-                    this.state.controller_voltage,
+                    controller_realtime1.voltage,
                     'V',
                 ),
                 generateSimpleNumberListItem(
                     'Controller temperature',
-                    this.state.controller_temperature,
+                    controller_realtime1.temperature,
                     'C°',
                 ),
                 generateSimpleNumberListItem(
                     'Motor temperature',
-                    this.state.controller_motor_temperature,
+                    controller_realtime1.motor_temperature,
                     'C°',
                 ),
                 generateSimpleNumberListItem(
                     'Current',
-                    this.state.controller_current,
+                    controller_realtime1.current,
                     'A',
                 ),
                 generateSimpleNumberListItem(
                     'Speed',
-                    this.state.controller_speed,
+                    controller_realtime1.speed,
                     'Km/H',
                 ),
             ];
@@ -200,38 +338,39 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
 
     getDisplayItems(): DescriptionsProps['items'] {
         let items: DescriptionsProps['items'] = [];
-        if (this.props.connection.isDisplayStateReady) {
+        if (this.state.display_realtime) {
+            const { display_realtime } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Assist levels number',
-                    this.state.display_assist_levels,
+                    display_realtime.assist_levels,
                 ),
                 generateSimpleBooleanListItem(
                     'Mode',
-                    this.state.display_ride_mode,
+                    display_realtime.ride_mode,
                     'SPORT',
                     'ECO',
                 ),
                 generateSimpleBooleanListItem(
                     'Boost',
-                    this.state.display_boost,
+                    display_realtime.boost,
                     'ON',
                     'OFF',
                 ),
                 generateSimpleStringListItem(
                     'Current assist',
-                    this.state.display_current_assist_level,
+                    display_realtime.current_assist_level,
                 ),
                 generateSimpleBooleanListItem(
                     'Light',
-                    this.state.display_light,
+                    display_realtime.light,
                     'ON',
                     'OFF',
                 ),
                 generateSimpleBooleanListItem(
                     'Button',
-                    this.state.display_button,
+                    display_realtime.button,
                     'Pressed',
                     'Not pressed',
                 ),
@@ -253,22 +392,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 generateSimpleStringListItem('Button', 'Not available yet'),
             ];
         }
-        if (this.props.connection.isDisplayData1Available) {
+        if (this.state.display_data1) {
+            const { display_data1 } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Total mileage',
-                    this.state.display_total_mileage,
+                    display_data1.total_mileage,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Single mileage',
-                    this.state.display_single_mileage,
+                    display_data1.single_mileage,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Max registered speed',
-                    this.state.display_max_speed,
+                    display_data1.max_speed,
                     'Km/H',
                 ),
             ];
@@ -289,17 +429,18 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ),
             ];
         }
-        if (this.props.connection.isDisplayData2Available) {
+        if (this.state.display_data2) {
+            const { display_data2 } = this.state;
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Average speed',
-                    this.state.display_average_speed,
+                    display_data2.average_speed,
                     'Km/H',
                 ),
                 generateSimpleNumberListItem(
                     'Mileage since last service',
-                    this.state.display_service_mileage,
+                    display_data2.service_mileage,
                     'Km',
                 ),
             ];
@@ -352,7 +493,16 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     }
 
     getSensorItems(): DescriptionsProps['items'] {
-        let codesArray = [
+        const codesArray = [
+            generateSimpleStringListItem(
+                'Serial number',
+                this.state.sensor_serial_number,
+                'Please note, that serial number could be easily changed, so it should never be used for security',
+            ),
+            generateSimpleStringListItem(
+                'Software version',
+                this.state.sensor_software_version,
+            ),
             generateSimpleStringListItem(
                 'Hardware version',
                 this.state.sensor_hardware_version,
@@ -361,30 +511,18 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 'Model number',
                 this.state.sensor_model_number,
             ),
-            generateSimpleStringListItem(
-                'Serial number',
-                this.state.sensor_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
-            ),
-            generateSimpleStringListItem(
-                'Customer number',
-                this.state.sensor_customer_number,
-            ),
-            generateSimpleStringListItem(
-                'Software version',
-                this.state.sensor_software_version,
-            ),
         ];
-        if (this.props.connection.isSensorRealtimeDataReady) {
+        const { sensor_realtime } = this.state;
+        if (sensor_realtime) {
             return [
                 generateSimpleNumberListItem(
                     'Torque value',
-                    this.state.sensor_torque,
+                    sensor_realtime.torque,
                     'mV',
                 ),
                 generateSimpleNumberListItem(
                     'Cadence',
-                    this.state.sensor_cadence,
+                    sensor_realtime.cadence,
                     'RPM',
                 ),
                 ...codesArray,
@@ -423,7 +561,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                     Info
                 </Typography.Title>
                 <br />
-                {!connection.isControllerAvailable && (
+                {!connection.controller.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">
@@ -433,7 +571,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {!connection.isDisplayAvailable && (
+                {!connection.display?.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">Display is not connected</Text>
@@ -441,7 +579,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {!connection.isSensorAvailable && (
+                {!connection.sensor.available && (
                     <>
                         <div style={{ marginBottom: '15px' }}>
                             <Text type="danger">Sensor is not connected</Text>
@@ -449,7 +587,15 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         <br />
                     </>
                 )}
-                {connection.isControllerAvailable && (
+                {!connection.battery?.available && (
+                    <>
+                        <div style={{ marginBottom: '15px' }}>
+                            <Text type="danger">Battery is not digital</Text>
+                        </div>
+                        <br />
+                    </>
+                )}
+                {connection.controller.available && (
                     <Descriptions
                         bordered
                         title="Controller"
@@ -458,7 +604,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         style={{ marginBottom: '20px' }}
                     />
                 )}
-                {connection.isDisplayAvailable && (
+                {connection.display?.available && (
                     <Descriptions
                         bordered
                         title="Display"
@@ -467,7 +613,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         style={{ marginBottom: '20px' }}
                     />
                 )}
-                {connection.isSensorAvailable && (
+                {connection.sensor.available && (
                     <Descriptions
                         bordered
                         title="Sensor"

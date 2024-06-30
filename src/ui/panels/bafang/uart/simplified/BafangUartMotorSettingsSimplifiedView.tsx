@@ -206,16 +206,14 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             {
                                 value: this.initial_pedal_parameters
                                     .pedal_speed_limit,
-                                label: (
-                                    <>
-                                        Leave old value -&nbsp;
-                                        {this.initial_pedal_parameters
-                                            .pedal_speed_limit ===
-                                        SpeedLimitByDisplay
-                                            ? 'By display'
-                                            : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`}
-                                    </>
-                                ),
+                                label: `Leave old value -&nbsp;
+                                        ${
+                                            this.initial_pedal_parameters
+                                                .pedal_speed_limit ===
+                                            SpeedLimitByDisplay
+                                                ? 'By display'
+                                                : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`
+                                        }`,
                             },
                             ...SimplifiedPedalSpeedLimitOptions,
                         ]}
@@ -606,9 +604,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 />
                 <Popconfirm
                     title="Parameter writing"
-                    description={
-                        'Are you sure that you want to write all parameters on device?'
-                    }
+                    description="Are you sure that you want to write all parameters on device?"
                     onConfirm={this.saveParameters}
                     okText="Yes"
                     cancelText="No"

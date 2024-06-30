@@ -1,9 +1,8 @@
 import { Typography } from 'antd';
-import React, { ReactNode } from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
+import React from 'react';
 
 type BooleanValueProps = {
-    value: boolean | number | NoData;
+    value: boolean | number;
     textTrue?: string;
     textFalse?: string;
 };
@@ -16,11 +15,6 @@ class BooleanValueComponent extends React.Component<BooleanValueProps> {
 
     render() {
         const { value, textTrue, textFalse } = this.props;
-        if (value === NotLoadedYet) {
-            return <>Isn&apos;t readed yet</>;
-        } else if (value === NotAvailable) {
-            return <>Not available on this hardware</>;
-        }
         return (
             <>
                 {value ? (

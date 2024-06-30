@@ -1,10 +1,14 @@
 export function intToByteArray(integer: number, bytes: number): number[] {
-    let array: number[] = [];
+    const array: number[] = [];
     for (let i = 0; i < bytes; i++) {
         array.push(integer & 255);
         integer >>= 8;
     }
     return array;
+}
+
+export function charsToString(char_arr: number[]): string {
+    return String.fromCharCode.apply(null, char_arr);
 }
 
 export function validateTime(

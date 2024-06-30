@@ -1,9 +1,9 @@
 import { Table } from 'antd';
 import React from 'react';
 import Column from 'antd/es/table/Column';
-import ParameterInputComponent from './ParameterInput';
 import { deepCopy } from 'deep-copy-ts';
-import { BafangCanTorqueProfile } from '../../types/BafangCanSystemTypes';
+import ParameterInputComponent from './ParameterInput';
+import { TorqueProfile } from '../../types/BafangCanSystemTypes';
 
 type TorqueTableRow = {
     key: React.Key;
@@ -20,13 +20,12 @@ type TorqueTableRow = {
 };
 
 type TorqueTableProps = {
-    torque_profiles: BafangCanTorqueProfile[];
-    onChange: (gear_level: BafangCanTorqueProfile[]) => void;
-    zero_level?: boolean;
+    torque_profiles: TorqueProfile[];
+    onChange: (gear_level: TorqueProfile[]) => void;
 };
 
 type TorqueTableState = {
-    torque_profiles: BafangCanTorqueProfile[];
+    torque_profiles: TorqueProfile[];
 };
 
 class TorqueTableComponent extends React.Component<

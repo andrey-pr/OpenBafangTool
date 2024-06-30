@@ -14,16 +14,15 @@ import {
     DeliveredProcedureOutlined,
     WarningTwoTone,
 } from '@ant-design/icons';
+import Title from 'antd/es/typography/Title';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
 import {
-    BafangCanControllerCodes,
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
     BafangCanControllerRealtime0,
     BafangCanControllerRealtime1,
     BafangCanControllerSpeedParameters,
-    BafangCanPedalSensorType,
-    BafangCanWheelDiameterTable,
+    PedalSensorType,
     TriggerTypeOptions,
 } from '../../../../../types/BafangCanSystemTypes';
 import ParameterInputComponent from '../../../../components/ParameterInput';
@@ -36,10 +35,10 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
-import Title from 'antd/es/typography/Title';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
 import { BooleanOptions } from '../../../../../types/common';
 import TorqueTableComponent from '../../../../components/TorqueTableComponent';
+import { WheelDiameterTable } from '../../../../../constants/BafangCanConstants';
 
 const { Text } = Typography;
 
@@ -47,12 +46,19 @@ type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanControllerRealtime0 &
-    BafangCanControllerRealtime1 &
-    BafangCanControllerSpeedParameters &
-    BafangCanControllerParameter1 &
-    BafangCanControllerParameter2 &
-    BafangCanControllerCodes & { position_sensor_calibration_dialog: boolean };
+type SettingsState = {
+    parameter1: BafangCanControllerParameter1 | null;
+    parameter2: BafangCanControllerParameter2 | null;
+    parameter3: BafangCanControllerSpeedParameters | null;
+    realtime0: BafangCanControllerRealtime0 | null;
+    realtime1: BafangCanControllerRealtime1 | null;
+    hardware_version: string | null;
+    software_version: string | null;
+    model_number: string | null;
+    serial_number: string | null;
+    manufacturer: string | null;
+    position_sensor_calibration_dialog: boolean;
+};
 
 // TODO add redux
 /* eslint-disable camelcase */
@@ -67,12 +73,16 @@ class BafangCanMotorSettingsView extends React.Component<
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.controllerSpeedParameters,
-            ...connection.controllerCodes,
-            ...connection.controllerRealtimeData0,
-            ...connection.controllerRealtimeData1,
-            ...connection.controllerParameter1,
-            ...connection.controllerParameter2,
+            parameter1: connection.controller.parameter1,
+            parameter2: connection.controller.parameter2,
+            parameter3: connection.controller.parameter3,
+            realtime0: connection.controller.realtimeData0,
+            realtime1: connection.controller.realtimeData1,
+            hardware_version: connection.controller.hardwareVersion,
+            software_version: connection.controller.softwareVersion,
+            model_number: connection.controller.modelNumber,
+            serial_number: connection.controller.serialNumber,
+            manufacturer: connection.controller.manufacturer,
             position_sensor_calibration_dialog: false,
         };
         this.getElectricItems = this.getElectricItems.bind(this);
@@ -83,11 +93,48 @@ class BafangCanMotorSettingsView extends React.Component<
         this.getOtherItems = this.getOtherItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
-        connection.emitter.once('controller-speed-data', this.updateData);
-        connection.emitter.on('controller-parameter1', this.updateData);
-        connection.emitter.on('controller-parameter2', this.updateData);
-        connection.emitter.on('controller-codes-data', this.updateData);
-        connection.emitter.on('broadcast-data-controller', this.updateData);
+        connection.controller.emitter.on(
+            'data-hv',
+            (hardware_version: string) => this.setState({ hardware_version }),
+        );
+        connection.controller.emitter.on(
+            'data-sv',
+            (software_version: string) => this.setState({ software_version }),
+        );
+        connection.controller.emitter.on('data-mn', (model_number: string) =>
+            this.setState({ model_number }),
+        );
+        connection.controller.emitter.on('data-sn', (serial_number: string) =>
+            this.setState({ serial_number }),
+        );
+        connection.controller.emitter.on('data-m', (manufacturer: string) =>
+            this.setState({ manufacturer }),
+        );
+        connection.controller.emitter.on(
+            'data-p1',
+            (parameter1: BafangCanControllerParameter1) =>
+                this.setState({ parameter1 }),
+        );
+        connection.controller.emitter.on(
+            'data-p2',
+            (parameter2: BafangCanControllerParameter2) =>
+                this.setState({ parameter2 }),
+        );
+        connection.controller.emitter.on(
+            'data-p3',
+            (parameter3: BafangCanControllerSpeedParameters) =>
+                this.setState({ parameter3 }),
+        );
+        connection.controller.emitter.on(
+            'data-r0',
+            (realtime0: BafangCanControllerRealtime0) =>
+                this.setState({ realtime0 }),
+        );
+        connection.controller.emitter.on(
+            'data-r1',
+            (realtime1: BafangCanControllerRealtime1) =>
+                this.setState({ realtime1 }),
+        );
     }
 
     updateData(values: any) {
@@ -97,32 +144,33 @@ class BafangCanMotorSettingsView extends React.Component<
 
     getRealtimeItems(): DescriptionsProps['items'] {
         let items: DescriptionsProps['items'] = [];
-        if (this.props.connection.isControllerRealtimeData0Ready) {
+        const { realtime0 } = this.state;
+        if (realtime0) {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
                     'Remaining capacity',
-                    this.state.controller_remaining_capacity,
+                    realtime0.remaining_capacity,
                     '%',
                 ),
                 generateSimpleNumberListItem(
                     'Remaining trip distance',
-                    this.state.controller_remaining_distance,
+                    realtime0.remaining_distance,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Last trip distance',
-                    this.state.controller_single_trip,
+                    realtime0.single_trip,
                     'Km',
                 ),
                 generateSimpleNumberListItem(
                     'Cadence',
-                    this.state.controller_cadence,
+                    realtime0.cadence,
                     'RPM',
                 ),
                 generateSimpleNumberListItem(
                     'Torque value',
-                    this.state.controller_torque,
+                    realtime0.torque,
                     'mV',
                 ),
             ];
@@ -148,34 +196,23 @@ class BafangCanMotorSettingsView extends React.Component<
                 ),
             ];
         }
-        if (this.props.connection.isControllerRealtimeData1Ready) {
+        const { realtime1 } = this.state;
+        if (realtime1) {
             items = [
                 ...items,
-                generateSimpleNumberListItem(
-                    'Voltage',
-                    this.state.controller_voltage,
-                    'V',
-                ),
+                generateSimpleNumberListItem('Voltage', realtime1.voltage, 'V'),
                 generateSimpleNumberListItem(
                     'Controller temperature',
-                    this.state.controller_temperature,
+                    realtime1.temperature,
                     'C°',
                 ),
                 generateSimpleNumberListItem(
                     'Motor temperature',
-                    this.state.controller_motor_temperature,
+                    realtime1.motor_temperature,
                     'C°',
                 ),
-                generateSimpleNumberListItem(
-                    'Current',
-                    this.state.controller_current,
-                    'A',
-                ),
-                generateSimpleNumberListItem(
-                    'Speed',
-                    this.state.controller_speed,
-                    'Km/H',
-                ),
+                generateSimpleNumberListItem('Current', realtime1.current, 'A'),
+                generateSimpleNumberListItem('Speed', realtime1.speed, 'Km/H'),
             ];
         } else {
             items = [
@@ -197,15 +234,17 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getElectricItems(): DescriptionsProps['items'] {
+        const { parameter1 } = this.state;
+        if (!parameter1) return [];
         return [
             generateSimpleNumberListItem(
                 'System voltage',
-                this.state.controller_system_voltage,
+                parameter1.system_voltage,
                 'V',
             ),
             generateAnnotatedEditableNumberListItem(
                 'Current limit',
-                this.state.controller_current_limit,
+                parameter1.current_limit,
                 (controller_current_limit: number) =>
                     this.setState({ controller_current_limit }),
                 'Be very careful with this parameter! Too big value may burn engine!',
@@ -215,7 +254,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateAnnotatedEditableNumberListItem(
                 'High voltage limit',
-                this.state.controller_overvoltage,
+                parameter1.overvoltage,
                 (controller_overvoltage: number) =>
                     this.setState({ controller_overvoltage }),
                 'Controller will show overvoltage error when this limit is reached',
@@ -225,7 +264,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateAnnotatedEditableNumberListItem(
                 'Low voltage limit under load',
-                this.state.controller_undervoltage_under_load,
+                parameter1.undervoltage_under_load,
                 (controller_undervoltage_under_load: number) =>
                     this.setState({ controller_undervoltage_under_load }),
                 'Controller will stop motor when this limit is reached under load (during riding) to protect battery from overdischarge',
@@ -235,7 +274,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateAnnotatedEditableNumberListItem(
                 'Idle low voltage limit',
-                this.state.controller_undervoltage,
+                parameter1.undervoltage,
                 (controller_undervoltage: number) =>
                     this.setState({ controller_undervoltage }),
                 'Controller will not launch motor motor when this limit is reached without load to protect battery from overdischarge',
@@ -247,10 +286,12 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getBatteryItems(): DescriptionsProps['items'] {
+        const { parameter1 } = this.state;
+        if (!parameter1) return [];
         return [
             generateEditableNumberListItem(
                 'Expected battery capacity',
-                this.state.controller_battery_capacity,
+                parameter1.battery_capacity,
                 (controller_battery_capacity: number) =>
                     this.setState({ controller_battery_capacity }),
                 'mAh',
@@ -259,7 +300,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateEditableNumberListItem(
                 'Expected range on full charge',
-                this.state.controller_full_capacity_range,
+                parameter1.full_capacity_range,
                 (controller_full_capacity_range: number) =>
                     this.setState({ controller_full_capacity_range }),
                 'Km',
@@ -268,18 +309,20 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             // generateEditableNumberListItem(
             //     'Max current on low capacity',
-            //     this.state.controller_max_current_on_low_charge,
+            //     parameter1.controller_max_current_on_low_charge,
             //     (controller_max_current_on_low_charge: number) =>
             //         this.setState({ controller_max_current_on_low_charge }),
             //     'A',
             //     1,
             //     100,
             // ),
-            //TODO add three low charge decay parameters, recovery voltage
+            // TODO add three low charge decay parameters, recovery voltage
         ];
     }
 
     getMechanicalItems(): DescriptionsProps['items'] {
+        const { parameter1 } = this.state;
+        if (!parameter1) return [];
         const MotorType: { [key: number]: string } = {
             0: 'Hub motor with reducer',
             1: 'Central motor',
@@ -293,28 +336,28 @@ class BafangCanMotorSettingsView extends React.Component<
         return [
             generateSimpleNumberListItem(
                 'Gear ration',
-                this.state.controller_deceleration_ratio,
+                parameter1.deceleration_ratio,
             ),
             generateSimpleStringListItem(
                 'Coaster brake supported',
-                this.state.controller_coaster_brake ? 'Yes' : 'No',
+                parameter1.coaster_brake ? 'Yes' : 'No',
             ),
             generateSimpleNumberListItem(
                 'Max motor rotation speed',
-                this.state.controller_motor_max_rotor_rpm,
+                parameter1.motor_max_rotor_rpm,
                 'RPM',
             ),
             generateSimpleNumberListItem(
                 'Signals per rotation from cadence sensor',
-                this.state.controller_pedal_sensor_signals_per_rotation,
+                parameter1.pedal_sensor_signals_per_rotation,
             ),
             generateSimpleStringListItem(
                 'Motor type',
-                MotorType[this.state.controller_motor_type],
+                MotorType[parameter1.motor_type],
             ),
             generateEditableNumberListItem(
                 'Number of magnets on speedmeter',
-                this.state.controller_speedmeter_magnets_number,
+                parameter1.speedmeter_magnets_number,
                 (controller_speedmeter_magnets_number: number) =>
                     this.setState({ controller_speedmeter_magnets_number }),
                 '',
@@ -323,14 +366,12 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateSimpleStringListItem(
                 'Temperature sensor',
-                TemperatureSensorType[
-                    this.state.controller_temperature_sensor_type
-                ],
+                TemperatureSensorType[parameter1.temperature_sensor_type],
             ),
             // generateEditableSelectListItem(
             //     'Displayless mode',
             //     BooleanOptions,
-            //     this.state.controller_displayless_mode,
+            //     parameter1.controller_displayless_mode,
             //     (e) =>
             //         this.setState({
             //             controller_displayless_mode: e as boolean,
@@ -339,7 +380,7 @@ class BafangCanMotorSettingsView extends React.Component<
             generateEditableSelectListItem(
                 'Lamps always on',
                 BooleanOptions,
-                this.state.controller_lamps_always_on,
+                parameter1.lamps_always_on,
                 (e) =>
                     this.setState({
                         controller_lamps_always_on: e as boolean,
@@ -349,11 +390,13 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getDrivingItems(): DescriptionsProps['items'] {
+        const { parameter1 } = this.state;
+        if (!parameter1) return [];
         return [
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Start current',
-                this.state.controller_start_current,
+                parameter1.start_current,
                 (controller_start_current: number) =>
                     this.setState({ controller_start_current }),
                 '%',
@@ -361,9 +404,9 @@ class BafangCanMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Current loading time',
-                this.state.controller_current_loading_time,
+                parameter1.current_loading_time,
                 (controller_current_loading_time: number) =>
                     this.setState({ controller_current_loading_time }),
                 'S',
@@ -372,9 +415,9 @@ class BafangCanMotorSettingsView extends React.Component<
                 1,
             ),
             generateEditableNumberListItem(
-                //TODO
+                // TODO
                 'Current shedding time',
-                this.state.controller_current_shedding_time,
+                parameter1.current_shedding_time,
                 (controller_current_shedding_time: number) =>
                     this.setState({ controller_current_shedding_time }),
                 'S',
@@ -385,21 +428,22 @@ class BafangCanMotorSettingsView extends React.Component<
             generateEditableSelectListItem(
                 'Motor trigger',
                 TriggerTypeOptions,
-                this.state.controller_pedal_sensor_type,
+                parameter1.pedal_sensor_type,
                 (e) =>
                     this.setState({
-                        controller_pedal_sensor_type:
-                            e as BafangCanPedalSensorType,
+                        controller_pedal_sensor_type: e as PedalSensorType,
                     }),
             ),
         ];
     }
 
     getThrottleItems(): DescriptionsProps['items'] {
+        const { parameter1 } = this.state;
+        if (!parameter1) return [];
         return [
             generateAnnotatedEditableNumberListItem(
                 'Throttle lever start voltage',
-                this.state.controller_throttle_start_voltage,
+                parameter1.throttle_start_voltage,
                 (controller_throttle_start_voltage: number) =>
                     this.setState({ controller_throttle_start_voltage }),
                 'Voltage from throttle lever on minimum power (not on zero power! on this level engine starts to work)',
@@ -410,7 +454,7 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateAnnotatedEditableNumberListItem(
                 'Throttle lever max voltage',
-                this.state.controller_throttle_max_voltage,
+                parameter1.throttle_max_voltage,
                 (controller_throttle_max_voltage: number) =>
                     this.setState({ controller_throttle_max_voltage }),
                 'Voltage from throttle lever on maximum power',
@@ -423,34 +467,29 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getSpeedItems(): DescriptionsProps['items'] {
-        const {
-            controller_speed_limit,
-            controller_wheel_diameter,
-            controller_circumference,
-        } = this.state;
+        const { parameter3 } = this.state;
+        if (!parameter3) return [];
         return [
             {
                 key: 'speed_limit',
                 label: (
                     <>
-                        {'Speed limit'}
+                        Speed limit
                         <br />
                         <Text italic>
-                            {
-                                'Its illegal to set speed limit bigger than 25km/h'
-                            }
+                            Its illegal to set speed limit bigger than 25km/h
                         </Text>
                     </>
                 ),
                 children: (
                     <ParameterInputComponent
-                        value={controller_speed_limit}
+                        value={parameter3.speed_limit}
                         unit="km/h"
                         min={1}
                         max={25}
-                        disabled={controller_speed_limit > 25}
+                        disabled={parameter3.speed_limit > 25}
                         onNewValue={(e) => {
-                            this.setState({ controller_speed_limit: e });
+                            this.setState({ speed_limit: e });
                         }}
                     />
                 ),
@@ -459,32 +498,27 @@ class BafangCanMotorSettingsView extends React.Component<
                 key: 'wheel_diameter',
                 label: (
                     <>
-                        {'Wheel diameter'}
+                        Wheel diameter
                         <br />
                         <Text italic>
-                            {
-                                'NEVER try to set wrong wheel diameter - its illegal, because it can lead to incorrect speed measurement'
-                            }
+                            NEVER try to set wrong wheel diameter - its illegal,
+                            because it can lead to incorrect speed measurement
                         </Text>
                     </>
                 ),
                 children: (
                     <ParameterSelectComponent
-                        value={controller_wheel_diameter.text}
-                        options={BafangCanWheelDiameterTable.map(
-                            (item) => item.text,
-                        )}
+                        value={parameter3.wheel_diameter.text}
+                        options={WheelDiameterTable.map((item) => item.text)}
                         onNewValue={(value) => {
-                            const controller_wheel_diameter =
-                                BafangCanWheelDiameterTable.find(
-                                    (item) => item.text === value,
-                                );
-                            if (controller_wheel_diameter)
+                            const wheel_diameter = WheelDiameterTable.find(
+                                (item) => item.text === value,
+                            );
+                            if (wheel_diameter)
                                 this.setState({
-                                    controller_wheel_diameter,
+                                    wheel_diameter,
                                 });
                         }}
-                        doNotBlock
                     />
                 ),
             },
@@ -493,12 +527,12 @@ class BafangCanMotorSettingsView extends React.Component<
                 label: 'Wheel circumference',
                 children: (
                     <ParameterInputComponent
-                        value={controller_circumference}
+                        value={parameter3.circumference}
                         unit="mm"
-                        min={controller_wheel_diameter.minimalCircumference}
-                        max={controller_wheel_diameter.maximalCircumference}
+                        min={parameter3.wheel_diameter.minimalCircumference}
+                        max={parameter3.wheel_diameter.maximalCircumference}
                         onNewValue={(e) => {
-                            this.setState({ controller_circumference: e });
+                            this.setState({ circumference: e });
                         }}
                     />
                 ),
@@ -514,7 +548,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <Popconfirm
                         title="Position sensor calibration"
-                        description={`Are you sure to calibrate position sensor?`}
+                        description="Are you sure to calibrate position sensor?"
                         onConfirm={() =>
                             this.setState({
                                 position_sensor_calibration_dialog: true,
@@ -531,29 +565,27 @@ class BafangCanMotorSettingsView extends React.Component<
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const { controller_serial_number, controller_manufacturer } =
-            this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                controller_serial_number,
+                this.state.serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',
-                this.state.controller_software_version,
+                this.state.software_version,
             ),
             generateSimpleStringListItem(
                 'Hardware version',
-                this.state.controller_hardware_version,
+                this.state.hardware_version,
             ),
             generateSimpleStringListItem(
                 'Model number',
-                this.state.controller_model_number,
+                this.state.model_number,
             ),
             generateEditableStringListItem(
                 'Manufacturer',
-                controller_manufacturer,
+                this.state.manufacturer,
                 (e) =>
                     this.setState({
                         controller_manufacturer: e,
@@ -566,28 +598,19 @@ class BafangCanMotorSettingsView extends React.Component<
         if (this.writingInProgress) return;
         this.writingInProgress = true;
         const { connection } = this.props;
-        if (connection.isControllerSpeedParametersAvailable) {
-            connection.controllerSpeedParameters = this
-                .state as BafangCanControllerSpeedParameters;
-        }
-        connection.controllerCodes = this.state as BafangCanControllerCodes;
-        if (connection.isControllerParameter1Available) {
-            connection.controllerParameter1 = this
-                .state as BafangCanControllerParameter1;
-        }
-        if (connection.isControllerParameter2Available) {
-            connection.controllerParameter2 = this
-                .state as BafangCanControllerParameter2;
-        }
-        connection.saveControllerData();
+        connection.controller.parameter1 = this.state.parameter1;
+        connection.controller.parameter2 = this.state.parameter2;
+        connection.controller.parameter3 = this.state.parameter3;
+        connection.controller.manufacturer = this.state.manufacturer;
+        connection.controller.saveData();
         message.open({
             key: 'writing',
             type: 'loading',
             content: 'Writing...',
             duration: 60,
         });
-        connection.emitter.once(
-            'controller-writing-finish',
+        connection.controller.emitter.once(
+            'write-finish',
             (readedSuccessfully, readededUnsuccessfully) => {
                 message.open({
                     key: 'writing',
@@ -628,7 +651,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         this.setState({
                             position_sensor_calibration_dialog: false,
                         });
-                        this.props.connection
+                        this.props.connection.controller
                             .calibratePositionSensor()
                             .then((success) => {})
                             .catch(() => {});
@@ -653,7 +676,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     items={this.getRealtimeItems()}
                     column={1}
                 />
-                {connection.isControllerParameter1Available && (
+                {this.state.parameter1 && (
                     <>
                         <br />
                         <Descriptions
@@ -695,7 +718,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         <br />
                         <AssistLevelTableComponent
                             assist_profiles={
-                                this.state.controller_assist_levels
+                                this.state.parameter1.assist_levels
                             }
                             onChange={(controller_assist_levels) =>
                                 this.setState({
@@ -705,7 +728,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         />
                     </>
                 )}
-                {!connection.isControllerParameter1Available && (
+                {!connection.controller.parameter1 && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -716,23 +739,23 @@ class BafangCanMotorSettingsView extends React.Component<
                         </div>
                     </>
                 )}
-                {connection.isControllerParameter2Available && (
+                {this.state.parameter2 && (
                     <>
                         <Title level={5}>Torque sensor-controlled assist</Title>
                         <br />
                         <TorqueTableComponent
                             torque_profiles={
-                                this.state.controller_torque_profiles
+                                this.state.parameter2.torque_profiles
                             }
-                            onChange={(controller_torque_profiles) => {
+                            onChange={(torque_profiles) => {
                                 this.setState({
-                                    controller_torque_profiles,
+                                    torque_profiles,
                                 });
                             }}
                         />
                     </>
                 )}
-                {!connection.isControllerParameter2Available && (
+                {!connection.controller.parameter2 && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -743,7 +766,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         </div>
                     </>
                 )}
-                {connection.isControllerSpeedParametersAvailable && (
+                {connection.controller.parameter3 && (
                     <>
                         <br />
                         <Descriptions
@@ -754,7 +777,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         />
                     </>
                 )}
-                {!connection.isControllerSpeedParametersAvailable && (
+                {!connection.controller.parameter3 && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -784,15 +807,15 @@ class BafangCanMotorSettingsView extends React.Component<
                     type="primary"
                     style={{ right: 94 }}
                     onClick={() => {
-                        connection.loadData();
+                        connection.controller.loadData();
                         message.open({
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
                             duration: 60,
                         });
-                        connection.emitter.once(
-                            'reading-finish',
+                        connection.controller.emitter.once(
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
