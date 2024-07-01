@@ -42,7 +42,7 @@ class StringInputComponent extends React.Component<
     render() {
         const { value, error } = this.state;
         const { onNewValue, maxLength, errorOnEmpty } = this.props;
-        if (!value) {
+        if (value === null) {
             return (
                 <Input
                     value="Not available"

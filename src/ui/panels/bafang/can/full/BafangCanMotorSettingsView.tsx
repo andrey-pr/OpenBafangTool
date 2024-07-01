@@ -715,41 +715,41 @@ class BafangCanMotorSettingsView extends React.Component<
         const { connection } = this.props;
         const { parameter1 } = this.state;
         if (parameter1) {
-            if (this.state.current_limit)
+            if (this.state.current_limit !== null)
                 parameter1.current_limit = this.state.current_limit;
-            if (this.state.overvoltage)
+            if (this.state.overvoltage !== null)
                 parameter1.overvoltage = this.state.overvoltage;
-            if (this.state.undervoltage_under_load)
+            if (this.state.undervoltage_under_load !== null)
                 parameter1.undervoltage_under_load =
                     this.state.undervoltage_under_load;
-            if (this.state.undervoltage)
+            if (this.state.undervoltage !== null)
                 parameter1.undervoltage = this.state.undervoltage;
-            if (this.state.battery_capacity)
+            if (this.state.battery_capacity !== null)
                 parameter1.battery_capacity = this.state.battery_capacity;
-            if (this.state.full_capacity_range)
+            if (this.state.full_capacity_range !== null)
                 parameter1.full_capacity_range = this.state.full_capacity_range;
-            if (this.state.speedmeter_magnets_number)
+            if (this.state.speedmeter_magnets_number !== null)
                 parameter1.speedmeter_magnets_number =
                     this.state.speedmeter_magnets_number;
             if (this.state.lamps_always_on !== null)
                 parameter1.lamps_always_on = this.state.lamps_always_on;
-            if (this.state.start_current)
+            if (this.state.start_current !== null)
                 parameter1.start_current = this.state.start_current;
-            if (this.state.current_loading_time)
+            if (this.state.current_loading_time !== null)
                 parameter1.current_loading_time =
                     this.state.current_loading_time;
-            if (this.state.current_shedding_time)
+            if (this.state.current_shedding_time !== null)
                 parameter1.current_shedding_time =
                     this.state.current_shedding_time;
-            if (this.state.pedal_sensor_type)
+            if (this.state.pedal_sensor_type !== null)
                 parameter1.pedal_sensor_type = this.state.pedal_sensor_type;
-            if (this.state.throttle_start_voltage)
+            if (this.state.throttle_start_voltage !== null)
                 parameter1.throttle_start_voltage =
                     this.state.throttle_start_voltage;
-            if (this.state.throttle_max_voltage)
+            if (this.state.throttle_max_voltage !== null)
                 parameter1.throttle_max_voltage =
                     this.state.throttle_max_voltage;
-            if (this.state.assist_levels)
+            if (this.state.assist_levels !== null)
                 parameter1.assist_levels = this.state.assist_levels;
             connection.controller.parameter1 = parameter1; //TODO
         }

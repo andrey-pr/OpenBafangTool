@@ -7,8 +7,8 @@ type StringValueProps = {
 class StringValueComponent extends React.Component<StringValueProps> {
     render() {
         const { value } = this.props;
-        if (value) return <>{value}</>;
-        else return <>Not available</>;
+        if (value === null) return <>Not available</>;
+        return <>{value}</>;
     }
 }
 
