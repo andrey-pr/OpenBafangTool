@@ -5,7 +5,7 @@ export type BafangCanControllerRealtime0 = {
     torque: number;
     remaining_capacity: number;
     single_trip: number;
-    remaining_distance: number;
+    remaining_distance: number | null;
 };
 
 export type BafangCanControllerRealtime1 = {
@@ -13,7 +13,7 @@ export type BafangCanControllerRealtime1 = {
     current: number;
     voltage: number;
     temperature: number;
-    motor_temperature: number;
+    motor_temperature: number | null;
 };
 
 export type SystemVoltage = 36 | 43 | 48;

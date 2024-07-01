@@ -21,7 +21,7 @@ export class BafangCanControllerParser {
             single_trip: ((packet.data[2] << 8) + packet.data[1]) / 100,
             cadence: packet.data[3],
             torque: (packet.data[5] << 8) + packet.data[4],
-            remaining_distance: tmp < 65535 ? tmp / 100 : -255,
+            remaining_distance: tmp < 65535 ? tmp / 100 : null,
         };
     }
 
@@ -34,7 +34,7 @@ export class BafangCanControllerParser {
             voltage: ((packet.data[5] << 8) + packet.data[4]) / 100,
             temperature: packet.data[6] - 40,
             motor_temperature:
-                packet.data[7] === 255 ? -255 : packet.data[7] - 40,
+                packet.data[7] === 255 ? null : packet.data[7] - 40,
         };
     }
 

@@ -62,7 +62,7 @@ export function generateEditableStringListItem(
 
 export function generateSimpleNumberListItem(
     text: string,
-    content: number,
+    content: number | null,
     content_unit?: ReactNode,
 ): DescriptionsItemType {
     return {
