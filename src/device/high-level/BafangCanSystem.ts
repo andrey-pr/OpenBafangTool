@@ -10,6 +10,7 @@ import BafangBesstTool from './bafang-can-devices/BafangBesstTool';
 import { RequestManager } from '../../utils/can/RequestManager';
 import BafangCanController from './bafang-can-devices/BafangCanController';
 import { BafangCanBackup } from '../../logging/BafangCanBackup';
+import log from 'electron-log/renderer';
 
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
@@ -54,7 +55,7 @@ export default class BafangCanSystem implements IConnection {
             this._sensor = new BafangCanSensor(true);
             this._battery = new BafangCanBattery(true);
             this._besst = new BafangBesstTool(true);
-            console.log('Demo mode: connected');
+            log.info('Demo mode: connected');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         this.device = new BesstDevice(this.devicePath);
@@ -100,7 +101,7 @@ export default class BafangCanSystem implements IConnection {
 
     public disconnect(): void {
         if (this.devicePath === 'demo') {
-            console.log('Demo mode: disconnected');
+            log.info('Demo mode: disconnected');
             return;
         }
         this.device?.disconnect();

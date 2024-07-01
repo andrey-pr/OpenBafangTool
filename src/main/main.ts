@@ -11,17 +11,13 @@
 
 import path from 'path';
 import { app, BrowserWindow, shell, globalShortcut } from 'electron';
-import log from 'electron-log/main';
-import getAppDataPath from 'appdata-path';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { initializeLogs } from '../logging/setup';
+import log from 'electron-log/renderer';
 
-log.initialize();
+initializeLogs();
 app.disableHardwareAcceleration();
-
-log.transports.file.level = 'info';
-log.transports.file.resolvePathFn = () =>
-    path.join(getAppDataPath('open-bafang-tool'), 'logs/log.log');
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -48,6 +44,8 @@ const createWindow = async () => {
 
     mainWindow = new BrowserWindow({
         show: false,
+        minWidth: 800,
+        minHeight: 400,
         width: 1024,
         height: 728,
         icon: getAssetPath('icon.png'),
@@ -120,4 +118,4 @@ app.whenReady()
             if (mainWindow === null) createWindow();
         });
     })
-    .catch(console.log);
+    .catch(log.error);

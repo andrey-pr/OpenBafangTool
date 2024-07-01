@@ -100,7 +100,7 @@ class BesstDevice {
             log.info('sent besst package:', packet.data);
             this.device?.write(packet.data);
         } catch (e) {
-            console.log('write error:', e);
+            log.error('write error:', e);
             this.onDisconnect();
         }
         setTimeout(this.processWriteQueue, packet.interval + 10);
@@ -112,7 +112,7 @@ class BesstDevice {
         switch (array[0]) {
             case 0x10:
             case 0x11:
-                console.log('UART bike connected - its not supported');
+                log.error('UART bike connected - its not supported');
                 break;
             case BesstPacketType.CAN_RESPONSE:
                 parseCanResponseFromBesst(array).forEach(this.processCanFrame);
@@ -133,7 +133,7 @@ class BesstDevice {
             case BesstPacketType.BESST_ACTIVATE:
                 break;
             default:
-                console.log('Unknown message type - not supported yet');
+                log.error('Unknown message type - not supported yet');
                 break;
         }
     }
@@ -229,7 +229,7 @@ class BesstDevice {
         } else if (packet.canOperationCode === CanOperation.WRITE_CMD) {
             this.emitter.emit('can', packet);
         } else {
-            console.log('unknown command', packet);
+            log.error('unknown command', packet);
         }
     }
 

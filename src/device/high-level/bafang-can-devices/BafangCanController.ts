@@ -221,7 +221,7 @@ export default class BafangCanController {
                 this.device_available = true;
                 this.emitter.emit('read-finish', 8, 0);
             }, 1500);
-            console.log('Demo mode: blank data loaded');
+            log.info('Demo mode: blank data loaded');
             return;
         }
         if (this.readingInProgress) return;
@@ -270,7 +270,7 @@ export default class BafangCanController {
     public saveData(): void {
         if (this.demo) {
             setTimeout(() => this.emitter.emit('write-finish', 5, 0), 300);
-            console.log('Demo mode: writing finished');
+            log.info('Demo mode: writing finished');
             return;
         }
         if (!this.besstDevice || !this.requestManager) return;
@@ -330,7 +330,7 @@ export default class BafangCanController {
 
     public calibratePositionSensor(): Promise<boolean> {
         if (this.demo) {
-            console.log('Demo mode: calibrated position sensor');
+            log.info('Demo mode: calibrated position sensor');
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {

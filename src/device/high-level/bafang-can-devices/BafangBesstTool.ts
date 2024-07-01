@@ -5,6 +5,7 @@ import {
     getBesstSVDemo,
 } from '../../../utils/can/demo_object_provider';
 import BesstDevice from '../../besst/besst';
+import log from 'electron-log/renderer';
 
 export default class BafangBesstTool {
     private besstDevice?: BesstDevice;
@@ -45,7 +46,7 @@ export default class BafangBesstTool {
 
     public loadData(): void {
         if (this.demo) {
-            console.log('Demo mode: blank data loaded');
+            log.info('Demo mode: blank data loaded');
             this.emitter.emit('read-finish', 3, 0);
             return;
         }
