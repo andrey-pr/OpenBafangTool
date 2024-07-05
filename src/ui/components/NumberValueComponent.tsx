@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 
 type NumberValueProps = {
-    value: number;
+    value: number | null;
     unit?: ReactNode;
 };
 
@@ -14,7 +14,7 @@ class NumberValueComponent extends React.Component<NumberValueProps> {
         const { unit, value } = this.props;
         return (
             <>
-                {value as number} {unit !== undefined ? unit : ''}
+                {value as number} {unit !== null ? unit : ''}
             </>
         );
     }
