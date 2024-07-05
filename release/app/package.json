@@ -1,6 +1,6 @@
 {
   "name": "open-bafang-tool",
-  "version": "2.2.1",
+  "version": "2.2.1-rc",
   "description": "Open source tool to configurate Bafang devices",
   "license": "MIT",
   "author": {
