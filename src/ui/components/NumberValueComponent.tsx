@@ -1,8 +1,7 @@
 import React, { ReactNode } from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type NumberValueProps = {
-    value: number | NoData;
+    value: number | null;
     unit?: ReactNode;
 };
 
@@ -13,15 +12,9 @@ class NumberValueComponent extends React.Component<NumberValueProps> {
 
     render() {
         const { unit, value } = this.props;
-        if (value === NotLoadedYet) {
-            return <>Isn&apos;t readed yet</>;
-        }
-        if (value === NotAvailable) {
-            return <>Not available on this hardware</>;
-        }
         return (
             <>
-                {value as number} {unit !== undefined ? unit : ''}
+                {value as number} {unit !== null ? unit : ''}
             </>
         );
     }

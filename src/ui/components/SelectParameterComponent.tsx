@@ -1,15 +1,14 @@
 import { Select } from 'antd';
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type SelectParameterProps = {
-    value: string | number | boolean | NoData;
+    value: string | number | boolean | null;
     options: { value: string | number | boolean; label: string }[];
     onChange: (e: string | number | boolean) => void;
 };
 
 type SelectParameterState = {
-    value: string | number | boolean | NoData;
+    value: string | number | boolean | null;
 };
 
 class SelectParameterComponent extends React.Component<
@@ -27,11 +26,7 @@ class SelectParameterComponent extends React.Component<
 
     render() {
         const { value, options } = this.props;
-        if (value === NotLoadedYet) {
-            return <>Isn&apos;t readed yet</>;
-        } else if (value === NotAvailable) {
-            return <>Not available on this hardware</>;
-        }
+        if (value === null) return 'Value not available';
         return (
             <Select
                 value={value}

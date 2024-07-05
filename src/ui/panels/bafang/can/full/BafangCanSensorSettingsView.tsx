@@ -1,14 +1,10 @@
 import React from 'react';
 import { Typography, Descriptions, FloatButton, message } from 'antd';
 import type { DescriptionsProps } from 'antd';
-import { SyncOutlined, DeliveredProcedureOutlined } from '@ant-design/icons';
+import { SyncOutlined } from '@ant-design/icons';
 import BafangCanSystem from '../../../../../device/high-level/BafangCanSystem';
+import { BafangCanSensorRealtime } from '../../../../../types/BafangCanSystemTypes';
 import {
-    BafangCanSensorCodes,
-    BafangCanSensorRealtime,
-} from '../../../../../types/BafangCanSystemTypes';
-import {
-    generateEditableStringListItem,
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
@@ -19,105 +15,86 @@ type SettingsProps = {
     connection: BafangCanSystem;
 };
 
-type SettingsState = BafangCanSensorRealtime & BafangCanSensorCodes;
+type SettingsState = {
+    realtime: BafangCanSensorRealtime | null;
+    hardware_version: string | null;
+    software_version: string | null;
+    model_number: string | null;
+    serial_number: string | null;
+};
 
-// TODO add redux
 /* eslint-disable camelcase */
 class BafangCanSensorSettingsView extends React.Component<
     SettingsProps,
     SettingsState
 > {
-    private writingInProgress: boolean = false;
-
     constructor(props: SettingsProps) {
         super(props);
         const { connection } = this.props;
         this.state = {
-            ...connection.sensorCodes,
-            ...connection.sensorRealtimeData,
+            realtime: connection.sensor.realtimeData,
+            hardware_version: connection.sensor.hardwareVersion,
+            software_version: connection.sensor.softwareVersion,
+            model_number: connection.sensor.modelNumber,
+            serial_number: connection.sensor.serialNumber,
         };
         this.getOtherItems = this.getOtherItems.bind(this);
-        this.saveParameters = this.saveParameters.bind(this);
-        this.updateData = this.updateData.bind(this);
-        connection.emitter.on('sensor-codes-data', this.updateData);
-        connection.emitter.on('broadcast-data-sensor', this.updateData);
-    }
-
-    updateData(values: any) {
-        // TODO add property check
-        this.setState(values);
+        connection.sensor.emitter.on(
+            'data-0',
+            (realtime: BafangCanSensorRealtime) => this.setState({ realtime }),
+        );
+        connection.sensor.emitter.on('data-hv', (hardware_version: string) =>
+            this.setState({ hardware_version }),
+        );
+        connection.sensor.emitter.on('data-sv', (software_version: string) =>
+            this.setState({ software_version }),
+        );
+        connection.sensor.emitter.on('data-mn', (model_number: string) =>
+            this.setState({ model_number }),
+        );
+        connection.sensor.emitter.on('data-sn', (serial_number: string) =>
+            this.setState({ serial_number }),
+        );
     }
 
     getRealtimeItems(): DescriptionsProps['items'] {
-        return [
-            generateSimpleNumberListItem(
-                'Torque value',
-                this.state.sensor_torque,
-                'mV',
-            ),
-            generateSimpleNumberListItem(
-                'Cadence',
-                this.state.sensor_cadence,
-                'RPM',
-            ),
-        ];
+        const { realtime } = this.state;
+        if (realtime) {
+            return [
+                generateSimpleNumberListItem(
+                    'Torque value',
+                    realtime.torque,
+                    'mV',
+                ),
+                generateSimpleNumberListItem(
+                    'Cadence',
+                    realtime.cadence,
+                    'RPM',
+                ),
+            ];
+        }
     }
 
     getOtherItems(): DescriptionsProps['items'] {
-        const { sensor_serial_number, sensor_customer_number } = this.state;
         return [
             generateSimpleStringListItem(
                 'Serial number',
-                sensor_serial_number,
+                this.state.serial_number,
                 'Please note, that serial number could be easily changed, so it should never be used for security',
             ),
             generateSimpleStringListItem(
                 'Software version',
-                this.state.sensor_software_version,
+                this.state.software_version,
             ),
             generateSimpleStringListItem(
                 'Hardware version',
-                this.state.sensor_hardware_version,
+                this.state.hardware_version,
             ),
             generateSimpleStringListItem(
                 'Model number',
-                this.state.sensor_model_number,
-            ),
-            generateEditableStringListItem(
-                'Customer number',
-                sensor_customer_number,
-                (e) =>
-                    this.setState({
-                        sensor_customer_number: e,
-                    }),
+                this.state.model_number,
             ),
         ];
-    }
-
-    saveParameters(): void {
-        if (this.writingInProgress) return;
-        this.writingInProgress = true;
-        const { connection } = this.props;
-        connection.sensorCodes = this.state as BafangCanSensorCodes;
-        connection.saveSensorData();
-        message.open({
-            key: 'writing',
-            type: 'loading',
-            content: 'Writing...',
-            duration: 60,
-        });
-        connection.emitter.once(
-            'sensor-writing-finish',
-            (readedSuccessfully, readededUnsuccessfully) => {
-                message.open({
-                    key: 'writing',
-                    type: 'info',
-                    content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
-                    duration: 5,
-                });
-                this.writingInProgress = false;
-            },
-        );
     }
 
     render() {
@@ -127,7 +104,7 @@ class BafangCanSensorSettingsView extends React.Component<
                 <Typography.Title level={2} style={{ margin: 0 }}>
                     Sensor settings
                 </Typography.Title>
-                {connection.isSensorRealtimeDataReady && (
+                {this.state.realtime && (
                     <>
                         <br />
                         <Descriptions
@@ -138,7 +115,7 @@ class BafangCanSensorSettingsView extends React.Component<
                         />
                     </>
                 )}
-                {!connection.isSensorRealtimeDataReady && (
+                {!this.state.realtime && (
                     <>
                         <br />
                         <div style={{ marginBottom: '15px' }}>
@@ -158,17 +135,17 @@ class BafangCanSensorSettingsView extends React.Component<
                 <FloatButton
                     icon={<SyncOutlined />}
                     type="primary"
-                    style={{ right: 94 }}
+                    style={{ right: 24 }}
                     onClick={() => {
-                        connection.loadData();
+                        connection.sensor.loadData();
                         message.open({
                             key: 'loading',
                             type: 'loading',
                             content: 'Loading...',
                             duration: 60,
                         });
-                        connection.emitter.once(
-                            'reading-finish',
+                        connection.sensor.emitter.once(
+                            'read-finish',
                             (readedSuccessfully, readededUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
@@ -178,12 +155,6 @@ class BafangCanSensorSettingsView extends React.Component<
                                 }),
                         );
                     }}
-                />
-                <FloatButton
-                    icon={<DeliveredProcedureOutlined />}
-                    type="primary"
-                    style={{ right: 24 }}
-                    onClick={this.saveParameters}
                 />
             </div>
         );

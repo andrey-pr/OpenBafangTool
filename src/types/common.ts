@@ -13,3 +13,8 @@ export const BooleanOptions = [
         label: 'No',
     },
 ];
+
+export type PromiseControls = {
+    resolve: (...args: any[]) => void;
+    reject: (...args: any[]) => void;
+};

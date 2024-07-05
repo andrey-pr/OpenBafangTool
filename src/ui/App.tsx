@@ -1,8 +1,8 @@
 /* eslint-disable no-else-return */
 import React from 'react';
-import IConnection from '../device/high-level/Connection';
-import InterfaceType from './models/InterfaceType';
 import { Spin } from 'antd';
+import IConnection from '../device/high-level/Connection';
+import InterfaceType from '../types/InterfaceType';
 
 const DeviceSelectionView = React.lazy(
     () => import('./views/DeviceSelectionView'),
@@ -68,7 +68,7 @@ class App extends React.Component<AppProps, AppState> {
         const { connection, interfaceType } = this.state;
         const loading = (
             <Spin
-                spinning={true}
+                spinning
                 style={{ height: '100%', width: '100%', marginTop: '100px' }}
             />
         );

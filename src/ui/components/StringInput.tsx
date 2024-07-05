@@ -1,16 +1,15 @@
 import { Input, Tooltip } from 'antd';
 import React from 'react';
-import { NoData, NotAvailable, NotLoadedYet } from '../../types/no_data';
 
 type StringInputProps = {
-    value: string | NoData;
+    value: string | null;
     maxLength: number;
     onNewValue: (value: string) => void;
     errorOnEmpty?: boolean;
 };
 
 type StringInputState = {
-    value: string | NoData;
+    value: string | null;
     error: boolean;
 };
 
@@ -43,18 +42,10 @@ class StringInputComponent extends React.Component<
     render() {
         const { value, error } = this.state;
         const { onNewValue, maxLength, errorOnEmpty } = this.props;
-        if (value === NotLoadedYet) {
+        if (value === null) {
             return (
                 <Input
-                    value="Isn't readed yet"
-                    style={{ minWidth: '150px' }}
-                    disabled
-                />
-            );
-        } else if (value === NotAvailable) {
-            return (
-                <Input
-                    value="Not available on this hardware"
+                    value="Not available"
                     style={{ minWidth: '150px' }}
                     disabled
                 />

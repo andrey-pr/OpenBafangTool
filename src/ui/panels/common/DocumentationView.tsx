@@ -26,11 +26,16 @@ class DocumentationView extends React.Component<InfoProps, InfoState> {
                     }}
                     rehypeRewrite={async (node) => {
                         if (
+                            // @ts-ignore
                             node.tagName === 'a' &&
+                            // @ts-ignore
                             node.properties.href.indexOf('#') !== 0
                         ) {
+                            // @ts-ignore
                             delete node.properties.href;
+                            // @ts-ignore
                         } else if (node.tagName === 'img') {
+                            // @ts-ignore
                             node.properties.src = getImage(node.properties.src);
                         }
                     }}

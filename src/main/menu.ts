@@ -1,15 +1,4 @@
-import {
-    app,
-    Menu,
-    shell,
-    BrowserWindow,
-    MenuItemConstructorOptions,
-} from 'electron';
-
-interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
-    selector?: string;
-    submenu?: DarwinMenuItemConstructorOptions[] | Menu;
-}
+import { Menu, BrowserWindow } from 'electron';
 
 export default class MenuBuilder {
     mainWindow: BrowserWindow;
