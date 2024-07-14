@@ -1,4 +1,4 @@
-import { BesstReadedCanFrame } from '../../../../device/besst/besst-types';
+import { ReadedCanFrame } from '../../../../types/BafangCanCommonTypes';
 import {
     BafangCanBatteryCapacityData,
     BafangCanBatteryStateData,
@@ -6,7 +6,7 @@ import {
 
 export class BafangCanBatteryParser {
     public static cells(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
         cells_arr: number[],
     ): void {
         for (let i = 0; i < packet.data.length / 2; i++) {
@@ -16,7 +16,7 @@ export class BafangCanBatteryParser {
     }
 
     public static capacity(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanBatteryCapacityData {
         return {
             full_capacity: (packet.data[1] << 8) + packet.data[0],
@@ -28,7 +28,7 @@ export class BafangCanBatteryParser {
     }
 
     public static state(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanBatteryStateData {
         let tmp = (packet.data[1] << 8) + packet.data[0];
         if ((tmp & 32768) > 0) {

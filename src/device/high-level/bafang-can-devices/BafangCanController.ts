@@ -1,7 +1,4 @@
 import { deepCopy } from 'deep-copy-ts';
-import BesstDevice from '../../besst/besst';
-import { BesstReadedCanFrame } from '../../besst/besst-types';
-import { DeviceNetworkId } from '../../besst/besst-types';
 import log from 'electron-log/renderer';
 import { RequestManager } from '../../../utils/can/RequestManager';
 import EventEmitter from 'events';
@@ -44,9 +41,11 @@ import {
     prepareParameter2WritePromise,
     prepareSpeedPackageWritePromise,
 } from '../../../parser/bafang/can/serializer/Controller';
+import { DeviceNetworkId, ReadedCanFrame } from '../../../types/BafangCanCommonTypes';
+import IGenericCanAdapter from '../../can/generic';
 
 export default class BafangCanController {
-    private besstDevice?: BesstDevice;
+    private converterDevice?: IGenericCanAdapter;
 
     private requestManager?: RequestManager;
 
@@ -84,7 +83,7 @@ export default class BafangCanController {
 
     constructor(
         demo: boolean,
-        besstDevice?: BesstDevice,
+        converterDevice?: IGenericCanAdapter,
         requestManager?: RequestManager,
     ) {
         if (demo) {
@@ -104,27 +103,27 @@ export default class BafangCanController {
         this.processParsedCanResponse =
             this.processParsedCanResponse.bind(this);
         this.demo = demo;
-        this.besstDevice = besstDevice;
+        this.converterDevice = converterDevice;
         this.requestManager = requestManager;
         this.emitter = new EventEmitter();
-        this.besstDevice?.emitter.on('can', this.processParsedCanResponse);
-        this.besstDevice?.emitter.on(
+        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.converterDevice?.emitter.on(
             'disconnection',
-            () => (this.besstDevice = undefined),
+            () => (this.converterDevice = undefined),
         );
     }
 
     public connect() {
-        this.besstDevice?.emitter.on('can', this.processParsedCanResponse);
-        this.besstDevice?.emitter.on(
+        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.converterDevice?.emitter.on(
             'disconnection',
-            () => (this.besstDevice = undefined),
+            () => (this.converterDevice = undefined),
         );
     }
 
-    private processParsedCanResponse(response: BesstReadedCanFrame) {
+    private processParsedCanResponse(response: ReadedCanFrame) {
         if (
-            !this.besstDevice ||
+            !this.converterDevice ||
             response.sourceDeviceCode !== DeviceNetworkId.DRIVE_UNIT
         )
             return;
@@ -133,7 +132,7 @@ export default class BafangCanController {
         if (response.canCommandCode === 0x60) {
             log.info('received can package:', response);
             if (response.data.length === 0) {
-                rereadParameter(response, this.besstDevice);
+                rereadParameter(response, this.converterDevice);
                 return;
             }
             switch (response.canCommandSubCode) {
@@ -241,11 +240,11 @@ export default class BafangCanController {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
-                if (!this.besstDevice || !this.requestManager) return;
+                if (!this.converterDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.DRIVE_UNIT,
                     command,
-                    this.besstDevice,
+                    this.converterDevice,
                     this.requestManager,
                     { resolve, reject },
                 );
@@ -273,7 +272,7 @@ export default class BafangCanController {
             console.log('Demo mode: writing finished');
             return;
         }
-        if (!this.besstDevice || !this.requestManager) return;
+        if (!this.converterDevice || !this.requestManager) return;
         let wroteSuccessfully = 0,
             wroteUnsuccessfully = 0;
         let writePromises: Promise<boolean>[] = [];
@@ -284,7 +283,7 @@ export default class BafangCanController {
             CanWriteCommandsList.Manufacturer,
             writePromises,
             writeLongParameter,
-            this.besstDevice,
+            this.converterDevice,
             this.requestManager,
         );
         prepareParameter1WritePromise(
@@ -292,7 +291,7 @@ export default class BafangCanController {
             this.parameter_1_array,
             writePromises,
             writeLongParameter,
-            this.besstDevice,
+            this.converterDevice,
             this.requestManager,
         );
         prepareParameter2WritePromise(
@@ -300,14 +299,14 @@ export default class BafangCanController {
             this.parameter_2_array,
             writePromises,
             writeLongParameter,
-            this.besstDevice,
+            this.converterDevice,
             this.requestManager,
         );
         prepareSpeedPackageWritePromise(
             this.speed_parameter,
             writePromises,
             writeShortParameter,
-            this.besstDevice,
+            this.converterDevice,
             this.requestManager,
         );
         for (let i = 0; i < writePromises.length; i++) {
@@ -334,12 +333,12 @@ export default class BafangCanController {
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {
-            if (!this.besstDevice || !this.requestManager) return;
+            if (!this.converterDevice || !this.requestManager) return;
             writeShortParameter(
                 DeviceNetworkId.DRIVE_UNIT,
                 CanWriteCommandsList.CalibratePositionSensor,
                 [0x00, 0x00, 0x00, 0x00, 0x00],
-                this.besstDevice,
+                this.converterDevice,
                 this.requestManager,
                 { resolve, reject },
             );

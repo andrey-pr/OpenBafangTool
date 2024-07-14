@@ -1,19 +1,19 @@
 import { deepCopy } from "deep-copy-ts";
-import { CanCommand, CanWriteCommandsList } from "../../../../constants/BafangCanConstants";
-import BesstDevice from "../../../../device/besst/besst";
-import { DeviceNetworkId } from "../../../../device/besst/besst-types";
+import { CanWriteCommandsList } from "../../../../constants/BafangCanConstants";
 import { BafangCanControllerParameter1, BafangCanControllerParameter2, BafangCanControllerSpeedParameters } from "../../../../types/BafangCanSystemTypes";
 import { RequestManager } from "../../../../utils/can/RequestManager";
 import { WriteFunctionType, addWritePromise } from "./common";
 import { calculateChecksum } from "../../../../utils/can/utils";
 import { intToByteArray } from "../../../../utils/utils";
+import { DeviceNetworkId } from "../../../../types/BafangCanCommonTypes";
+import IGenericCanAdapter from "../../../../device/can/generic";
 
 export function prepareParameter1WritePromise(
     value: BafangCanControllerParameter1 | null,
     old_pkg: number[] | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device: BesstDevice,
+    converter_device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if (!old_pkg || !value) return;
@@ -47,7 +47,7 @@ export function prepareParameter1WritePromise(
         new_pkg,
         promise_array,
         write_function,
-        besst_device,
+        converter_device,
         request_manager,
     );
 }
@@ -57,7 +57,7 @@ export function prepareParameter2WritePromise(
     old_pkg: number[] | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device: BesstDevice,
+    converter_device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if (!old_pkg || !value) return;
@@ -81,7 +81,7 @@ export function prepareParameter2WritePromise(
         new_pkg,
         promise_array,
         write_function,
-        besst_device,
+        converter_device,
         request_manager,
     );
 }
@@ -90,7 +90,7 @@ export function prepareSpeedPackageWritePromise(
     value: BafangCanControllerSpeedParameters | null,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device: BesstDevice,
+    converter_device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if(!value) return;
@@ -106,7 +106,7 @@ export function prepareSpeedPackageWritePromise(
         data,
         promise_array,
         write_function,
-        besst_device,
+        converter_device,
         request_manager,
     );
 }

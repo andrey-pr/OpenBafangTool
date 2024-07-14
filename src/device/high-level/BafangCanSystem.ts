@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
 import IConnection from './Connection';
-import { DeviceName } from '../../types/DeviceType';
+import { CanConverterType, DeviceName } from '../../types/DeviceType';
 import BesstDevice from '../besst/besst';
 import BafangCanDisplay from './bafang-can-devices/BafangCanDisplay';
 import BafangCanSensor from './bafang-can-devices/BafangCanSensor';
@@ -10,13 +10,17 @@ import BafangBesstTool from './bafang-can-devices/BafangBesstTool';
 import { RequestManager } from '../../utils/can/RequestManager';
 import BafangCanController from './bafang-can-devices/BafangCanController';
 import { BafangCanBackup } from '../../logging/BafangCanBackup';
+import CanableDevice from '../canable/canable';
+import IGenericCanAdapter from '../can/generic';
 
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
 
+    private _converterType: CanConverterType;
+
     readonly deviceName: DeviceName = DeviceName.BafangCanSystem;
 
-    private device?: BesstDevice;
+    private device?: IGenericCanAdapter;
 
     public emitter: EventEmitter;
 
@@ -34,8 +38,9 @@ export default class BafangCanSystem implements IConnection {
 
     private readingInProgress: boolean = false;
 
-    constructor(devicePath: string) {
+    constructor(devicePath: string, converterType: CanConverterType) {
         this.devicePath = devicePath;
+        this._converterType = converterType;
         this.emitter = new EventEmitter();
         this.loadData = this.loadData.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -57,7 +62,15 @@ export default class BafangCanSystem implements IConnection {
             console.log('Demo mode: connected');
             return new Promise<boolean>((resolve) => resolve(true));
         }
-        this.device = new BesstDevice(this.devicePath);
+        if (this._converterType === CanConverterType.BESST) {
+            this.device = new BesstDevice(this.devicePath);
+            this._besst = new BafangBesstTool(
+                false,
+                this.device as BesstDevice,
+            );
+        } else {
+            this.device = new CanableDevice(this.devicePath);
+        }
         this.requestManager = new RequestManager(this.device);
         this._controller = new BafangCanController(
             false,
@@ -79,22 +92,24 @@ export default class BafangCanSystem implements IConnection {
             this.device,
             this.requestManager,
         );
-        this._besst = new BafangBesstTool(false, this.device);
         this.device?.emitter.on('disconnection', this.onDisconnect);
 
         return new Promise<boolean>(async (resolve) => {
-            this.device?.reset().then(() => {
-                this.device?.emitter.removeAllListeners();
-                this._controller?.connect();
-                this._display?.connect();
-                this._sensor?.connect();
-                this._battery?.connect();
-                this._besst?.connect();
-                this.device?.emitter.on('disconnection', this.onDisconnect);
-                this.device?.activateDriveUnit().then(() => {
-                    resolve(true);
+            if (this._converterType === CanConverterType.BESST) {
+                let besst = this.device as BesstDevice;
+                besst.reset().then(() => {
+                    besst.emitter.removeAllListeners();
+                    this._controller?.connect();
+                    this._display?.connect();
+                    this._sensor?.connect();
+                    this._battery?.connect();
+                    this._besst?.connect();
+                    this.device?.emitter.on('disconnection', this.onDisconnect);
+                    besst.activateDriveUnit().then(() => {
+                        resolve(true);
+                    });
                 });
-            });
+            } else resolve(true);
         });
     }
 
@@ -178,8 +193,12 @@ export default class BafangCanSystem implements IConnection {
         throw new ReferenceError();
     }
 
-    public get besst(): BafangBesstTool {
+    public get besst(): BafangBesstTool | undefined {
         if (this._besst) return this._besst;
-        throw new ReferenceError();
+        return undefined;
+    }
+
+    public get converterType(): CanConverterType {
+        return this._converterType;
     }
 }

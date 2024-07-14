@@ -1,4 +1,4 @@
-import { DeviceNetworkId } from '../device/besst/besst-types';
+import { DeviceNetworkId } from '../types/BafangCanCommonTypes';
 import { Wheel } from '../types/BafangCanSystemTypes';
 
 export type CanCommand = {

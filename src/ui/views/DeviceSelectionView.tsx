@@ -15,6 +15,7 @@ import IConnection from '../../device/high-level/Connection';
 import BafangUartMotor from '../../device/high-level/BafangUartMotor';
 import BafangCanSystem from '../../device/high-level/BafangCanSystem';
 import {
+    CanConverterType,
     DeviceBrand,
     DeviceInterface,
     DeviceType,
@@ -22,6 +23,7 @@ import {
 import InterfaceType from '../../types/InterfaceType';
 import filterPorts from '../../device/serial/serial-patcher';
 import { listBesstDevices } from '../../device/besst/besst';
+import { listCanableDevices } from '../../device/canable/canable';
 
 const { Option } = Select;
 
@@ -35,6 +37,7 @@ type DeviceSelectionProps = {
 type DeviceSelectionState = {
     portList: string[];
     besstDeviceList: HID.Device[];
+    canableDeviceList: string[];
     connectionChecked: boolean;
     connection: IConnection | null;
     interfaceType: InterfaceType | null;
@@ -42,6 +45,7 @@ type DeviceSelectionState = {
     deviceInterface: DeviceInterface | null;
     deviceType: DeviceType | null;
     devicePort: string | null;
+    canConveterType: CanConverterType | null;
     localLawsAgreement: boolean | null;
     disclaimerAgreement: boolean | null;
 };
@@ -55,6 +59,7 @@ class DeviceSelectionView extends React.Component<
         this.state = {
             portList: [],
             besstDeviceList: [],
+            canableDeviceList: [],
             connectionChecked: false,
             connection: null,
             interfaceType: null,
@@ -62,6 +67,7 @@ class DeviceSelectionView extends React.Component<
             deviceInterface: null,
             deviceType: null,
             devicePort: null,
+            canConveterType: null,
             localLawsAgreement: false,
             disclaimerAgreement: false,
         };
@@ -75,6 +81,10 @@ class DeviceSelectionView extends React.Component<
                     ),
                 });
             });
+
+            listCanableDevices().then((canableDeviceList) =>
+                this.setState({ canableDeviceList }),
+            );
 
             this.setState({ besstDeviceList: listBesstDevices() });
         }, 1000);
@@ -92,15 +102,9 @@ class DeviceSelectionView extends React.Component<
             deviceInterface,
             deviceType,
             devicePort,
+            canConveterType,
+            canableDeviceList,
         } = this.state;
-
-        const portComponents = portList.map((item) => {
-            return (
-                <Option value={item} key={item}>
-                    {item}
-                </Option>
-            );
-        });
 
         return (
             <div
@@ -204,45 +208,116 @@ class DeviceSelectionView extends React.Component<
                                 style={{ minWidth: '150px' }}
                             >
                                 <Option value="demo">Demo</Option>
-                                {portComponents}
-                            </Select>
-                        </Form.Item>
-                    )}
-                    {deviceInterface === DeviceInterface.CAN && (
-                        <Form.Item
-                            name="usb_device"
-                            label="USB device"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'USB device is required',
-                                },
-                            ]}
-                        >
-                            <Select
-                                onChange={(value: string) => {
-                                    this.setState({
-                                        devicePort: value,
-                                        connectionChecked: false,
-                                    });
-                                }}
-                                allowClear
-                                style={{ minWidth: '150px' }}
-                            >
-                                <Option value="demo">Demo</Option>
-                                {besstDeviceList.map((item) => {
+                                {portList.map((item) => {
                                     return (
-                                        <Option
-                                            value={item.path}
-                                            key={item.path}
-                                        >
-                                            {item.product}
+                                        <Option value={item} key={item}>
+                                            {item}
                                         </Option>
                                     );
                                 })}
                             </Select>
                         </Form.Item>
                     )}
+                    {deviceInterface === DeviceInterface.CAN && (
+                        <Form.Item
+                            name="converter_type"
+                            label="CAN converter type"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'CAN converter is required',
+                                },
+                            ]}
+                        >
+                            <Select
+                                onChange={(value: CanConverterType) => {
+                                    this.setState({
+                                        canConveterType: value,
+                                        connectionChecked: false,
+                                    });
+                                }}
+                                allowClear
+                                style={{ minWidth: '150px' }}
+                            >
+                                {/* <Option value="demo">Demo</Option> */}
+                                <Option value={CanConverterType.BESST}>
+                                    BESST
+                                </Option>
+                                <Option value={CanConverterType.Canable}>
+                                    Canable Pro 1.0
+                                </Option>
+                            </Select>
+                        </Form.Item>
+                    )}
+                    {deviceInterface === DeviceInterface.CAN &&
+                        canConveterType === CanConverterType.BESST && (
+                            <Form.Item
+                                name="usb_device"
+                                label="USB device"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'USB device is required',
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    onChange={(value: string) => {
+                                        this.setState({
+                                            devicePort: value,
+                                            connectionChecked: false,
+                                        });
+                                    }}
+                                    allowClear
+                                    style={{ minWidth: '150px' }}
+                                >
+                                    <Option value="demo">Demo</Option>
+                                    {besstDeviceList.map((item) => {
+                                        return (
+                                            <Option
+                                                value={item.path}
+                                                key={item.path}
+                                            >
+                                                {item.product}
+                                            </Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+                        )}
+                    {deviceInterface === DeviceInterface.CAN &&
+                        canConveterType === CanConverterType.Canable && (
+                            <Form.Item
+                                name="usb_device"
+                                label="USB device"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'USB device is required',
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    onChange={(value: string) => {
+                                        this.setState({
+                                            devicePort: value,
+                                            connectionChecked: false,
+                                        });
+                                    }}
+                                    allowClear
+                                    style={{ minWidth: '150px' }}
+                                >
+                                    <Option value="demo">Demo</Option>
+                                    {canableDeviceList.map((item) => {
+                                        return (
+                                            <Option value={item} key={item}>
+                                                {item}
+                                            </Option>
+                                        );
+                                    })}
+                                </Select>
+                            </Form.Item>
+                        )}
                     <Form.Item
                         name="local_laws_agreement"
                         label=""
@@ -334,6 +409,7 @@ class DeviceSelectionView extends React.Component<
                                     ) {
                                         newConnection = new BafangCanSystem(
                                             devicePort,
+                                            canConveterType,
                                         );
                                     } else {
                                         message.info(

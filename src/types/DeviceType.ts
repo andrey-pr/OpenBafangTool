@@ -13,6 +13,11 @@ export enum DeviceType {
     System = 'system',
 }
 
+export enum CanConverterType {
+    BESST = 'besst',
+    Canable = 'canable',
+}
+
 export enum DeviceName {
     BafangUartMotor = 'bafang_uart_motor',
     BafangUartDisplay = 'bafang_uart_display',

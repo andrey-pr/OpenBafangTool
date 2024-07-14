@@ -1,6 +1,6 @@
 import { CanWriteCommandsList } from "../../../../constants/BafangCanConstants";
-import BesstDevice from "../../../../device/besst/besst";
-import { DeviceNetworkId } from "../../../../device/besst/besst-types";
+import IGenericCanAdapter from "../../../../device/can/generic";
+import { DeviceNetworkId } from "../../../../types/BafangCanCommonTypes";
 import { RequestManager } from "../../../../utils/can/RequestManager";
 import { intToByteArray } from "../../../../utils/utils";
 import { WriteFunctionType, addWritePromise } from "./common";
@@ -13,7 +13,7 @@ export function prepareTotalMileageWritePromise(
     value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if (!value) return;
@@ -32,7 +32,7 @@ export function prepareSingleMileageWritePromise(
     value: number | null | undefined,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if (!value) return;

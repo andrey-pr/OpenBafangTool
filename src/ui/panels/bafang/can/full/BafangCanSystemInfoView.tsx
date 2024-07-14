@@ -16,6 +16,7 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import { CanConverterType } from '../../../../../types/DeviceType';
 
 const { Text } = Typography;
 
@@ -56,6 +57,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     constructor(props: any) {
         super(props);
         const { connection } = this.props;
+        let besst = connection.besst;
         this.state = {
             controller_realtime0: connection.controller.realtimeData0,
             controller_realtime1: connection.controller.realtimeData1,
@@ -79,24 +81,22 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             sensor_software_version: connection.sensor.softwareVersion,
             sensor_model_number: connection.sensor.modelNumber,
             sensor_serial_number: connection.sensor.serialNumber,
-            besst_serial_number: connection.besst.serialNumber,
-            besst_software_version: connection.besst.softwareVersion,
-            besst_hardware_version: connection.besst.hardwareVersion,
+            besst_serial_number: besst ? besst.serialNumber : null,
+            besst_software_version: besst ? besst.softwareVersion : null,
+            besst_hardware_version: besst ? besst.hardwareVersion : null,
         };
         this.getControllerItems = this.getControllerItems.bind(this);
-        connection.besst.emitter.on('data-sn', (besst_serial_number: string) =>
-            this.setState({ besst_serial_number }),
-        );
-        connection.besst.emitter.on(
-            'data-sv',
-            (besst_software_version: string) =>
+        if (besst) {
+            besst.emitter.on('data-sn', (besst_serial_number: string) =>
+                this.setState({ besst_serial_number }),
+            );
+            besst.emitter.on('data-sv', (besst_software_version: string) =>
                 this.setState({ besst_software_version }),
-        );
-        connection.besst.emitter.on(
-            'data-hv',
-            (besst_hardware_version: string) =>
+            );
+            besst.emitter.on('data-hv', (besst_hardware_version: string) =>
                 this.setState({ besst_hardware_version }),
-        );
+            );
+        }
         connection.sensor.emitter.on(
             'data-0',
             (sensor_realtime: BafangCanSensorRealtime) =>
@@ -619,13 +619,15 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         style={{ marginBottom: '20px' }}
                     />
                 )}
-                <Descriptions
-                    bordered
-                    title="BESST Tool"
-                    items={this.getBesstItems()}
-                    column={1}
-                    style={{ marginBottom: '20px' }}
-                />
+                {connection.converterType === CanConverterType.BESST && (
+                    <Descriptions
+                        bordered
+                        title="BESST Tool"
+                        items={this.getBesstItems()}
+                        column={1}
+                        style={{ marginBottom: '20px' }}
+                    />
+                )}
                 <FloatButton
                     icon={<SyncOutlined />}
                     type="primary"

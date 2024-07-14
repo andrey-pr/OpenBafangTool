@@ -1,6 +1,6 @@
 import { CanCommand } from "../../../../constants/BafangCanConstants";
-import BesstDevice from "../../../../device/besst/besst";
-import { DeviceNetworkId } from "../../../../device/besst/besst-types";
+import IGenericCanAdapter from "../../../../device/can/generic";
+import { DeviceNetworkId } from "../../../../types/BafangCanCommonTypes";
 import { PromiseControls } from "../../../../types/common";
 import { RequestManager } from "../../../../utils/can/RequestManager";
 
@@ -8,7 +8,7 @@ export type WriteFunctionType = (
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     request_manager: RequestManager,
     promise?: PromiseControls,
 ) => void;
@@ -23,7 +23,7 @@ export function addWritePromise(
     data: number[],
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device: BesstDevice,
+    converter_device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     promise_array.push(
@@ -32,7 +32,7 @@ export function addWritePromise(
                 target,
                 command,
                 data,
-                besst_device,
+                converter_device,
                 request_manager,
                 { resolve, reject },
             );
@@ -46,7 +46,7 @@ export function prepareStringWritePromise(
     can_command: CanCommand,
     promise_array: Promise<boolean>[],
     write_function: WriteFunctionType,
-    besst_device: BesstDevice,
+    converter_device: IGenericCanAdapter,
     request_manager: RequestManager,
 ): void {
     if (!value) return;
@@ -56,7 +56,7 @@ export function prepareStringWritePromise(
         serializeString(value),
         promise_array,
         write_function,
-        besst_device,
+        converter_device,
         request_manager,
     );
 }

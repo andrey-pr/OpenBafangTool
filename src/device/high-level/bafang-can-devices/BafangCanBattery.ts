@@ -12,18 +12,18 @@ import {
     getBatterySVDemo,
     getBatteryStateDemoData,
 } from '../../../utils/can/demo_object_provider';
-import BesstDevice from '../../besst/besst';
 import EventEmitter from 'events';
 import { RequestManager } from '../../../utils/can/RequestManager';
-import { BesstReadedCanFrame, DeviceNetworkId } from '../../besst/besst-types';
 import log from 'electron-log/renderer';
 import { readParameter, rereadParameter } from '../../../utils/can/utils';
 import { charsToString } from '../../../utils/utils';
 import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
 import { BafangCanBatteryParser } from '../../../parser/bafang/can/parser/Battery';
+import { DeviceNetworkId, ReadedCanFrame } from '../../../types/BafangCanCommonTypes';
+import IGenericCanAdapter from '../../can/generic';
 
 export default class BafangCanBattery {
-    private besstDevice?: BesstDevice;
+    private converterDevice?: IGenericCanAdapter;
 
     private requestManager?: RequestManager;
 
@@ -51,7 +51,7 @@ export default class BafangCanBattery {
 
     constructor(
         demo: boolean,
-        besstDevice?: BesstDevice,
+        converterDevice?: IGenericCanAdapter,
         requestManager?: RequestManager,
     ) {
         if (demo) {
@@ -66,27 +66,27 @@ export default class BafangCanBattery {
         this.processParsedCanResponse =
             this.processParsedCanResponse.bind(this);
         this.demo = demo;
-        this.besstDevice = besstDevice;
+        this.converterDevice = converterDevice;
         this.requestManager = requestManager;
         this.emitter = new EventEmitter();
-        this.besstDevice?.emitter.on('can', this.processParsedCanResponse);
-        this.besstDevice?.emitter.on(
+        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.converterDevice?.emitter.on(
             'disconnection',
-            () => (this.besstDevice = undefined),
+            () => (this.converterDevice = undefined),
         );
     }
 
     public connect() {
-        this.besstDevice?.emitter.on('can', this.processParsedCanResponse);
-        this.besstDevice?.emitter.on(
+        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.converterDevice?.emitter.on(
             'disconnection',
-            () => (this.besstDevice = undefined),
+            () => (this.converterDevice = undefined),
         );
     }
 
-    private processParsedCanResponse(response: BesstReadedCanFrame) {
+    private processParsedCanResponse(response: ReadedCanFrame) {
         if (
-            !this.besstDevice ||
+            !this.converterDevice ||
             response.sourceDeviceCode !== DeviceNetworkId.BATTERY
         )
             return;
@@ -95,7 +95,7 @@ export default class BafangCanBattery {
         if (response.canCommandCode === 0x60) {
             log.info('received can package:', response);
             if (response.data.length === 0) {
-                rereadParameter(response, this.besstDevice);
+                rereadParameter(response, this.converterDevice);
                 return;
             }
             switch (response.canCommandSubCode) {
@@ -167,11 +167,11 @@ export default class BafangCanBattery {
 
         commands.forEach((command) => {
             new Promise<boolean>((resolve, reject) => {
-                if (!this.besstDevice || !this.requestManager) return;
+                if (!this.converterDevice || !this.requestManager) return;
                 readParameter(
                     DeviceNetworkId.BATTERY,
                     command,
-                    this.besstDevice,
+                    this.converterDevice,
                     this.requestManager,
                     { resolve, reject },
                 );

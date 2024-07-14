@@ -1,8 +1,5 @@
-import BesstDevice from '../../device/besst/besst';
-import {
-    BesstReadedCanFrame,
-    CanOperation,
-} from '../../device/besst/besst-types';
+import IGenericCanAdapter from '../../device/can/generic';
+import { CanOperation, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
 import { PromiseControls } from '../../types/common';
 
 type SentRequest = {
@@ -13,10 +10,10 @@ type SentRequest = {
 export class RequestManager {
     private sentRequests: SentRequest[][][] = [];
 
-    private besstDevice: BesstDevice;
+    private converterDevice: IGenericCanAdapter;
 
-    constructor(besstDevice: BesstDevice) {
-        this.besstDevice = besstDevice;
+    constructor(converterDevice: IGenericCanAdapter) {
+        this.converterDevice = converterDevice;
         this.registerRequest = this.registerRequest.bind(this);
         this.resolveRequest = this.resolveRequest.bind(this);
     }
@@ -49,7 +46,7 @@ export class RequestManager {
                         promise.resolve(false);
                         return;
                     }
-                    this.besstDevice
+                    this.converterDevice
                         .sendCanFrame(
                             source,
                             target,
@@ -73,7 +70,7 @@ export class RequestManager {
         }
     }
 
-    public resolveRequest(response: BesstReadedCanFrame, success = true): void {
+    public resolveRequest(response: ReadedCanFrame, success = true): void {
         if (
             this.sentRequests[response.sourceDeviceCode] &&
             this.sentRequests[response.sourceDeviceCode][

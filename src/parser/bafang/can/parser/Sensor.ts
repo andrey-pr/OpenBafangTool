@@ -1,9 +1,9 @@
-import { BesstReadedCanFrame } from '../../../../device/besst/besst-types';
+import { ReadedCanFrame } from '../../../../device/besst/besst-types';
 import { BafangCanSensorRealtime } from '../../../../types/BafangCanSystemTypes';
 
 export class BafangCanSensorParser {
     public static package0(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanSensorRealtime {
         return {
             torque: (packet.data[1] << 8) + packet.data[0],

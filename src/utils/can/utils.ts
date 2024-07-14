@@ -1,10 +1,6 @@
 import { CanCommand } from '../../constants/BafangCanConstants';
-import BesstDevice from '../../device/besst/besst';
-import {
-    BesstReadedCanFrame,
-    CanOperation,
-    DeviceNetworkId,
-} from '../../device/besst/besst-types';
+import IGenericCanAdapter from '../../device/can/generic';
+import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
 import { PromiseControls } from '../../types/common';
 import { RequestManager } from './RequestManager';
 
@@ -17,8 +13,8 @@ export function calculateChecksum(bytes: number[]): number {
 }
 
 export function rereadParameter(
-    dto: BesstReadedCanFrame,
-    device: BesstDevice,
+    dto: ReadedCanFrame,
+    device: IGenericCanAdapter,
 ): void {
     //TODO
     device.sendCanFrame(
@@ -33,7 +29,7 @@ export function rereadParameter(
 export function readParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
@@ -61,7 +57,7 @@ export function writeShortParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
@@ -90,7 +86,7 @@ export function writeLongParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
     value: number[],
-    device: BesstDevice,
+    device: IGenericCanAdapter,
     requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {

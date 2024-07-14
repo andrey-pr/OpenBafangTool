@@ -1,9 +1,7 @@
+import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
 import { PromiseControls } from '../../types/common';
 import {
-    BesstReadedCanFrame,
     BesstPacketType,
-    DeviceNetworkId,
-    CanOperation,
 } from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
@@ -80,8 +78,8 @@ export function buildBesstCanCommandPacket(
 
 export function parseCanResponseFromBesst(
     array: number[],
-): BesstReadedCanFrame[] {
-    const packets: BesstReadedCanFrame[] = [];
+): ReadedCanFrame[] {
+    const packets: ReadedCanFrame[] = [];
     array = array.slice(3);
     while (array.length > 0) {
         if (array.slice(0, 13).filter((value) => value !== 0).length !== 0) {

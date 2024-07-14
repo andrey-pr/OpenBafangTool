@@ -1,5 +1,5 @@
 import HID from 'node-hid';
-import { EventEmitter } from 'stream';
+import { EventEmitter } from 'events';
 import log from 'electron-log/renderer';
 import {
     buildBesstCanCommandPacket,
@@ -11,17 +11,16 @@ import {
     BesstWritePacket,
     BesstPacketType,
     BesstActivationCode,
-    DeviceNetworkId,
-    CanOperation,
-    BesstReadedCanFrame,
 } from './besst-types';
 import { PromiseControls } from '../../types/common';
+import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
+import IGenericCanAdapter from '../can/generic';
 
 export function listBesstDevices(): HID.Device[] {
     return HID.devices().filter((device) => device.product === 'BaFang Besst');
 }
 
-class BesstDevice {
+class BesstDevice implements IGenericCanAdapter {
     private device?: HID.HID;
 
     public readonly emitter: EventEmitter;
@@ -35,7 +34,7 @@ class BesstDevice {
     private packetQueue: BesstWritePacket[] = [];
 
     private lastMultiframeCanResponse: {
-        [key: number]: BesstReadedCanFrame;
+        [key: number]: ReadedCanFrame;
     } = [];
 
     constructor(path?: string, vid?: number, pid?: number) {
@@ -64,7 +63,7 @@ class BesstDevice {
         setTimeout(this.processWriteQueue, 100);
     }
 
-    onDisconnect() {
+    private onDisconnect() {
         this.disconnect();
         this.emitter.emit('disconnection');
     }
@@ -138,7 +137,7 @@ class BesstDevice {
         }
     }
 
-    private processCanFrame(packet: BesstReadedCanFrame): void {
+    private processCanFrame(packet: ReadedCanFrame): void {
         if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
             if (packet.canOperationCode === CanOperation.MULTIFRAME_START) {
                 this.lastMultiframeCanResponse[packet.sourceDeviceCode] =
@@ -307,7 +306,7 @@ class BesstDevice {
         canOperationCode: CanOperation,
         canCommandCode: number,
         canCommandSubCode: number,
-        data = [0],
+        data: number[] = [0],
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.push(
@@ -330,7 +329,7 @@ class BesstDevice {
         canOperationCode: CanOperation,
         canCommandCode: number,
         canCommandSubCode: number,
-        data = [0],
+        data: number[] = [0],
     ): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.unshift(

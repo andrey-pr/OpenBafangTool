@@ -1,5 +1,5 @@
 import { WheelDiameterTable } from '../../../../constants/BafangCanConstants';
-import { BesstReadedCanFrame } from '../../../../device/besst/besst-types';
+import { ReadedCanFrame } from '../../../../types/BafangCanCommonTypes';
 import {
     BafangCanControllerParameter1,
     BafangCanControllerParameter2,
@@ -13,7 +13,7 @@ import { calculateChecksum } from '../../../../utils/can/utils';
 
 export class BafangCanControllerParser {
     public static package0(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanControllerRealtime0 {
         const tmp = (packet.data[7] << 8) + packet.data[6];
         return {
@@ -26,7 +26,7 @@ export class BafangCanControllerParser {
     }
 
     public static package1(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanControllerRealtime1 {
         return {
             speed: ((packet.data[1] << 8) + packet.data[0]) / 100,
@@ -39,7 +39,7 @@ export class BafangCanControllerParser {
     }
 
     public static parameter1(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanControllerParameter1 | null {
         if (packet.data[63] !== calculateChecksum(packet.data.slice(0, 63)))
             return null;
@@ -89,7 +89,7 @@ export class BafangCanControllerParser {
     }
 
     public static parameter2(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanControllerParameter2 | null {
         if (packet.data[63] !== calculateChecksum(packet.data.slice(0, 63)))
             return null;
@@ -112,7 +112,7 @@ export class BafangCanControllerParser {
     }
 
     public static parameter3(
-        packet: BesstReadedCanFrame,
+        packet: ReadedCanFrame,
     ): BafangCanControllerSpeedParameters | null {
         const diameter = WheelDiameterTable.find(
             (item) =>
