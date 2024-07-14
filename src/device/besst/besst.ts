@@ -25,11 +25,11 @@ class BesstDevice implements IGenericCanAdapter {
 
     public readonly emitter: EventEmitter;
 
-    private serialNumberPromise?: PromiseControls = undefined;
+    private serialNumberPromise?: PromiseControls;
 
-    private softwareVersionPromise?: PromiseControls = undefined;
+    private softwareVersionPromise?: PromiseControls;
 
-    private hardwareVersionPromise?: PromiseControls = undefined;
+    private hardwareVersionPromise?: PromiseControls;
 
     private packetQueue: BesstWritePacket[] = [];
 

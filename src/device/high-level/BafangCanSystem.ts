@@ -109,7 +109,12 @@ export default class BafangCanSystem implements IConnection {
                         resolve(true);
                     });
                 });
-            } else resolve(true);
+            } else {
+                let canable = this.device as CanableDevice;
+                await canable.connect();
+                console.log(await canable.testConnection());
+                resolve(true);
+            }
         });
     }
 

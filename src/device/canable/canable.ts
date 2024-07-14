@@ -1,4 +1,3 @@
-import HID from 'node-hid';
 import { EventEmitter } from 'events';
 import {
     CanOperation,
@@ -8,6 +7,7 @@ import {
 import IGenericCanAdapter from '../can/generic';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
+import { PromiseControls } from '../../types/common';
 
 export async function listCanableDevices(): Promise<string[]> {
     return (await SerialPort.list())
@@ -22,6 +22,10 @@ class CanableDevice implements IGenericCanAdapter {
 
     public readonly emitter: EventEmitter;
 
+    private serialReadBuffer: number[] = [];
+
+    private versionPromise?: PromiseControls;
+
     // private packetQueue: BesstWritePacket[] = [];
 
     private lastMultiframeCanResponse: {
@@ -30,12 +34,13 @@ class CanableDevice implements IGenericCanAdapter {
 
     constructor(path: string) {
         this.path = path;
-        // this.processReadedData = this.processReadedData.bind(this);
+        this.processReadedData = this.processReadedData.bind(this);
         // this.processWriteQueue = this.processWriteQueue.bind(this);
         // this.processCanFrame = this.processCanFrame.bind(this);
         this.connect = this.connect.bind(this);
         this.sendCanFrame = this.sendCanFrame.bind(this);
         this.sendCanFrameImmediately = this.sendCanFrameImmediately.bind(this);
+        this.getVersion = this.getVersion.bind(this);
         this.disconnect = this.disconnect.bind(this);
         this.emitter = new EventEmitter();
     }
@@ -77,37 +82,54 @@ class CanableDevice implements IGenericCanAdapter {
     //     setTimeout(this.processWriteQueue, packet.interval + 10);
     // }
 
-    // private processReadedData(data: Uint8Array): void {
-    //     if (data.length === 0) return;
-    //     const array: number[] = [...data];
-    //     switch (array[0]) {
-    //         case 0x10:
-    //         case 0x11:
-    //             console.log('UART bike connected - its not supported');
-    //             break;
-    //         case BesstPacketType.CAN_RESPONSE:
-    //             parseCanResponseFromBesst(array).forEach(this.processCanFrame);
-    //             break;
-    //         case BesstPacketType.BESST_HV:
-    //             this.hardwareVersionPromise?.resolve(hexMsgDecoder(array));
-    //             this.hardwareVersionPromise = undefined;
-    //             break;
-    //         case BesstPacketType.BESST_SN:
-    //             this.serialNumberPromise?.resolve(hexMsgDecoder(array));
-    //             this.serialNumberPromise = undefined;
-    //             break;
-    //         case BesstPacketType.BESST_SV:
-    //             this.softwareVersionPromise?.resolve(hexMsgDecoder(array));
-    //             this.softwareVersionPromise = undefined;
-    //             break;
-    //         case BesstPacketType.BESST_RESET:
-    //         case BesstPacketType.BESST_ACTIVATE:
-    //             break;
-    //         default:
-    //             console.log('Unknown message type - not supported yet');
-    //             break;
-    //     }
-    // }
+    private processReadedData(data: Uint8Array): void {
+        this.serialReadBuffer = [...this.serialReadBuffer, ...data];
+        if (this.serialReadBuffer.indexOf(0x0a) === -1) return;
+        let cmd = this.serialReadBuffer.splice(
+            0,
+            this.serialReadBuffer.indexOf(0x0a) + 1,
+        );
+        let cmdData = cmd.slice(1, cmd.length - 1).map((byte) => byte - 0x30);
+        console.log('Raw cmd:', cmd);
+        switch (cmd[0]) {
+            case 0x20:
+                let length = cmdData[0];
+                let frame_id: number[] = [
+                    (cmdData[1] << 4) + cmdData[2],
+                    (cmdData[3] << 4) + cmdData[4],
+                    (cmdData[5] << 4) + cmdData[6],
+                    (cmdData[7] << 4) + cmdData[8],
+                ];
+                let frame_data: number[] = [];
+                cmdData.slice(9, cmdData.length).forEach((value, index) => {
+                    index % 2 == 0
+                        ? frame_data.push(value)
+                        : (frame_data[frame_data.length - 1] =
+                              (frame_data[frame_data.length - 1] << 4) + value);
+                });
+                if (frame_data.length !== length) {
+                    console.log('Error (length)');
+                    break;
+                }
+                console.log('Got frame:', length, frame_id, frame_data);
+                break;
+            case 0x40:
+                console.log('Error');
+                break;
+            case 0xff:
+                if (cmdData.length !== 6) this.versionPromise?.reject();
+                let version: number[] = [
+                    (cmdData[0] << 4) + cmdData[1],
+                    (cmdData[2] << 4) + cmdData[3],
+                    (cmdData[4] << 4) + cmdData[5],
+                ];
+                this.versionPromise?.resolve(version);
+                this.versionPromise = undefined;
+                break;
+            default:
+                break;
+        }
+    }
 
     // private processCanFrame(packet: ReadedCanFrame): void {
     //     if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
@@ -204,22 +226,41 @@ class CanableDevice implements IGenericCanAdapter {
     //     }
     // }
 
-    public connect(): Promise<void> {
+    public async connect(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.device = new SerialPort({
                 path: this.path,
                 baudRate: 921600,
                 autoOpen: false,
             });
+            this.device.on('readable', () =>
+                this.processReadedData(this.device?.read()),
+            );
+            this.device.on('open', () => {
+                this.device?.write([0x11, 0x0a]);
+                resolve();
+            });
             this.device.open((error) => (error ? reject(error) : 0));
-            this.device.on('open', resolve);
-            // this.device.on('readable', this.processReadedData);
             // setTimeout(this.processWriteQueue, 100);
         });
     }
 
+    public getVersion(): Promise<number[]> {
+        this.device?.write([0xff, 0x0a]);
+        return new Promise<number[]>((resolve, reject) => {
+            this.versionPromise = { resolve, reject };
+        });
+    }
+
     public testConnection(): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
+        return new Promise<boolean>(async (resolve, reject) => {
+            if (!this.device) await this.connect();
+            this.getVersion()
+                .then((version) => {
+                    console.log(version);
+                    resolve(true);
+                })
+                .catch(reject);
             resolve(true);
         });
     }
