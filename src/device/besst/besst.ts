@@ -2,7 +2,6 @@ import HID from 'node-hid';
 import { EventEmitter } from 'events';
 import log from 'electron-log/renderer';
 import {
-    buildBesstCanCommandPacket,
     generateBesstWritePacket,
     hexMsgDecoder,
     parseCanResponseFromBesst,
@@ -13,8 +12,13 @@ import {
     BesstActivationCode,
 } from './besst-types';
 import { PromiseControls } from '../../types/common';
-import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
+import {
+    CanOperation,
+    DeviceNetworkId,
+    ParsedCanFrame,
+} from '../../types/BafangCanCommonTypes';
 import IGenericCanAdapter from '../can/generic';
+import { CanFrame } from '../can/can-types';
 
 export function listBesstDevices(): HID.Device[] {
     return HID.devices().filter((device) => device.product === 'BaFang Besst');
@@ -34,7 +38,7 @@ class BesstDevice implements IGenericCanAdapter {
     private packetQueue: BesstWritePacket[] = [];
 
     private lastMultiframeCanResponse: {
-        [key: number]: ReadedCanFrame;
+        [key: number]: ParsedCanFrame;
     } = [];
 
     constructor(path?: string, vid?: number, pid?: number) {
@@ -48,7 +52,6 @@ class BesstDevice implements IGenericCanAdapter {
         }
         this.processReadedData = this.processReadedData.bind(this);
         this.processWriteQueue = this.processWriteQueue.bind(this);
-        this.processCanFrame = this.processCanFrame.bind(this);
         this.getSerialNumber = this.getSerialNumber.bind(this);
         this.getSoftwareVersion = this.getSoftwareVersion.bind(this);
         this.getHardwareVersion = this.getHardwareVersion.bind(this);
@@ -114,7 +117,9 @@ class BesstDevice implements IGenericCanAdapter {
                 console.log('UART bike connected - its not supported');
                 break;
             case BesstPacketType.CAN_RESPONSE:
-                parseCanResponseFromBesst(array).forEach(this.processCanFrame);
+                parseCanResponseFromBesst(array).forEach((frame) => {
+                    this.emitter.emit('can', frame);
+                });
                 break;
             case BesstPacketType.BESST_HV:
                 this.hardwareVersionPromise?.resolve(hexMsgDecoder(array));
@@ -137,100 +142,100 @@ class BesstDevice implements IGenericCanAdapter {
         }
     }
 
-    private processCanFrame(packet: ReadedCanFrame): void {
-        if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
-            if (packet.canOperationCode === CanOperation.MULTIFRAME_START) {
-                this.lastMultiframeCanResponse[packet.sourceDeviceCode] =
-                    packet;
-                this.lastMultiframeCanResponse[packet.sourceDeviceCode].data =
-                    [];
-                this.packetQueue.unshift(
-                    buildBesstCanCommandPacket(
-                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
-                            .targetDeviceCode,
-                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
-                            .sourceDeviceCode,
-                        CanOperation.NORMAL_ACK,
-                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
-                            .canCommandCode,
-                        this.lastMultiframeCanResponse[packet.sourceDeviceCode]
-                            .canCommandSubCode,
-                    ),
-                );
-            } else if (packet.canOperationCode === CanOperation.MULTIFRAME) {
-                if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
-                    this.lastMultiframeCanResponse[
-                        packet.sourceDeviceCode
-                    ].data = [
-                        ...this.lastMultiframeCanResponse[
-                            packet.sourceDeviceCode
-                        ].data,
-                        ...packet.data,
-                    ];
-                    this.packetQueue.unshift(
-                        buildBesstCanCommandPacket(
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].targetDeviceCode,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].sourceDeviceCode,
-                            CanOperation.NORMAL_ACK,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].canCommandCode,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].canCommandSubCode,
-                        ),
-                    );
-                }
-            } else if (
-                packet.canOperationCode === CanOperation.MULTIFRAME_END
-            ) {
-                if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
-                    this.lastMultiframeCanResponse[
-                        packet.sourceDeviceCode
-                    ].data = [
-                        ...this.lastMultiframeCanResponse[
-                            packet.sourceDeviceCode
-                        ].data,
-                        ...packet.data,
-                    ];
-                    this.emitter.emit(
-                        'can',
-                        this.lastMultiframeCanResponse[packet.sourceDeviceCode],
-                    );
-                    this.packetQueue.unshift(
-                        buildBesstCanCommandPacket(
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].targetDeviceCode,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].sourceDeviceCode,
-                            CanOperation.NORMAL_ACK,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].canCommandCode,
-                            this.lastMultiframeCanResponse[
-                                packet.sourceDeviceCode
-                            ].canCommandSubCode,
-                        ),
-                    );
-                    delete this.lastMultiframeCanResponse[
-                        packet.sourceDeviceCode
-                    ];
-                }
-            } else if (packet.canOperationCode === CanOperation.NORMAL_ACK) {
-                this.emitter.emit('can', packet);
-            }
-        } else if (packet.canOperationCode === CanOperation.WRITE_CMD) {
-            this.emitter.emit('can', packet);
-        } else {
-            console.log('unknown command', packet);
-        }
-    }
+    // private processCanFrame(packet: ReadedCanFrame): void {
+    //     if (packet.targetDeviceCode === DeviceNetworkId.BESST) {
+    //         if (packet.canOperationCode === CanOperation.MULTIFRAME_START) {
+    //             this.lastMultiframeCanResponse[packet.sourceDeviceCode] =
+    //                 packet;
+    //             this.lastMultiframeCanResponse[packet.sourceDeviceCode].data =
+    //                 [];
+    //             this.packetQueue.unshift(
+    //                 buildBesstCanCommandPacket(
+    //                     this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+    //                         .targetDeviceCode,
+    //                     this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+    //                         .sourceDeviceCode,
+    //                     CanOperation.NORMAL_ACK,
+    //                     this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+    //                         .canCommandCode,
+    //                     this.lastMultiframeCanResponse[packet.sourceDeviceCode]
+    //                         .canCommandSubCode,
+    //                 ),
+    //             );
+    //         } else if (packet.canOperationCode === CanOperation.MULTIFRAME) {
+    //             if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
+    //                 this.lastMultiframeCanResponse[
+    //                     packet.sourceDeviceCode
+    //                 ].data = [
+    //                     ...this.lastMultiframeCanResponse[
+    //                         packet.sourceDeviceCode
+    //                     ].data,
+    //                     ...packet.data,
+    //                 ];
+    //                 this.packetQueue.unshift(
+    //                     buildBesstCanCommandPacket(
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].targetDeviceCode,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].sourceDeviceCode,
+    //                         CanOperation.NORMAL_ACK,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].canCommandCode,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].canCommandSubCode,
+    //                     ),
+    //                 );
+    //             }
+    //         } else if (
+    //             packet.canOperationCode === CanOperation.MULTIFRAME_END
+    //         ) {
+    //             if (this.lastMultiframeCanResponse[packet.sourceDeviceCode]) {
+    //                 this.lastMultiframeCanResponse[
+    //                     packet.sourceDeviceCode
+    //                 ].data = [
+    //                     ...this.lastMultiframeCanResponse[
+    //                         packet.sourceDeviceCode
+    //                     ].data,
+    //                     ...packet.data,
+    //                 ];
+    //                 this.emitter.emit(
+    //                     'can',
+    //                     this.lastMultiframeCanResponse[packet.sourceDeviceCode],
+    //                 );
+    //                 this.packetQueue.unshift(
+    //                     buildBesstCanCommandPacket(
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].targetDeviceCode,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].sourceDeviceCode,
+    //                         CanOperation.NORMAL_ACK,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].canCommandCode,
+    //                         this.lastMultiframeCanResponse[
+    //                             packet.sourceDeviceCode
+    //                         ].canCommandSubCode,
+    //                     ),
+    //                 );
+    //                 delete this.lastMultiframeCanResponse[
+    //                     packet.sourceDeviceCode
+    //                 ];
+    //             }
+    //         } else if (packet.canOperationCode === CanOperation.NORMAL_ACK) {
+    //             this.emitter.emit('can', packet);
+    //         }
+    //     } else if (packet.canOperationCode === CanOperation.WRITE_CMD) {
+    //         this.emitter.emit('can', packet);
+    //     } else {
+    //         console.log('unknown command', packet);
+    //     }
+    // }
 
     public getSerialNumber(): Promise<string> {
         this.packetQueue.push(
@@ -300,47 +305,27 @@ class BesstDevice implements IGenericCanAdapter {
         });
     }
 
-    public sendCanFrame(
-        source: DeviceNetworkId,
-        target: DeviceNetworkId,
-        canOperationCode: CanOperation,
-        canCommandCode: number,
-        canCommandSubCode: number,
-        data: number[] = [0],
-    ): Promise<void> {
+    public sendCanFrame(frame: CanFrame): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.push(
-                buildBesstCanCommandPacket(
-                    source,
-                    target,
-                    canOperationCode,
-                    canCommandCode,
-                    canCommandSubCode,
+                generateBesstWritePacket(
+                    BesstPacketType.CAN_REQUEST,
+                    frame.id.reverse(),
                     { resolve, reject },
-                    data,
+                    frame.data,
                 ),
             );
         });
     }
 
-    public sendCanFrameImmediately(
-        source: DeviceNetworkId,
-        target: DeviceNetworkId,
-        canOperationCode: CanOperation,
-        canCommandCode: number,
-        canCommandSubCode: number,
-        data: number[] = [0],
-    ): Promise<void> {
+    public sendCanFrameImmediately(frame: CanFrame): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.unshift(
-                buildBesstCanCommandPacket(
-                    source,
-                    target,
-                    canOperationCode,
-                    canCommandCode,
-                    canCommandSubCode,
+                generateBesstWritePacket(
+                    BesstPacketType.CAN_REQUEST,
+                    frame.id.reverse(),
                     { resolve, reject },
-                    data,
+                    frame.data,
                 ),
             );
         });

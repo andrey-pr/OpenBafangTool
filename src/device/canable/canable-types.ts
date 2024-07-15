@@ -1,4 +1,5 @@
 import { PromiseControls } from '../../types/common';
+import { CanFrame } from '../can/can-types';
 
 export enum CanableCommands {
     OPEN = 0x11,
@@ -29,10 +30,6 @@ export function getCanableCommandInterval(command: CanableCommands): number {
 
 export type CanableWritePacket = {
     type: CanableCommands;
-    frame?: {
-        length: number;
-        id: number[];
-        data: number[];
-    };
+    frame?: CanFrame;
     promise?: PromiseControls;
 };

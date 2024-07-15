@@ -12,6 +12,7 @@ import BafangCanController from './bafang-can-devices/BafangCanController';
 import { BafangCanBackup } from '../../logging/BafangCanBackup';
 import CanableDevice from '../canable/canable';
 import IGenericCanAdapter from '../can/generic';
+import { parseCanFrame } from './bafang-can-utils';
 
 export default class BafangCanSystem implements IConnection {
     private devicePath: string;
@@ -23,6 +24,8 @@ export default class BafangCanSystem implements IConnection {
     private device?: IGenericCanAdapter;
 
     public emitter: EventEmitter;
+
+    private can_emitter: EventEmitter;
 
     private _controller: BafangCanController | null = null;
 
@@ -42,6 +45,7 @@ export default class BafangCanSystem implements IConnection {
         this.devicePath = devicePath;
         this._converterType = converterType;
         this.emitter = new EventEmitter();
+        this.can_emitter = new EventEmitter();
         this.loadData = this.loadData.bind(this);
         this.disconnect = this.disconnect.bind(this);
         this.onDisconnect = this.onDisconnect.bind(this);
@@ -71,28 +75,35 @@ export default class BafangCanSystem implements IConnection {
         } else {
             this.device = new CanableDevice(this.devicePath);
         }
+        this.device.emitter.on('can', (frame) => {
+            this.can_emitter.emit('can', parseCanFrame(frame));
+        });
         this.requestManager = new RequestManager(this.device);
         this._controller = new BafangCanController(
             false,
+            this.can_emitter,
             this.device,
             this.requestManager,
         );
         this._display = new BafangCanDisplay(
             false,
+            this.can_emitter,
             this.device,
             this.requestManager,
         );
         this._sensor = new BafangCanSensor(
             false,
+            this.can_emitter,
             this.device,
             this.requestManager,
         );
         this._battery = new BafangCanBattery(
             false,
+            this.can_emitter,
             this.device,
             this.requestManager,
         );
-        this.device?.emitter.on('disconnection', this.onDisconnect);
+        this.device.emitter.on('disconnection', this.onDisconnect);
 
         return new Promise<boolean>(async (resolve) => {
             if (this._converterType === CanConverterType.BESST) {
@@ -104,6 +115,9 @@ export default class BafangCanSystem implements IConnection {
                     this._sensor?.connect();
                     this._battery?.connect();
                     this._besst?.connect();
+                    this.device?.emitter.on('can', (frame) => {
+                        this.can_emitter.emit('can', parseCanFrame(frame));
+                    });
                     this.device?.emitter.on('disconnection', this.onDisconnect);
                     besst.activateDriveUnit().then(() => {
                         resolve(true);
@@ -132,7 +146,7 @@ export default class BafangCanSystem implements IConnection {
         }
         return new Promise<boolean>((resolve) => {
             try {
-                // this.device = new HID.HID(this.devicePath);
+                //TODO
                 resolve(true);
             } catch (error) {
                 console.log(error);

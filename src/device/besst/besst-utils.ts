@@ -1,8 +1,10 @@
-import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
-import { PromiseControls } from '../../types/common';
 import {
-    BesstPacketType,
-} from './besst-types';
+    CanOperation,
+    DeviceNetworkId,
+} from '../../types/BafangCanCommonTypes';
+import { PromiseControls } from '../../types/common';
+import { CanFrame } from '../can/can-types';
+import { BesstPacketType } from './besst-types';
 
 export function hexMsgDecoder(msg: number[]) {
     return String.fromCharCode.apply(
@@ -54,47 +56,42 @@ export function generateBesstWritePacket(
     };
 }
 
-export function buildBesstCanCommandPacket(
-    source: DeviceNetworkId,
-    target: DeviceNetworkId,
-    canOperationCode: CanOperation,
-    canCommandCode: number,
-    canCommandSubCode: number,
-    promise?: PromiseControls,
-    data: number[] = [0],
-) {
-    return generateBesstWritePacket(
-        BesstPacketType.CAN_REQUEST,
-        [
-            canCommandSubCode,
-            canCommandCode,
-            ((target & 0b11111) << 3) + (canOperationCode & 0b111),
-            source & 0b11111,
-        ],
-        promise,
-        data,
-    );
-}
+// export function buildBesstCanCommandPacket(
+//     source: DeviceNetworkId,
+//     target: DeviceNetworkId,
+//     canOperationCode: CanOperation,
+//     canCommandCode: number,
+//     canCommandSubCode: number,
+//     promise?: PromiseControls,
+//     data: number[] = [0],
+// ) {
+//     return generateBesstWritePacket(
+//         BesstPacketType.CAN_REQUEST,
+//         [
+//             canCommandSubCode,
+//             canCommandCode,
+//             ((target & 0b11111) << 3) + (canOperationCode & 0b111),
+//             source & 0b11111,
+//         ],
+//         promise,
+//         data,
+//     );
+// }
 
-export function parseCanResponseFromBesst(
-    array: number[],
-): ReadedCanFrame[] {
-    const packets: ReadedCanFrame[] = [];
+export function parseCanResponseFromBesst(array: number[]): CanFrame[] {
+    const packets: CanFrame[] = [];
     array = array.slice(3);
+    console.log('raw data from besst', array)
     while (array.length > 0) {
         if (array.slice(0, 13).filter((value) => value !== 0).length !== 0) {
             packets.push({
-                canCommandCode: array[1],
-                canCommandSubCode: array[0],
-                canOperationCode: array[2] & 0b0111,
-                sourceDeviceCode: array[3] & 0b1111,
-                targetDeviceCode: (array[2] & 0b01111000) >> 3,
-                dataLength: array[4],
+                id: array.slice(0, 4).reverse(),
                 data: array.slice(5, 5 + array[4]),
             });
         }
         array = array.slice(13);
     }
+    console.log('parsed data from besst', packets)
 
     return packets;
 }

@@ -11,11 +11,18 @@ import { charsToString } from '../../../utils/utils';
 import log from 'electron-log/renderer';
 import { RequestManager } from '../../../utils/can/RequestManager';
 import EventEmitter from 'events';
-import { readParameter, rereadParameter } from '../../../utils/can/utils';
+import {
+    readParameter,
+    rereadParameter,
+} from '../../../utils/can/utils';
 import { CanReadCommandsList } from '../../../constants/BafangCanConstants';
 import { BafangCanSensorParser } from '../../../parser/bafang/can/parser/Sensor';
-import { DeviceNetworkId, ReadedCanFrame } from '../../../types/BafangCanCommonTypes';
+import {
+    DeviceNetworkId,
+    ParsedCanFrame,
+} from '../../../types/BafangCanCommonTypes';
 import IGenericCanAdapter from '../../can/generic';
+import { parseCanFrame } from '../bafang-can-utils';
 
 export default class BafangCanSensor {
     private converterDevice?: IGenericCanAdapter;
@@ -23,6 +30,8 @@ export default class BafangCanSensor {
     private requestManager?: RequestManager;
 
     public emitter: EventEmitter;
+
+    private can_emitter?: EventEmitter;
 
     private readingInProgress: boolean = false;
 
@@ -42,6 +51,7 @@ export default class BafangCanSensor {
 
     constructor(
         demo: boolean,
+        can_emitter?: EventEmitter,
         converterDevice?: IGenericCanAdapter,
         requestManager?: RequestManager,
     ) {
@@ -57,8 +67,11 @@ export default class BafangCanSensor {
         this.demo = demo;
         this.converterDevice = converterDevice;
         this.requestManager = requestManager;
+        this.can_emitter = can_emitter;
         this.emitter = new EventEmitter();
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
@@ -66,14 +79,16 @@ export default class BafangCanSensor {
     }
 
     public connect() {
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
         );
     }
 
-    private processParsedCanResponse(response: ReadedCanFrame) {
+    private processParsedCanResponse(response: ParsedCanFrame) {
         if (
             !this.converterDevice ||
             response.sourceDeviceCode !== DeviceNetworkId.TORQUE_SENSOR

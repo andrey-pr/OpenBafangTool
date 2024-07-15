@@ -1,5 +1,6 @@
 import IGenericCanAdapter from '../../device/can/generic';
-import { CanOperation, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
+import { generateCanFrameId } from '../../device/high-level/bafang-can-utils';
+import { CanOperation, ParsedCanFrame } from '../../types/BafangCanCommonTypes';
 import { PromiseControls } from '../../types/common';
 
 type SentRequest = {
@@ -47,13 +48,16 @@ export class RequestManager {
                         return;
                     }
                     this.converterDevice
-                        .sendCanFrame(
-                            source,
-                            target,
-                            can_operation,
-                            code,
-                            subcode,
-                        )
+                        .sendCanFrame({
+                            id: generateCanFrameId(
+                                source,
+                                target,
+                                can_operation,
+                                code,
+                                subcode,
+                            ),
+                            data: [0],
+                        })
                         .then(() =>
                             this.registerRequest(
                                 source,
@@ -70,7 +74,7 @@ export class RequestManager {
         }
     }
 
-    public resolveRequest(response: ReadedCanFrame, success = true): void {
+    public resolveRequest(response: ParsedCanFrame, success = true): void {
         if (
             this.sentRequests[response.sourceDeviceCode] &&
             this.sentRequests[response.sourceDeviceCode][

@@ -37,8 +37,12 @@ import {
     prepareSingleMileageWritePromise,
     prepareTotalMileageWritePromise,
 } from '../../../parser/bafang/can/serializer/Display';
-import { DeviceNetworkId, ReadedCanFrame } from '../../../types/BafangCanCommonTypes';
+import {
+    DeviceNetworkId,
+    ParsedCanFrame,
+} from '../../../types/BafangCanCommonTypes';
 import IGenericCanAdapter from '../../can/generic';
+import { parseCanFrame } from '../bafang-can-utils';
 
 export default class BafangCanDisplay {
     private converterDevice?: IGenericCanAdapter;
@@ -46,6 +50,8 @@ export default class BafangCanDisplay {
     private requestManager?: RequestManager;
 
     public emitter: EventEmitter;
+
+    private can_emitter?: EventEmitter;
 
     private readingInProgress: boolean = false;
 
@@ -77,6 +83,7 @@ export default class BafangCanDisplay {
 
     constructor(
         demo: boolean,
+        can_emitter?: EventEmitter,
         converterDevice?: IGenericCanAdapter,
         requestManager?: RequestManager,
     ) {
@@ -98,8 +105,11 @@ export default class BafangCanDisplay {
         this.demo = demo;
         this.converterDevice = converterDevice;
         this.requestManager = requestManager;
+        this.can_emitter = can_emitter;
         this.emitter = new EventEmitter();
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
@@ -107,14 +117,16 @@ export default class BafangCanDisplay {
     }
 
     public connect() {
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
         );
     }
 
-    private processParsedCanResponse(response: ReadedCanFrame) {
+    private processParsedCanResponse(response: ParsedCanFrame) {
         if (
             !this.converterDevice ||
             response.sourceDeviceCode !== DeviceNetworkId.DISPLAY
@@ -335,7 +347,9 @@ export default class BafangCanDisplay {
             return new Promise<boolean>((resolve) => resolve(false));
         }
         if (this.demo) {
-            console.log(`Demo mode: new display time is ${hours}:${minutes}:${seconds}`);
+            console.log(
+                `Demo mode: new display time is ${hours}:${minutes}:${seconds}`,
+            );
             return new Promise<boolean>((resolve) => resolve(true));
         }
         return new Promise<boolean>((resolve, reject) => {

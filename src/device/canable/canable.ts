@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import {
     CanOperation,
     DeviceNetworkId,
-    ReadedCanFrame,
+    ParsedCanFrame,
 } from '../../types/BafangCanCommonTypes';
 import IGenericCanAdapter from '../can/generic';
 import { SerialPort } from 'serialport';
@@ -14,6 +14,7 @@ import {
     getCanableCommandInterval,
     getCanableCommandTimeout,
 } from './canable-types';
+import { CanFrame } from '../can/can-types';
 
 export async function listCanableDevices(): Promise<string[]> {
     return (await SerialPort.list())
@@ -35,7 +36,7 @@ class CanableDevice implements IGenericCanAdapter {
     private packetQueue: CanableWritePacket[] = [];
 
     private lastMultiframeCanResponse: {
-        [key: number]: ReadedCanFrame;
+        [key: number]: ParsedCanFrame;
     } = [];
 
     constructor(path: string) {
@@ -64,7 +65,7 @@ class CanableDevice implements IGenericCanAdapter {
                 this.versionPromise = undefined;
             }, getCanableCommandTimeout(packet.type));
         } else if (packet.type === CanableCommands.FRAME && packet.frame) {
-            bytes.push((packet.frame.length & 0xf) + 0x30);
+            bytes.push((packet.frame.data.length & 0xf) + 0x30);
             packet.frame.id.forEach((value) => {
                 bytes.push(((value & 0xf0) >> 4) + 0x30);
                 bytes.push((value & 0xf) + 0x30);
@@ -120,12 +121,7 @@ class CanableDevice implements IGenericCanAdapter {
                 }
                 console.log('Got frame:', length, frame_id, frame_data);
                 this.emitter.emit('can', {
-                    canCommandCode: frame_id[2],
-                    canCommandSubCode: frame_id[3],
-                    canOperationCode: frame_id[1] & 0b111,
-                    sourceDeviceCode: frame_id[0],
-                    targetDeviceCode: (frame_id[1] & 0b11111000) >> 3,
-                    dataLength: length,
+                    id: frame_id,
                     data: frame_data,
                 });
                 break;
@@ -285,40 +281,17 @@ class CanableDevice implements IGenericCanAdapter {
         });
     }
 
-    public sendCanFrame(
-        source: DeviceNetworkId,
-        target: DeviceNetworkId,
-        canOperationCode: CanOperation,
-        canCommandCode: number,
-        canCommandSubCode: number,
-        data: number[] = [0],
-    ): Promise<void> {
+    public sendCanFrame(frame: CanFrame): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.packetQueue.push({
                 type: CanableCommands.FRAME,
-                frame: {
-                    length: data.length,
-                    id: [
-                        source & 0b11111,
-                        ((target & 0b11111) << 3) + canOperationCode,
-                        canCommandCode,
-                        canCommandSubCode,
-                    ],
-                    data,
-                },
+                frame,
                 promise: { resolve, reject },
             });
         });
     }
 
-    public sendCanFrameImmediately(
-        source: DeviceNetworkId,
-        target: DeviceNetworkId,
-        canOperationCode: CanOperation,
-        canCommandCode: number,
-        canCommandSubCode: number,
-        data: number[] = [0],
-    ): Promise<void> {
+    public sendCanFrameImmediately(frame: CanFrame): Promise<void> {
         return new Promise<void>((resolve, reject) => {});
     }
 

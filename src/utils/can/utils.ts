@@ -1,6 +1,12 @@
 import { CanCommand } from '../../constants/BafangCanConstants';
+import { CanFrame } from '../../device/can/can-types';
 import IGenericCanAdapter from '../../device/can/generic';
-import { CanOperation, DeviceNetworkId, ReadedCanFrame } from '../../types/BafangCanCommonTypes';
+import { generateCanFrameId } from '../../device/high-level/bafang-can-utils';
+import {
+    CanOperation,
+    DeviceNetworkId,
+    ParsedCanFrame,
+} from '../../types/BafangCanCommonTypes';
 import { PromiseControls } from '../../types/common';
 import { RequestManager } from './RequestManager';
 
@@ -13,17 +19,20 @@ export function calculateChecksum(bytes: number[]): number {
 }
 
 export function rereadParameter(
-    dto: ReadedCanFrame,
+    dto: ParsedCanFrame,
     device: IGenericCanAdapter,
 ): void {
     //TODO
-    device.sendCanFrame(
-        DeviceNetworkId.BESST,
-        dto.sourceDeviceCode,
-        CanOperation.READ_CMD,
-        dto.canCommandCode,
-        dto.canCommandSubCode,
-    );
+    device.sendCanFrame({
+        id: generateCanFrameId(
+            DeviceNetworkId.BESST,
+            dto.sourceDeviceCode,
+            CanOperation.READ_CMD,
+            dto.canCommandCode,
+            dto.canCommandSubCode,
+        ),
+        data: [0],
+    });
 }
 
 export function readParameter(
@@ -34,13 +43,16 @@ export function readParameter(
     promise?: PromiseControls,
 ): void {
     device
-        .sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.READ_CMD,
-            can_command.canCommandCode,
-            can_command.canCommandSubCode,
-        )
+        .sendCanFrame({
+            id: generateCanFrameId(
+                DeviceNetworkId.BESST,
+                target,
+                CanOperation.READ_CMD,
+                can_command.canCommandCode,
+                can_command.canCommandSubCode,
+            ),
+            data: [0],
+        })
         .then(() =>
             requestManager.registerRequest(
                 DeviceNetworkId.BESST,
@@ -56,20 +68,22 @@ export function readParameter(
 export function writeShortParameter(
     target: DeviceNetworkId,
     can_command: CanCommand,
-    value: number[],
+    data: number[],
     device: IGenericCanAdapter,
     requestManager: RequestManager,
     promise?: PromiseControls,
 ): void {
     device
-        .sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.WRITE_CMD,
-            can_command.canCommandCode,
-            can_command.canCommandSubCode,
-            value,
-        )
+        .sendCanFrame({
+            id: generateCanFrameId(
+                DeviceNetworkId.BESST,
+                target,
+                CanOperation.WRITE_CMD,
+                can_command.canCommandCode,
+                can_command.canCommandSubCode,
+            ),
+            data,
+        })
         .then(() =>
             requestManager.registerRequest(
                 DeviceNetworkId.BESST,
@@ -91,44 +105,52 @@ export function writeLongParameter(
     promise?: PromiseControls,
 ): void {
     let arrayClone = [...value];
-    device.sendCanFrame(
-        DeviceNetworkId.BESST,
-        target,
-        CanOperation.WRITE_CMD,
-        can_command.canCommandCode,
-        can_command.canCommandSubCode,
-        [arrayClone.length],
-    );
-    device.sendCanFrame(
-        DeviceNetworkId.BESST,
-        target,
-        CanOperation.MULTIFRAME_START,
-        can_command.canCommandCode,
-        can_command.canCommandSubCode,
-        arrayClone.slice(0, 8),
-    );
+    device.sendCanFrame({
+        id: generateCanFrameId(
+            DeviceNetworkId.BESST,
+            target,
+            CanOperation.WRITE_CMD,
+            can_command.canCommandCode,
+            can_command.canCommandSubCode,
+        ),
+        data: [arrayClone.length],
+    });
+    device.sendCanFrame({
+        id: generateCanFrameId(
+            DeviceNetworkId.BESST,
+            target,
+            CanOperation.MULTIFRAME_START,
+            can_command.canCommandCode,
+            can_command.canCommandSubCode,
+        ),
+        data: arrayClone.slice(0, 8),
+    });
     arrayClone = arrayClone.slice(8);
     let packages = 0;
     do {
-        device.sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.MULTIFRAME,
-            0,
-            packages++,
-            arrayClone.slice(0, 8),
-        );
+        device.sendCanFrame({
+            id: generateCanFrameId(
+                DeviceNetworkId.BESST,
+                target,
+                CanOperation.MULTIFRAME,
+                0,
+                packages++,
+            ),
+            data: arrayClone.slice(0, 8),
+        });
         arrayClone = arrayClone.slice(8);
     } while (arrayClone.length > 8);
     device
-        .sendCanFrame(
-            DeviceNetworkId.BESST,
-            target,
-            CanOperation.MULTIFRAME_END,
-            0,
-            packages,
-            arrayClone.slice(0, 8),
-        )
+        .sendCanFrame({
+            id: generateCanFrameId(
+                DeviceNetworkId.BESST,
+                target,
+                CanOperation.MULTIFRAME_END,
+                0,
+                packages,
+            ),
+            data: arrayClone.slice(0, 8),
+        })
         .then(() =>
             requestManager.registerRequest(
                 DeviceNetworkId.BESST,

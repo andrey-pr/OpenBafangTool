@@ -18,12 +18,11 @@ export enum DeviceNetworkId {
     BROADCAST = 0x1f,
 }
 
-export type ReadedCanFrame = {
+export type ParsedCanFrame = {
     canCommandCode: number;
     canCommandSubCode: number;
     canOperationCode: CanOperation;
     sourceDeviceCode: DeviceNetworkId;
     targetDeviceCode: DeviceNetworkId;
-    dataLength: number;
     data: number[];
 };

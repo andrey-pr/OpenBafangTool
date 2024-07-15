@@ -41,8 +41,12 @@ import {
     prepareParameter2WritePromise,
     prepareSpeedPackageWritePromise,
 } from '../../../parser/bafang/can/serializer/Controller';
-import { DeviceNetworkId, ReadedCanFrame } from '../../../types/BafangCanCommonTypes';
+import {
+    DeviceNetworkId,
+    ParsedCanFrame,
+} from '../../../types/BafangCanCommonTypes';
 import IGenericCanAdapter from '../../can/generic';
+import { parseCanFrame } from '../bafang-can-utils';
 
 export default class BafangCanController {
     private converterDevice?: IGenericCanAdapter;
@@ -50,6 +54,8 @@ export default class BafangCanController {
     private requestManager?: RequestManager;
 
     public emitter: EventEmitter;
+
+    private can_emitter?: EventEmitter;
 
     private readingInProgress: boolean = false;
 
@@ -83,6 +89,7 @@ export default class BafangCanController {
 
     constructor(
         demo: boolean,
+        can_emitter?: EventEmitter,
         converterDevice?: IGenericCanAdapter,
         requestManager?: RequestManager,
     ) {
@@ -105,8 +112,11 @@ export default class BafangCanController {
         this.demo = demo;
         this.converterDevice = converterDevice;
         this.requestManager = requestManager;
+        this.can_emitter = can_emitter;
         this.emitter = new EventEmitter();
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
@@ -114,14 +124,16 @@ export default class BafangCanController {
     }
 
     public connect() {
-        this.converterDevice?.emitter.on('can', this.processParsedCanResponse);
+        this.can_emitter?.on('can', (parsed_frame) =>
+            this.processParsedCanResponse(parsed_frame),
+        );
         this.converterDevice?.emitter.on(
             'disconnection',
             () => (this.converterDevice = undefined),
         );
     }
 
-    private processParsedCanResponse(response: ReadedCanFrame) {
+    private processParsedCanResponse(response: ParsedCanFrame) {
         if (
             !this.converterDevice ||
             response.sourceDeviceCode !== DeviceNetworkId.DRIVE_UNIT
