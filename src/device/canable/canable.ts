@@ -8,6 +8,12 @@ import IGenericCanAdapter from '../can/generic';
 import { SerialPort } from 'serialport';
 import { AutoDetectTypes } from '@serialport/bindings-cpp';
 import { PromiseControls } from '../../types/common';
+import {
+    CanableCommands,
+    CanableWritePacket,
+    getCanableCommandInterval,
+    getCanableCommandTimeout,
+} from './canable-types';
 
 export async function listCanableDevices(): Promise<string[]> {
     return (await SerialPort.list())
@@ -26,7 +32,7 @@ class CanableDevice implements IGenericCanAdapter {
 
     private versionPromise?: PromiseControls;
 
-    // private packetQueue: BesstWritePacket[] = [];
+    private packetQueue: CanableWritePacket[] = [];
 
     private lastMultiframeCanResponse: {
         [key: number]: ReadedCanFrame;
@@ -35,7 +41,7 @@ class CanableDevice implements IGenericCanAdapter {
     constructor(path: string) {
         this.path = path;
         this.processReadedData = this.processReadedData.bind(this);
-        // this.processWriteQueue = this.processWriteQueue.bind(this);
+        this.processWriteQueue = this.processWriteQueue.bind(this);
         // this.processCanFrame = this.processCanFrame.bind(this);
         this.connect = this.connect.bind(this);
         this.sendCanFrame = this.sendCanFrame.bind(this);
@@ -45,42 +51,43 @@ class CanableDevice implements IGenericCanAdapter {
         this.emitter = new EventEmitter();
     }
 
-    // private processWriteQueue(): void {
-    //     if (this.packetQueue.length === 0) {
-    //         setTimeout(this.processWriteQueue, 100);
-    //         return;
-    //     }
-    //     const packet = this.packetQueue.shift() as BesstWritePacket;
-    //     if (
-    //         packet.type === BesstPacketType.CAN_REQUEST ||
-    //         packet.type === BesstPacketType.BESST_ACTIVATE
-    //     ) {
-    //         packet.promise?.resolve();
-    //     } else if (packet.type === BesstPacketType.BESST_HV) {
-    //         setTimeout(() => {
-    //             this.hardwareVersionPromise?.reject();
-    //             this.hardwareVersionPromise = undefined;
-    //         }, packet.timeout);
-    //     } else if (packet.type === BesstPacketType.BESST_SV) {
-    //         setTimeout(() => {
-    //             this.softwareVersionPromise?.reject();
-    //             this.softwareVersionPromise = undefined;
-    //         }, packet.timeout);
-    //     } else if (packet.type === BesstPacketType.BESST_SN) {
-    //         setTimeout(() => {
-    //             this.serialNumberPromise?.reject();
-    //             this.serialNumberPromise = undefined;
-    //         }, packet.timeout);
-    //     }
-    //     try {
-    //         log.info('sent besst package:', packet.data);
-    //         this.device?.write(packet.data);
-    //     } catch (e) {
-    //         console.log('write error:', e);
-    //         this.onDisconnect();
-    //     }
-    //     setTimeout(this.processWriteQueue, packet.interval + 10);
-    // }
+    private processWriteQueue(): void {
+        if (this.packetQueue.length === 0) {
+            setTimeout(this.processWriteQueue, 100);
+            return;
+        }
+        const packet = this.packetQueue.shift() as CanableWritePacket;
+        let bytes: number[] = [packet.type];
+        if (packet.type === CanableCommands.VERSION) {
+            setTimeout(() => {
+                this.versionPromise?.reject();
+                this.versionPromise = undefined;
+            }, getCanableCommandTimeout(packet.type));
+        } else if (packet.type === CanableCommands.FRAME && packet.frame) {
+            bytes.push((packet.frame.length & 0xf) + 0x30);
+            packet.frame.id.forEach((value) => {
+                bytes.push(((value & 0xf0) >> 4) + 0x30);
+                bytes.push((value & 0xf) + 0x30);
+            });
+            packet.frame.data.forEach((value) => {
+                bytes.push(((value & 0xf0) >> 4) + 0x30);
+                bytes.push((value & 0xf) + 0x30);
+            });
+        }
+        bytes.push(0x0a);
+        packet.promise?.resolve();
+        try {
+            // log.info('sent besst package:', packet.data);
+            this.device?.write(bytes);
+        } catch (e) {
+            console.log('write error:', e);
+            // this.onDisconnect();
+        }
+        setTimeout(
+            this.processWriteQueue,
+            getCanableCommandInterval(packet.type) + 10,
+        );
+    }
 
     private processReadedData(data: Uint8Array): void {
         this.serialReadBuffer = [...this.serialReadBuffer, ...data];
@@ -112,6 +119,15 @@ class CanableDevice implements IGenericCanAdapter {
                     break;
                 }
                 console.log('Got frame:', length, frame_id, frame_data);
+                this.emitter.emit('can', {
+                    canCommandCode: frame_id[2],
+                    canCommandSubCode: frame_id[3],
+                    canOperationCode: frame_id[1] & 0b111,
+                    sourceDeviceCode: frame_id[0],
+                    targetDeviceCode: (frame_id[1] & 0b11111000) >> 3,
+                    dataLength: length,
+                    data: frame_data,
+                });
                 break;
             case 0x40:
                 console.log('Error');
@@ -237,17 +253,21 @@ class CanableDevice implements IGenericCanAdapter {
                 this.processReadedData(this.device?.read()),
             );
             this.device.on('open', () => {
-                this.device?.write([0x11, 0x0a]);
+                this.packetQueue.push({
+                    type: CanableCommands.OPEN,
+                });
                 resolve();
             });
             this.device.open((error) => (error ? reject(error) : 0));
-            // setTimeout(this.processWriteQueue, 100);
+            setTimeout(this.processWriteQueue, 100);
         });
     }
 
     public getVersion(): Promise<number[]> {
-        this.device?.write([0xff, 0x0a]);
         return new Promise<number[]>((resolve, reject) => {
+            this.packetQueue.push({
+                type: CanableCommands.VERSION,
+            });
             this.versionPromise = { resolve, reject };
         });
     }
@@ -273,7 +293,22 @@ class CanableDevice implements IGenericCanAdapter {
         canCommandSubCode: number,
         data: number[] = [0],
     ): Promise<void> {
-        return new Promise<void>((resolve, reject) => {});
+        return new Promise<void>((resolve, reject) => {
+            this.packetQueue.push({
+                type: CanableCommands.FRAME,
+                frame: {
+                    length: data.length,
+                    id: [
+                        source & 0b11111,
+                        ((target & 0b11111) << 3) + canOperationCode,
+                        canCommandCode,
+                        canCommandSubCode,
+                    ],
+                    data,
+                },
+                promise: { resolve, reject },
+            });
+        });
     }
 
     public sendCanFrameImmediately(
