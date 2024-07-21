@@ -44,6 +44,7 @@ import {
 import TorqueTableComponent from '../../../../components/TorqueTableComponent';
 import { WheelDiameterTable } from '../../../../../constants/BafangCanConstants';
 import { updateField } from '../../../../../utils/utils';
+import i18n from '../../../../../i18n/i18n';
 
 const { Text } = Typography;
 
@@ -231,22 +232,22 @@ class BafangCanMotorSettingsView extends React.Component<
                 generateSimpleNumberListItem(
                     'Remaining trip distance',
                     realtime0.remaining_distance,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
                     'Last trip distance',
                     realtime0.single_trip,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
-                    'Cadence',
+                    i18n.t('cadence'),
                     realtime0.cadence,
-                    'RPM',
+                    i18n.t('rpm'),
                 ),
                 generateSimpleNumberListItem(
-                    'Torque value',
+                    i18n.t('torque_value'),
                     realtime0.torque,
-                    'mV',
+                    i18n.t('mv'),
                 ),
             ];
         } else {
@@ -264,9 +265,12 @@ class BafangCanMotorSettingsView extends React.Component<
                     'Last trip distance',
                     'Not available yet',
                 ),
-                generateSimpleStringListItem('Cadence', 'Not available yet'),
                 generateSimpleStringListItem(
-                    'Torque value',
+                    i18n.t('cadence'),
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    i18n.t('torque_value'),
                     'Not available yet',
                 ),
             ];
@@ -275,24 +279,39 @@ class BafangCanMotorSettingsView extends React.Component<
         if (realtime1) {
             items = [
                 ...items,
-                generateSimpleNumberListItem('Voltage', realtime1.voltage, 'V'),
+                generateSimpleNumberListItem(
+                    i18n.t('voltage'),
+                    realtime1.voltage,
+                    i18n.t('v'),
+                ),
                 generateSimpleNumberListItem(
                     'Controller temperature',
                     realtime1.temperature,
-                    'C°',
+                    i18n.t('c_degree'),
                 ),
                 generateSimpleNumberListItem(
                     'Motor temperature',
                     realtime1.motor_temperature,
-                    'C°',
+                    i18n.t('c_degree'),
                 ),
-                generateSimpleNumberListItem('Current', realtime1.current, 'A'),
-                generateSimpleNumberListItem('Speed', realtime1.speed, 'Km/H'),
+                generateSimpleNumberListItem(
+                    i18n.t('current'),
+                    realtime1.current,
+                    i18n.t('a'),
+                ),
+                generateSimpleNumberListItem(
+                    i18n.t('speed'),
+                    realtime1.speed,
+                    i18n.t('km/h'),
+                ),
             ];
         } else {
             items = [
                 ...items,
-                generateSimpleStringListItem('Voltage', 'Not available yet'),
+                generateSimpleStringListItem(
+                    i18n.t('voltage'),
+                    'Not available yet',
+                ),
                 generateSimpleStringListItem(
                     'Controller temperature',
                     'Not available yet',
@@ -301,8 +320,14 @@ class BafangCanMotorSettingsView extends React.Component<
                     'Motor temperature',
                     'Not available yet',
                 ),
-                generateSimpleStringListItem('Current', 'Not available yet'),
-                generateSimpleStringListItem('Speed', 'Not available yet'),
+                generateSimpleStringListItem(
+                    i18n.t('current'),
+                    'Not available yet',
+                ),
+                generateSimpleStringListItem(
+                    i18n.t('speed'),
+                    'Not available yet',
+                ),
             ];
         }
         return items;
@@ -315,7 +340,7 @@ class BafangCanMotorSettingsView extends React.Component<
             generateSimpleNumberListItem(
                 'System voltage',
                 parameter1.system_voltage,
-                'V',
+                i18n.t('v'),
             ),
             generateAnnotatedEditableNumberListItem(
                 'Current limit',
@@ -325,7 +350,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         current_limit,
                     }),
                 'Be very careful with this parameter! Too big value may burn engine!',
-                'A',
+                i18n.t('a'),
                 1,
                 100,
             ),
@@ -337,7 +362,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         overvoltage,
                     }),
                 'Controller will show overvoltage error when this limit is reached',
-                'V',
+                i18n.t('v'),
                 0,
                 256,
             ),
@@ -349,7 +374,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         undervoltage_under_load,
                     }),
                 'Controller will stop motor when this limit is reached under load (during riding) to protect battery from overdischarge',
-                'V',
+                i18n.t('v'),
                 0,
                 256,
             ),
@@ -361,7 +386,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         undervoltage,
                     }),
                 'Controller will not launch motor motor when this limit is reached without load to protect battery from overdischarge',
-                'V',
+                i18n.t('v'),
                 0,
                 256,
             ),
@@ -379,7 +404,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.setState({
                         battery_capacity,
                     }),
-                'mAh',
+                i18n.t('mah'),
                 1,
                 65000,
             ),
@@ -390,7 +415,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.setState({
                         full_capacity_range,
                     }),
-                'Km',
+                i18n.t('km'),
                 1,
                 255,
             ),
@@ -399,7 +424,7 @@ class BafangCanMotorSettingsView extends React.Component<
             //     parameter1.max_current_on_low_charge,
             //     (max_current_on_low_charge: number) =>
             //         this.setState({ max_current_on_low_charge }),
-            //     'A',
+            //     i18n.t('a'),
             //     1,
             //     100,
             // ),
@@ -411,14 +436,14 @@ class BafangCanMotorSettingsView extends React.Component<
         const { parameter1 } = this.state;
         if (!parameter1) return [];
         const MotorType: { [key: number]: string } = {
-            0: 'Hub motor with reducer',
-            1: 'Central motor',
-            2: 'Direct-drive motor (hud motor without reducer)',
+            0: i18n.t('hub_motor_with_reducer'),
+            1: i18n.t('central_motor'),
+            2: i18n.t('hub_motor_without_reducer'),
         };
         const TemperatureSensorType: { [key: number]: string } = {
-            0: 'No sensor',
-            1: '10K',
-            2: 'PT1000',
+            0: i18n.t('no_sensor'),
+            1: i18n.t('thermistor_10k'),
+            2: i18n.t('thermocouple_pt1000'),
         };
         return [
             generateSimpleNumberListItem(
@@ -427,12 +452,12 @@ class BafangCanMotorSettingsView extends React.Component<
             ),
             generateSimpleStringListItem(
                 'Coaster brake supported',
-                parameter1.coaster_brake ? 'Yes' : 'No',
+                parameter1.coaster_brake ? i18n.t('yes') : i18n.t('no'),
             ),
             generateSimpleNumberListItem(
                 'Max motor rotation speed',
                 parameter1.motor_max_rotor_rpm,
-                'RPM',
+                i18n.t('rpm'),
             ),
             generateSimpleNumberListItem(
                 'Signals per rotation from cadence sensor',
@@ -502,7 +527,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.setState({
                         current_loading_time,
                     }),
-                'S',
+                i18n.t('s'),
                 0.1,
                 20,
                 1,
@@ -515,7 +540,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.setState({
                         current_shedding_time,
                     }),
-                'S',
+                i18n.t('s'),
                 0.1,
                 20,
                 1,
@@ -544,7 +569,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         throttle_start_voltage,
                     }),
                 'Voltage from throttle lever on minimum power (not on zero power! on this level engine starts to work)',
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -557,7 +582,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         throttle_max_voltage,
                     }),
                 'Voltage from throttle lever on maximum power',
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -583,7 +608,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={parameter3.speed_limit}
-                        unit="km/h"
+                        unit={i18n.t('km/h')}
                         min={1}
                         max={25}
                         disabled={parameter3.speed_limit > 25}
@@ -637,7 +662,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={parameter3.circumference}
-                        unit="mm"
+                        unit={i18n.t('mm')}
                         min={parameter3.wheel_diameter.minimalCircumference}
                         max={parameter3.wheel_diameter.maximalCircumference}
                         onNewValue={(e) => {
@@ -669,10 +694,10 @@ class BafangCanMotorSettingsView extends React.Component<
                                 position_sensor_calibration_dialog: true,
                             })
                         }
-                        okText="Yes"
-                        cancelText="No"
+                        okText={i18n.t('yes')}
+                        cancelText={i18n.t('no')}
                     >
-                        <Button type="primary">Calibrate</Button>
+                        <Button type="primary">{i18n.t('calibrate')}</Button>
                     </Popconfirm>
                 ),
             },
@@ -682,24 +707,24 @@ class BafangCanMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.model_number,
             ),
             generateEditableStringListItem(
-                'Manufacturer',
+                i18n.t('manufacturer'),
                 this.state.manufacturer,
                 (e) =>
                     this.setState({
@@ -786,7 +811,7 @@ class BafangCanMotorSettingsView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Motor settings
+                    {i18n.t('controller')}
                 </Typography.Title>
                 <Modal
                     title={
@@ -796,8 +821,8 @@ class BafangCanMotorSettingsView extends React.Component<
                             <WarningTwoTone twoToneColor="red" />
                         </>
                     }
-                    okText="Continue"
-                    cancelText="Cancel"
+                    okText={i18n.t('continue')}
+                    cancelText={i18n.t('cancel')}
                     open={this.state.position_sensor_calibration_dialog}
                     onOk={() => {
                         message.open({
@@ -830,7 +855,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 <br />
                 <Descriptions
                     bordered
-                    title="Real-Time data"
+                    title={i18n.t('realtime_data')}
                     items={this.getRealtimeItems()}
                     column={1}
                 />
@@ -952,7 +977,7 @@ class BafangCanMotorSettingsView extends React.Component<
                 <br />
                 <Descriptions
                     bordered
-                    title="Other"
+                    title={i18n.t('version_list_title')}
                     items={this.getOtherItems()}
                     column={1}
                 />
@@ -965,7 +990,7 @@ class BafangCanMotorSettingsView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                             duration: 60,
                         });
                         connection.controller.emitter.once(

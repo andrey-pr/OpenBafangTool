@@ -31,6 +31,7 @@ import {
 } from '../../../../utils/UIUtils';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
 import SelectParameterComponent from '../../../../components/SelectParameterComponent';
+import i18n from '../../../../../i18n/i18n';
 
 const { Title } = Typography;
 
@@ -112,9 +113,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         const info = connection.getInfo();
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 info.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem('Voltage', info.voltage),
             generateSimpleStringListItem(
@@ -212,7 +213,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                                 .pedal_speed_limit ===
                                             SpeedLimitByDisplay
                                                 ? 'By display'
-                                                : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`
+                                                : `${this.initial_pedal_parameters.pedal_speed_limit} ${i18n.t('km/h')}`
                                         }`,
                             },
                             ...SimplifiedPedalSpeedLimitOptions,
@@ -432,7 +433,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             {this.initial_throttle_parameters
                                 .throttle_speed_limit === SpeedLimitByDisplay
                                 ? 'By display'
-                                : `${this.initial_throttle_parameters.throttle_speed_limit} km/h`}
+                                : `${this.initial_throttle_parameters.throttle_speed_limit} ${i18n.t('km/h')}`}
                         </Radio>
                         <Radio value={25}>25 km/h</Radio>
                         <Radio value={32}>32 km/h</Radio>
@@ -580,7 +581,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;
@@ -606,8 +607,8 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     title="Parameter writing"
                     description="Are you sure that you want to write all parameters on device?"
                     onConfirm={this.saveParameters}
-                    okText="Yes"
-                    cancelText="No"
+                    okText={i18n.t('yes')}
+                    cancelText={i18n.t('no')}
                 >
                     <FloatButton
                         icon={<DeliveredProcedureOutlined />}

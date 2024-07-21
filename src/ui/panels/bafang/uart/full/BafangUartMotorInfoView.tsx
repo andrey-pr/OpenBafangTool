@@ -5,6 +5,7 @@ import { SyncOutlined } from '@ant-design/icons';
 import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import { BafangUartMotorInfo } from '../../../../../types/BafangUartMotorTypes';
 import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import i18n from '../../../../../i18n/i18n';
 
 type InfoProps = {
     connection: BafangUartMotor;
@@ -32,9 +33,9 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            generateSimpleStringListItem('Serial number', info.serial_number),
+            generateSimpleStringListItem(i18n.t('serial_number'), info.serial_number),
             generateSimpleStringListItem('Model', info.model),
-            generateSimpleStringListItem('Manufacturer', info.manufacturer),
+            generateSimpleStringListItem(i18n.t('manufacturer'), info.manufacturer),
             generateSimpleStringListItem('System code', info.system_code),
         ];
     }
@@ -48,7 +49,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                 info.firmware_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 info.hardware_version,
             ),
         ];
@@ -58,7 +59,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem(i18n.t('voltage'), info.voltage),
             generateSimpleStringListItem('Max current', info.max_current),
         ];
     }
@@ -105,7 +106,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;

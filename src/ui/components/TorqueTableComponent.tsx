@@ -4,6 +4,7 @@ import Column from 'antd/es/table/Column';
 import { deepCopy } from 'deep-copy-ts';
 import ParameterInputComponent from './ParameterInput';
 import { TorqueProfile } from '../../types/BafangCanSystemTypes';
+import i18n from '../../i18n/i18n';
 
 type TorqueTableRow = {
     key: React.Key;
@@ -202,7 +203,7 @@ class TorqueTableComponent extends React.Component<
                     render={(_: any, record: TorqueTableRow) => (
                         <ParameterInputComponent
                             value={record.current_decay_time}
-                            unit="ms"
+                            unit={i18n.t('ms')}
                             min={1}
                             max={1275}
                             onNewValue={(e) => {
@@ -225,7 +226,7 @@ class TorqueTableComponent extends React.Component<
                     render={(_: any, record: TorqueTableRow) => (
                         <ParameterInputComponent
                             value={record.stop_delay}
-                            unit="ms"
+                            unit={i18n.t('ms')}
                             min={1}
                             max={510}
                             onNewValue={(e) => {

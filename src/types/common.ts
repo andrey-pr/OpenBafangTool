@@ -1,3 +1,5 @@
+import i18n from '../i18n/i18n';
+
 export type BafangAssistProfile = {
     current_limit: number;
     speed_limit: number;
@@ -6,11 +8,11 @@ export type BafangAssistProfile = {
 export const BooleanOptions = [
     {
         value: true,
-        label: 'Yes',
+        label: i18n.t('yes'),
     },
     {
         value: false,
-        label: 'No',
+        label: i18n.t('no'),
     },
 ];
 

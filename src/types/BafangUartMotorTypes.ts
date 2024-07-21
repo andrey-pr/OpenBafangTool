@@ -1,3 +1,4 @@
+import i18n from '../i18n/i18n';
 import { BafangAssistProfile } from './common';
 
 export const Voltage = [24, 36, 48, 43];
@@ -29,15 +30,15 @@ export enum SpeedmeterType {
 export const SpeedmeterTypeOptions = [
     {
         value: SpeedmeterType.External,
-        label: 'External',
+        label: i18n.t('external'),
     },
     {
         value: SpeedmeterType.Internal,
-        label: 'Internal',
+        label: i18n.t('internal'),
     },
     {
         value: SpeedmeterType.Motorphase,
-        label: 'Motorphase',
+        label: i18n.t('motorphase'),
     },
 ];
 
@@ -273,11 +274,11 @@ export enum ThrottleMode {
 export const ThrottleModeOptions = [
     {
         value: ThrottleMode.Speed,
-        label: 'Speed',
+        label: i18n.t('speed'),
     },
     {
         value: ThrottleMode.Current,
-        label: 'Current',
+        label: i18n.t('current'),
     },
 ];
 

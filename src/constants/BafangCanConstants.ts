@@ -348,130 +348,59 @@ export const WheelDiameterTable: Wheel[] = [
     },
 ];
 
+type ErrorCodeDescription = { description: string; recommendations: string };
+
 const ErrorCodes: {
-    [key: number]: { description: string; recommendations: string };
+    [key: number]: ErrorCodeDescription | null;
 } = {
-    4: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    5: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    7: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
+    4: null,
+    5: null,
+    7: null,
     8: {
         description: 'Inner motor hall sensor (not speed hall sensor) error',
         recommendations:
             'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
     },
-    9: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    10: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    11: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    12: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
+    9: null,
+    10: null,
+    11: null,
+    12: null,
     14: {
         description: 'Motor communication error',
         recommendations:
             'Check connection with motor. If its overheated, let it cool down. Check if motor has supply. Check contacts in connectors for dirt and damage.',
     },
-    15: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
+    15: null,
     21: {
         description: 'Hall sensor error',
         recommendations:
             'Check magnet on wheel. Check connection with of hall sensor. Check hall sensor with multimeter. Try to connect spare sensor if available.',
     },
-    25: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    26: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    27: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    30: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    33: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    35: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    36: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    37: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    41: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    42: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    43: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    45: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    46: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    47: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    48: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    71: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
-    81: {
-        description: 'Description for this code is not available', // TODO
-        recommendations: '-',
-    },
+    25: null,
+    26: null,
+    27: null,
+    30: null,
+    33: null,
+    35: null,
+    36: null,
+    37: null,
+    41: null,
+    42: null,
+    43: null,
+    45: null,
+    46: null,
+    47: null,
+    48: null,
+    71: null,
+    81: null,
 };
-export function getErrorCodeText(code: number): {
-    description: string;
-    recommendations: string;
-} {
-    if (ErrorCodes[code]) return ErrorCodes[code];
+export function getErrorCodeText(code: number): ErrorCodeDescription {
+    if (ErrorCodes[code]) return ErrorCodes[code] as ErrorCodeDescription;
+    if (ErrorCodes[code] === null)
+        return {
+            description: 'Description for this code is not available', // TODO
+            recommendations: '-',
+        };
     return {
         description: 'Unknown code',
         recommendations: '-',

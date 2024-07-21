@@ -16,6 +16,7 @@ import { DocPages } from '../../docs/document_resolver';
 import InterfaceType from '../../types/InterfaceType';
 import BafangCanSystem from '../../device/high-level/BafangCanSystem';
 import { DeviceName } from '../../types/DeviceType';
+import i18n from '../../i18n/i18n';
 
 const BafangUartMotorSettingsSimplifiedView = React.lazy(
     () =>
@@ -118,7 +119,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('back'),
                     },
                     {
                         key: 'bafang_uart_motor_settings_simplified',
@@ -128,11 +129,11 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_uart_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                             {
                                 key: `manual_${DocPages.BafangUartMotorParamsSimplifiedDocument}`,
@@ -145,7 +146,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('controller'),
                     },
                     {
                         key: 'bafang_uart_motor_info',
@@ -160,11 +161,11 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_uart_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                             {
                                 key: `manual_${DocPages.BafangUartMotorParamsDocument}`,
@@ -187,16 +188,16 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('controller'),
                     },
                     {
                         key: 'bafang_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                         ],
                     },
@@ -205,16 +206,16 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('controller'),
                     },
                     {
                         key: 'bafang_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                         ],
                     },
@@ -225,16 +226,16 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('controller'),
                     },
                     {
                         key: 'bafang_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                         ],
                     },
@@ -243,7 +244,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'back',
                         icon: <ArrowLeftOutlined />,
-                        label: 'Back',
+                        label: i18n.t('controller'),
                     },
                     {
                         key: 'bafang_can_system_info',
@@ -253,7 +254,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_motor_settings',
                         icon: <CarOutlined />,
-                        label: 'Motor',
+                        label: i18n.t('controller'),
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -263,7 +264,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_display_settings',
                         icon: <DesktopOutlined />,
-                        label: 'Display',
+                        label: i18n.t('display'),
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -273,7 +274,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_sensor_settings',
                         icon: <RotateRightOutlined />,
-                        label: 'Sensor',
+                        label: i18n.t('sensor'),
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -283,7 +284,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_battery',
                         icon: <ThunderboltOutlined />,
-                        label: 'Battery',
+                        label: i18n.t('battery'),
                         disabled:
                             this.props.connection.deviceName ===
                                 DeviceName.BafangCanSystem &&
@@ -293,11 +294,11 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_motor_manual',
                         icon: <BookOutlined />,
-                        label: 'Manual',
+                        label: i18n.t('manual'),
                         children: [
                             {
                                 key: `manual_${DocPages.BafangUartMotorGeneralManualDocument}`,
-                                label: 'General manual',
+                                label: i18n.t('general_manual'),
                             },
                         ],
                     },

@@ -36,6 +36,7 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
+import i18n from '../../../../../i18n/i18n';
 
 const { Title } = Typography;
 
@@ -135,7 +136,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
                     this.setState({ low_battery_protection }),
-                'V',
+                i18n.t('v'),
                 0,
                 100,
             ),
@@ -143,7 +144,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 'Current limit',
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
-                'A',
+                i18n.t('a'),
                 1,
                 this.state.max_current,
             ),
@@ -166,7 +167,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 20,
                 (throttle_start_voltage) =>
                     this.setState({ throttle_start_voltage }),
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -179,7 +180,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 20,
                 (throttle_end_voltage) =>
                     this.setState({ throttle_end_voltage }),
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -275,7 +276,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
                                         label: 'By display',
@@ -325,7 +326,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
                                         label: 'By display',
@@ -387,7 +388,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={pedal_time_to_stop}
-                        unit="ms"
+                        unit={i18n.t('ms')}
                         min={1}
                         max={1000}
                         onNewValue={(e) => {
@@ -418,7 +419,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={pedal_stop_decay}
-                        unit="ms"
+                        unit={i18n.t('ms')}
                         min={0}
                         max={500}
                         onNewValue={(e) => {
@@ -449,9 +450,9 @@ class BafangUartMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
         ];
     }
@@ -466,11 +467,14 @@ class BafangUartMotorSettingsView extends React.Component<
             max_current,
         } = this.state;
         return [
-            generateSimpleStringListItem('Manufacturer', manufacturer),
+            generateSimpleStringListItem(i18n.t('manufacturer'), manufacturer),
             generateSimpleStringListItem('Model', model),
-            generateSimpleStringListItem('Hardware version', hardware_version),
+            generateSimpleStringListItem(
+                i18n.t('hardware_version'),
+                hardware_version,
+            ),
             generateSimpleStringListItem('Firmware version', firmware_version),
-            generateSimpleStringListItem('Voltage', voltage),
+            generateSimpleStringListItem(i18n.t('voltage'), voltage),
             generateSimpleStringListItem('Max current', max_current),
         ];
     }
@@ -489,7 +493,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
                     this.setState({ low_battery_protection }),
-                'V',
+                i18n.t('v'),
                 0,
                 100,
             ),
@@ -497,7 +501,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 'Current limit',
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
-                'A',
+                i18n.t('a'),
                 1,
                 this.state.max_current,
             ),
@@ -560,7 +564,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
                                         label: 'By display',
@@ -705,7 +709,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={throttle_start_voltage * 10}
-                        unit="100mV"
+                        unit={`100${i18n.t('mv')}`}
                         min={10}
                         max={1000}
                         onNewValue={(e) => {
@@ -724,7 +728,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={throttle_end_voltage * 10}
-                        unit="100mV"
+                        unit={`100${i18n.t('mv')}`}
                         min={10}
                         max={1000}
                         onNewValue={(e) => {
@@ -769,7 +773,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
                                         label: 'By display',
@@ -905,7 +909,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         />
                         <Descriptions
                             bordered
-                            title="Other"
+                            title={i18n.t('version_list_title')}
                             items={this.getOtherItems()}
                             column={1}
                         />
@@ -958,7 +962,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;
@@ -984,8 +988,8 @@ class BafangUartMotorSettingsView extends React.Component<
                     title="Parameter writing"
                     description="Are you sure that you want to write all parameters on device?"
                     onConfirm={this.saveParameters}
-                    okText="Yes"
-                    cancelText="No"
+                    okText={i18n.t('yes')}
+                    cancelText={i18n.t('no')}
                 >
                     <FloatButton
                         icon={<DeliveredProcedureOutlined />}
