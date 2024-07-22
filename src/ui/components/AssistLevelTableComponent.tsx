@@ -4,6 +4,7 @@ import Column from 'antd/es/table/Column';
 import { deepCopy } from 'deep-copy-ts';
 import ParameterInputComponent from './ParameterInput';
 import { BafangAssistProfile } from '../../types/common';
+import i18n from '../../i18n/i18n';
 
 type AssistTableRow = {
     key: React.Key;
@@ -65,12 +66,12 @@ class AssistLevelTableComponent extends React.Component<
                 style={{ marginBottom: '20px' }}
             >
                 <Column
-                    title="Assist levels"
+                    title={i18n.t('assist_levels') as string}
                     dataIndex="assist_level"
                     key="assist_level"
                 />
                 <Column
-                    title="Current limit"
+                    title={i18n.t('current_limit') as string}
                     dataIndex="current"
                     key="current"
                     render={(_: any, record: AssistTableRow) => (
@@ -99,7 +100,7 @@ class AssistLevelTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Speed limit"
+                    title={i18n.t('speed_limit') as string}
                     dataIndex="Speed"
                     key="tags"
                     render={(_: any, record: AssistTableRow) => (

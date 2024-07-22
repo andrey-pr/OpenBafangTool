@@ -76,7 +76,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         this.state.cells_voltage.forEach((voltage, cell) => {
             items?.push(
                 generateSimpleNumberMulticolumnListItem(
-                    `${i18n.t('cell')} ${cell + 1}`,
+                    i18n.t('cell', { number: cell + 1 }),
                     voltage,
                     i18n.t('v'),
                 ),
@@ -175,7 +175,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         <br />
                         <Descriptions
                             bordered
-                            title="Cell voltage"
+                            title={i18n.t('cell_voltage_array_title')}
                             items={this.getCellVoltageItems()}
                             column={2}
                         />
@@ -197,7 +197,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         <br />
                         <Descriptions
                             bordered
-                            title="Capacity info"
+                            title={i18n.t('capacity_info')}
                             items={this.getCapacityItems()}
                             column={1}
                         />
@@ -218,7 +218,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         <br />
                         <Descriptions
                             bordered
-                            title="Current state"
+                            title={i18n.t('current_state')}
                             items={this.getCurrentStateItems()}
                             column={1}
                         />
@@ -256,11 +256,14 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         });
                         connection.battery.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );

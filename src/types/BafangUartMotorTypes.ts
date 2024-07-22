@@ -132,7 +132,7 @@ export enum AssistLevel {
 export const AssistLevelOptions = [
     {
         value: AssistLevel.ByDisplay,
-        label: 'By display',
+        label: i18n.t('by_display'),
     },
     {
         value: AssistLevel.AssistLevel0,

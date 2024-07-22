@@ -279,7 +279,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                     { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
@@ -329,7 +329,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                     { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
@@ -567,7 +567,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                     { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
@@ -742,7 +742,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 ),
             },
             generateEditableSelectListItem(
-                'Mode',
+                i18n.t('mode'),
                 ThrottleModeOptions,
                 this.state.throttle_mode,
                 (e) => this.setState({ throttle_mode: e as ThrottleMode }),
@@ -776,7 +776,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                     { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
@@ -970,14 +970,14 @@ class BafangUartMotorSettingsView extends React.Component<
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }
@@ -985,8 +985,8 @@ class BafangUartMotorSettingsView extends React.Component<
                     }}
                 />
                 <Popconfirm
-                    title="Parameter writing"
-                    description="Are you sure that you want to write all parameters on device?"
+                    title={i18n.t('parameter_writing_title')}
+                    description={i18n.t('parameter_writing_confirm')}
                     onConfirm={this.saveParameters}
                     okText={i18n.t('yes')}
                     cancelText={i18n.t('no')}

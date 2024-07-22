@@ -114,14 +114,14 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }

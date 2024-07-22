@@ -92,18 +92,21 @@ class MainView extends React.Component<MainProps, MainState> {
         connection.emitter.once('disconnection', () => {
             Modal.error({
                 title: 'Connection error',
-                content: 'Device has been disconnected',
+                content: i18n.t('device_disconnected'),
                 onOk: this.props.backHook,
             });
         });
         setTimeout(() => this.setState({ loading: false }), 60000);
         connection.emitter.once(
             'read-finish',
-            (readedSuccessfully, readededUnsuccessfully) => {
+            (readedSuccessfully, readedUnsuccessfully) => {
                 message.open({
                     key: 'loading',
                     type: 'info',
-                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    content: i18n.t('loaded_x_parameters', {
+                        successfully: readedSuccessfully,
+                        nonSuccessfully: readedUnsuccessfully,
+                    }),
                     duration: 5,
                 });
                 this.setState({ loading: false });
@@ -249,7 +252,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_can_system_info',
                         icon: <InfoCircleOutlined />,
-                        label: 'General Info',
+                        label: i18n.t('can_main_tab_title'),
                     },
                     {
                         key: 'bafang_can_motor_settings',

@@ -147,11 +147,14 @@ class BafangCanSensorSettingsView extends React.Component<
                         });
                         connection.sensor.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );

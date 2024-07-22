@@ -212,8 +212,12 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                             this.initial_pedal_parameters
                                                 .pedal_speed_limit ===
                                             SpeedLimitByDisplay
-                                                ? 'By display'
-                                                : `${this.initial_pedal_parameters.pedal_speed_limit} ${i18n.t('km/h')}`
+                                                ? i18n.t('by_display')
+                                                : i18n.t('x_km/h', {
+                                                      speed: this
+                                                          .initial_pedal_parameters
+                                                          .pedal_speed_limit,
+                                                  })
                                         }`,
                             },
                             ...SimplifiedPedalSpeedLimitOptions,
@@ -432,8 +436,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             Leave old value -&nbsp;
                             {this.initial_throttle_parameters
                                 .throttle_speed_limit === SpeedLimitByDisplay
-                                ? 'By display'
-                                : `${this.initial_throttle_parameters.throttle_speed_limit} ${i18n.t('km/h')}`}
+                                ? i18n.t('by_display')
+                                : i18n.t('x_km/h', {
+                                      speed: this.initial_throttle_parameters
+                                          .throttle_speed_limit,
+                                  })}
                         </Radio>
                         <Radio value={25}>25 km/h</Radio>
                         <Radio value={32}>32 km/h</Radio>
@@ -589,14 +596,14 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }
@@ -604,8 +611,8 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     }}
                 />
                 <Popconfirm
-                    title="Parameter writing"
-                    description="Are you sure that you want to write all parameters on device?"
+                    title={i18n.t('parameter_writing_title')}
+                    description={i18n.t('parameter_writing_confirm')}
                     onConfirm={this.saveParameters}
                     okText={i18n.t('yes')}
                     cancelText={i18n.t('no')}

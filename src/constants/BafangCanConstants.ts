@@ -1,4 +1,5 @@
 import { DeviceNetworkId } from '../device/besst/besst-types';
+import i18n from '../i18n/i18n';
 import { Wheel } from '../types/BafangCanSystemTypes';
 
 export type CanCommand = {
@@ -357,24 +358,21 @@ const ErrorCodes: {
     5: null,
     7: null,
     8: {
-        description: 'Inner motor hall sensor (not speed hall sensor) error',
-        recommendations:
-            'Check cable connection (for motorwheels), replace motor, try repair motor with disassembling if you are electronics specialist',
+        description: i18n.t('error_code_8_description'),
+        recommendations: i18n.t('error_code_8_recommendations'),
     },
     9: null,
     10: null,
     11: null,
     12: null,
     14: {
-        description: 'Motor communication error',
-        recommendations:
-            'Check connection with motor. If its overheated, let it cool down. Check if motor has supply. Check contacts in connectors for dirt and damage.',
+        description: i18n.t('error_code_14_description'),
+        recommendations: i18n.t('error_code_14_recommendations'),
     },
     15: null,
     21: {
-        description: 'Hall sensor error',
-        recommendations:
-            'Check magnet on wheel. Check connection with of hall sensor. Check hall sensor with multimeter. Try to connect spare sensor if available.',
+        description: i18n.t('error_code_21_description'),
+        recommendations: i18n.t('error_code_21_recommendations'),
     },
     25: null,
     26: null,
@@ -398,11 +396,11 @@ export function getErrorCodeText(code: number): ErrorCodeDescription {
     if (ErrorCodes[code]) return ErrorCodes[code] as ErrorCodeDescription;
     if (ErrorCodes[code] === null)
         return {
-            description: 'Description for this code is not available', // TODO
-            recommendations: '-',
+            description: i18n.t('code_no_description'), // TODO
+            recommendations: i18n.t('code_no_recommendations'),
         };
     return {
-        description: 'Unknown code',
-        recommendations: '-',
+        description: i18n.t('unknown_code_description'),
+        recommendations: i18n.t('unknown_code_recomendations'),
     };
 }
