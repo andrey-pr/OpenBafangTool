@@ -1,5 +1,6 @@
 import { Typography } from 'antd';
 import React from 'react';
+import i18n from '../../i18n/i18n';
 
 type BooleanValueProps = {
     value: boolean | number;
@@ -9,8 +10,8 @@ type BooleanValueProps = {
 
 class BooleanValueComponent extends React.Component<BooleanValueProps> {
     static defaultProps = {
-        textTrue: 'True',
-        textFalse: 'False',
+        textTrue: i18n.t('true'),
+        textFalse: i18n.t('false'),
     };
 
     render() {

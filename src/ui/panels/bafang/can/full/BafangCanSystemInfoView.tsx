@@ -245,23 +245,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('remaining_capacity'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('remaining_trip_distance'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('last_trip_distance'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('cadence'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('torque_value'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -299,23 +299,23 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('voltage'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('controller_temperature'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('motor_temperature'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('current'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('speed'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -390,16 +390,16 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('total_assist_levels_number'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem(i18n.t('mode'), 'Not available yet'),
-                generateSimpleStringListItem(i18n.t('boost'), 'Not available yet'),
+                generateSimpleStringListItem(i18n.t('mode'), i18n.t('parameter_not_available_yet')),
+                generateSimpleStringListItem(i18n.t('boost'), i18n.t('parameter_not_available_yet')),
                 generateSimpleStringListItem(
                     i18n.t('current_assist_level'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem(i18n.t('light'), 'Not available yet'),
-                generateSimpleStringListItem(i18n.t('button_pressed'), 'Not available yet'),
+                generateSimpleStringListItem(i18n.t('light'), i18n.t('parameter_not_available_yet')),
+                generateSimpleStringListItem(i18n.t('button_pressed'), i18n.t('parameter_not_available_yet')),
             ];
         }
         if (this.state.display_data1) {
@@ -427,15 +427,15 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('total_mileage'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('single_trip_mileage'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('max_registered_speed'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -459,11 +459,11 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('average_speed'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('mileage_since_last_service'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -541,11 +541,11 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         return [
             generateSimpleStringListItem(
                 i18n.t('torque_value'),
-                'Not available yet',
+                i18n.t('parameter_not_available_yet'),
             ),
             generateSimpleStringListItem(
                 i18n.t('cadence'),
-                'Not available yet',
+                i18n.t('parameter_not_available_yet'),
             ),
             ...codesArray,
         ];

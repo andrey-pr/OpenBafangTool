@@ -186,15 +186,15 @@ class BafangCanDisplaySettingsView extends React.Component<
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('total_mileage'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('single_trip_mileage'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('max_registered_speed'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -278,11 +278,11 @@ class BafangCanDisplaySettingsView extends React.Component<
                 ...items,
                 generateSimpleStringListItem(
                     i18n.t('average_speed'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
                     i18n.t('mileage_since_last_service'),
-                    'Not available yet',
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
