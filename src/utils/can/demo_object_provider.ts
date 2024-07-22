@@ -98,6 +98,7 @@ export function getControllerParameter1Demo(): BafangCanControllerParameter1 {
         ],
         displayless_mode: false,
         lamps_always_on: false,
+        walk_assist_speed: 3.5,
     };
 }
 

@@ -85,6 +85,7 @@ export type BafangCanControllerParameter1 = {
     assist_levels: BafangAssistProfile[];
     displayless_mode: boolean;
     lamps_always_on: boolean;
+    walk_assist_speed: number;
 };
 
 export type TorqueProfile = {
