@@ -180,12 +180,12 @@ export const SpeedLimitByDisplay: number = 255;
 
 export const SimplifiedPedalSpeedLimitOptions = [
     {
-        value: 25,
-        label: '25 km/h (EU region)',
+        value: 16,
+        label: '16 km/h',
     },
     {
-        value: 32,
-        label: '32 km/h (USA region)',
+        value: 25,
+        label: '25 km/h',
     },
     {
         value: SpeedLimitByDisplay,
