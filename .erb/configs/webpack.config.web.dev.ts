@@ -43,7 +43,7 @@ const configuration: webpack.Configuration = {
 
     mode: 'development',
 
-    target: ['electron-renderer'],
+    target: ['web', 'electron-renderer'],
 
     entry: [
         `webpack-dev-server/client?http://localhost:${port}/dist`,
@@ -55,6 +55,9 @@ const configuration: webpack.Configuration = {
         path: webpackPaths.distRendererPath,
         publicPath: '/',
         filename: 'renderer.dev.js',
+        library: {
+            type: 'umd',
+        },
     },
 
     module: {
@@ -146,7 +149,7 @@ const configuration: webpack.Configuration = {
          */
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',
-            WEB_MODE: false,
+            WEB_MODE: true,
         }),
 
         new webpack.LoaderOptionsPlugin({
@@ -185,27 +188,6 @@ const configuration: webpack.Configuration = {
         },
         historyApiFallback: {
             verbose: true,
-        },
-        setupMiddlewares(middlewares) {
-            console.log('Starting Main Process...');
-            let args = ['run', 'start:main'];
-            if (process.env.MAIN_ARGS) {
-                args = args.concat(
-                    [
-                        '--',
-                        ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g),
-                    ].flat(),
-                );
-            }
-            spawn('npm', args, {
-                shell: true,
-                stdio: 'inherit',
-            })
-                .on('close', (code: number) => {
-                    process.exit(code!);
-                })
-                .on('error', (spawnError) => console.error(spawnError));
-            return middlewares;
         },
     },
 };

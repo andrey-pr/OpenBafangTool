@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { CheckboxChangeEvent } from 'antd/es/checkbox';
 import {
     Button,
@@ -9,19 +9,21 @@ import {
     Space,
     message,
 } from 'antd';
-import { SerialPort } from 'serialport';
-import HID from 'node-hid';
+import { Device } from 'node-hid';
 import IConnection from '../../device/high-level/Connection';
 import BafangUartMotor from '../../device/high-level/BafangUartMotor';
-import BafangCanSystem from '../../device/high-level/BafangCanSystem';
+import BafangCanSystem from '../../platform-dependent-wrapper/bafang-can/BafangCanSystem';
 import {
     DeviceBrand,
     DeviceInterface,
     DeviceType,
 } from '../../types/DeviceType';
 import InterfaceType from '../../types/InterfaceType';
-import filterPorts from '../../device/serial/serial-patcher';
-import { listBesstDevices } from '../../device/besst/besst';
+import {
+    getSerialPorts,
+    listBesstDevices,
+    requestPort,
+} from '../../platform-dependent-wrapper/list-ports/ListPorts';
 
 const { Option } = Select;
 
@@ -34,7 +36,7 @@ type DeviceSelectionProps = {
 
 type DeviceSelectionState = {
     portList: string[];
-    besstDeviceList: HID.Device[];
+    besstDeviceList: Device[];
     connectionChecked: boolean;
     connection: IConnection | null;
     interfaceType: InterfaceType | null;
@@ -59,23 +61,19 @@ class DeviceSelectionView extends React.Component<
             connection: null,
             interfaceType: null,
             deviceBrand: DeviceBrand.Bafang,
-            deviceInterface: null,
-            deviceType: null,
+            deviceInterface: process.env.WEB_MODE ? DeviceInterface.UART : null,
+            deviceType: process.env.WEB_MODE ? DeviceType.Motor : null,
             devicePort: null,
             localLawsAgreement: false,
             disclaimerAgreement: false,
         };
 
         setInterval(() => {
-            SerialPort.list().then((ports) => {
+            getSerialPorts().then((ports: string[]) => {
                 this.setState({
-                    portList: filterPorts(
-                        ports.map((port) => port.path),
-                        true,
-                    ),
+                    portList: ports,
                 });
             });
-
             this.setState({ besstDeviceList: listBesstDevices() });
         }, 1000);
     }
@@ -94,13 +92,22 @@ class DeviceSelectionView extends React.Component<
             devicePort,
         } = this.state;
 
-        const portComponents = portList.map((item) => {
-            return (
-                <Option value={item} key={item}>
-                    {item}
-                </Option>
-            );
-        });
+        let portComponents: ReactNode[] = [];
+        if (!process.env.WEB_MODE) {
+            portComponents = portList.map((item) => {
+                return (
+                    <Option value={item} key={item}>
+                        {item}
+                    </Option>
+                );
+            });
+        } else {
+            portComponents = [
+                <Option value="webserial" key="webserial">
+                    Choose serial port in browser
+                </Option>,
+            ];
+        }
 
         return (
             <div
@@ -122,38 +129,42 @@ class DeviceSelectionView extends React.Component<
                     }}
                 >
                     <Typography.Title level={3}>Select device</Typography.Title>
-                    <Form.Item
-                        name="device_interface"
-                        label="Device protocol"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Device protocol is required',
-                            },
-                        ]}
-                    >
-                        <Select
-                            onChange={(value: DeviceInterface) => {
-                                if (value === DeviceInterface.CAN) {
+                    {!process.env.WEB_MODE && (
+                        <Form.Item
+                            name="device_interface"
+                            label="Device protocol"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Device protocol is required',
+                                },
+                            ]}
+                        >
+                            <Select
+                                onChange={(value: DeviceInterface) => {
+                                    if (value === DeviceInterface.CAN) {
+                                        this.setState({
+                                            deviceInterface: value,
+                                            interfaceType: InterfaceType.Full,
+                                            connectionChecked: false,
+                                        });
+                                    }
                                     this.setState({
                                         deviceInterface: value,
-                                        interfaceType: InterfaceType.Full,
+                                        deviceType: DeviceType.Motor,
                                         connectionChecked: false,
                                     });
-                                }
-                                this.setState({
-                                    deviceInterface: value,
-                                    deviceType: DeviceType.Motor,
-                                    connectionChecked: false,
-                                });
-                            }}
-                            allowClear
-                            style={{ minWidth: '150px' }}
-                        >
-                            <Option value={DeviceInterface.UART}>UART</Option>
-                            <Option value={DeviceInterface.CAN}>CAN</Option>
-                        </Select>
-                    </Form.Item>
+                                }}
+                                allowClear
+                                style={{ minWidth: '150px' }}
+                            >
+                                <Option value={DeviceInterface.UART}>
+                                    UART
+                                </Option>
+                                <Option value={DeviceInterface.CAN}>CAN</Option>
+                            </Select>
+                        </Form.Item>
+                    )}
                     {deviceInterface === DeviceInterface.UART && (
                         <Form.Item
                             name="interface_type"
@@ -195,6 +206,9 @@ class DeviceSelectionView extends React.Component<
                         >
                             <Select
                                 onChange={(value: string) => {
+                                    if(value === "webserial"){
+                                        requestPort(1200);//todo
+                                    }
                                     this.setState({
                                         devicePort: value,
                                         connectionChecked: false,

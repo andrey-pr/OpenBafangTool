@@ -9,7 +9,7 @@ const tntVirtualDebugPorts = [
     '/dev/tnt7',
 ];
 
-export default function filterPorts(ports: string[], usbOnly: boolean) {
+export function filterPorts(ports: string[], usbOnly: boolean) {
     let newPorts = ports;
     if (usbOnly) {
         if (process.platform === 'linux') {

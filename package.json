@@ -23,13 +23,16 @@
     "build:dll": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
+    "build:web": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.web.prod.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && cd release/app && npm install && cd ../.. && npm run build:dll",
     "lint": "cross-env NODE_ENV=development eslint . --ext .js,.jsx,.ts,.tsx",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build && npm run build:dll",
+    "package:web": "ts-node ./.erb/scripts/clean.js dist && npm run build:web",
     "clean": "ts-node ./.erb/scripts/clean.js dist",
     "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
     "start:main": "cross-env NODE_ENV=development electronmon -r ts-node/register/transpile-only .",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
+    "start:web": "ts-node ./.erb/scripts/check-port-in-use.js && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.web.dev.ts",
     "test": "jest"
   },
   "browserslist": [],
@@ -80,6 +83,7 @@
     }
   },
   "dependencies": {
+    "@types/w3c-web-serial": "^1.0.6",
     "@uiw/react-markdown-preview": "^5.1.1",
     "antd": "^5.18.1",
     "appdata-path": "^1.0.0",

@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import EventEmitter from 'events';
-import log from 'electron-log/renderer';
+import { log_info } from '../../logging/BasicLogging';
 import { DeviceName } from '../../types/DeviceType';
 import {
     AssistLevel,
@@ -119,7 +119,7 @@ export default class BafangUartMotor implements IConnection {
     }
 
     private processBuffer(): void {
-        log.info(this.portBuffer);
+        log_info(this.portBuffer);
         if (this.portBuffer.length <= 2) {
             return;
         }
@@ -129,7 +129,7 @@ export default class BafangUartMotor implements IConnection {
                     this.portBuffer[2] ===
                     ((this.portBuffer[0] + this.portBuffer[1]) & 0xff)
                 ) {
-                    log.info(
+                    log_info(
                         'Received short-format package: ',
                         this.portBuffer.slice(0, 3),
                     );
@@ -147,7 +147,7 @@ export default class BafangUartMotor implements IConnection {
                 this.processPacket(
                     this.portBuffer.slice(0, this.portBuffer[1] + 3),
                 );
-                log.info(
+                log_info(
                     'Received usual format package: ',
                     this.portBuffer.slice(0, this.portBuffer[1] + 3),
                 );
@@ -157,7 +157,7 @@ export default class BafangUartMotor implements IConnection {
                     break;
                 }
 
-                log.info('Received thrash byte: ', this.portBuffer.slice(0, 1));
+                log_info('Received thrash byte: ', this.portBuffer.slice(0, 1));
                 this.portBuffer = this.portBuffer.slice(1);
             }
         }
@@ -255,29 +255,31 @@ export default class BafangUartMotor implements IConnection {
         }
         let ready: boolean = false;
         let success: boolean = false;
-        openPort(
-            this.port,
-            1200,
-            () => {
-                success = true;
-                ready = true;
-            },
-            (err: Error | null) => {
-                if (!err) return;
-                console.log('Serial port error ', err);
-                success = false;
-                ready = true;
-            },
-            (responsePath: string, data: Uint8Array) => {
-                if (responsePath === this.port) {
-                    this.portBuffer = new Uint8Array([
-                        ...Array.from(this.portBuffer),
-                        ...Array.from(data),
-                    ]);
-                    this.processBuffer();
-                }
-            },
-        );
+        if (!process.env.WEB_MODE) {
+            openPort(
+                this.port,
+                1200,
+                () => {
+                    success = true;
+                    ready = true;
+                },
+                (err: Error | null) => {
+                    if (!err) return;
+                    console.log('Serial port error ', err);
+                    success = false;
+                    ready = true;
+                },
+                (responsePath: string, data: Uint8Array) => {
+                    if (responsePath === this.port) {
+                        this.portBuffer = new Uint8Array([
+                            ...Array.from(this.portBuffer),
+                            ...Array.from(data),
+                        ]);
+                        this.processBuffer();
+                    }
+                },
+            );
+        }
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<boolean>(async (resolve) => {
             let counter: number = 0;
@@ -299,6 +301,11 @@ export default class BafangUartMotor implements IConnection {
 
     testConnection(): Promise<boolean> {
         if (this.port === 'demo') {
+            return new Promise<boolean>((resolve) => {
+                resolve(true);
+            });
+        }
+        if(this.port === 'webserial'){
             return new Promise<boolean>((resolve) => {
                 resolve(true);
             });
@@ -384,8 +391,8 @@ export default class BafangUartMotor implements IConnection {
         ];
         const port = this.port;
         function sendRequest(i: number): void {
-            log.info('Sent read package: ', request[i]);
-            writeToPort(port, Buffer.from(request[i])).then();
+            log_info('Sent read package: ', request[i]);
+            writeToPort(port, Uint8Array.from(request[i])).then();
             if (i !== request.length - 1) {
                 setTimeout(sendRequest, 300, i + 1);
             }
@@ -486,8 +493,8 @@ export default class BafangUartMotor implements IConnection {
         ];
         const port = this.port;
         function sendRequest(i: number): void {
-            log.info('Sent write package: ', request[i]);
-            writeToPort(port, Buffer.from(request[i])).then();
+            log_info('Sent write package: ', request[i]);
+            writeToPort(port, Uint8Array.from(request[i])).then();
             if (i !== request.length - 1) {
                 setTimeout(sendRequest, 300, i + 1);
             }

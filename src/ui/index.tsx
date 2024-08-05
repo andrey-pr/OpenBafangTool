@@ -1,8 +1,8 @@
 import { createRoot } from 'react-dom/client';
-import log from 'electron-log/renderer';
 import App from './App';
+import { log_info } from '../logging/BasicLogging';
 
-log.info('Start');
+log_info('Start');
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);

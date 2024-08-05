@@ -23,7 +23,7 @@ const configuration: webpack.Configuration = {
 
     mode: 'production',
 
-    target: ['electron-renderer'],
+    target: ['web', 'electron-renderer'],
 
     entry: [path.join(webpackPaths.srcRendererPath, 'index.tsx')],
 
@@ -31,6 +31,9 @@ const configuration: webpack.Configuration = {
         path: webpackPaths.distRendererPath,
         publicPath: './',
         filename: 'renderer.js',
+        library: {
+          type: 'umd',
+        },
     },
 
     module: {
@@ -106,7 +109,7 @@ const configuration: webpack.Configuration = {
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
             DEBUG_PROD: false,
-            WEB_MODE: false,
+            WEB_MODE: true,
         }),
 
         new MiniCssExtractPlugin({
