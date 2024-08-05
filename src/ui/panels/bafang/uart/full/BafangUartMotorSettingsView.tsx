@@ -468,14 +468,17 @@ class BafangUartMotorSettingsView extends React.Component<
         } = this.state;
         return [
             generateSimpleStringListItem(i18n.t('manufacturer'), manufacturer),
-            generateSimpleStringListItem('Model', model),
+            generateSimpleStringListItem(i18n.t('model_number'), model),
             generateSimpleStringListItem(
                 i18n.t('hardware_version'),
                 hardware_version,
             ),
-            generateSimpleStringListItem('Firmware version', firmware_version),
+            generateSimpleStringListItem(
+                i18n.t('software_version'),
+                firmware_version,
+            ),
             generateSimpleStringListItem(i18n.t('voltage'), voltage),
-            generateSimpleStringListItem('Max current', max_current),
+            generateSimpleStringListItem(i18n.t('max_current'), max_current),
         ];
     }
 
@@ -865,11 +868,11 @@ class BafangUartMotorSettingsView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Settings
+                    {i18n.t('uart_motor_parameters_title')}
                 </Typography.Title>
                 <br />
                 <Typography.Title level={5} style={{ margin: 0 }}>
-                    Old style layout&nbsp;&nbsp;
+                    {i18n.t('old_style_layout')}&nbsp;&nbsp;
                     <Switch
                         checked={oldStyle}
                         onChange={(value) => this.setState({ oldStyle: value })}
@@ -880,19 +883,19 @@ class BafangUartMotorSettingsView extends React.Component<
                     <>
                         <Descriptions
                             bordered
-                            title="Electrical parameters"
+                            title={i18n.t('electric_parameters')}
                             items={this.getElectricalParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Physical parameters"
+                            title={i18n.t('mechanical_parameters')}
                             items={this.getPhysicalParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
-                        <Title level={5}>Assist levels</Title>
+                        <Title level={5}>{i18n.t('assist_table_title')}</Title>
                         <AssistLevelTableComponent
                             assist_profiles={this.state.assist_profiles}
                             onChange={(assist_profiles) =>
@@ -902,7 +905,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         />
                         <Descriptions
                             bordered
-                            title="Drive parameters"
+                            title={i18n.t('driving_parameters')}
                             items={this.getDriveParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
@@ -919,14 +922,14 @@ class BafangUartMotorSettingsView extends React.Component<
                     <>
                         <Descriptions
                             bordered
-                            title="Info"
+                            title={i18n.t('info')}
                             items={this.getInfoItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Basic parameters"
+                            title={i18n.t('basic_parameters')}
                             items={this.getBasicParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
@@ -940,14 +943,14 @@ class BafangUartMotorSettingsView extends React.Component<
                         />
                         <Descriptions
                             bordered
-                            title="Pedal parameters"
+                            title={i18n.t('pedal_parameters')}
                             items={this.getPedalParametersItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Throttle parameters"
+                            title={i18n.t('throttle_parameters')}
                             items={this.getThrottleParametersItems()}
                             column={1}
                         />

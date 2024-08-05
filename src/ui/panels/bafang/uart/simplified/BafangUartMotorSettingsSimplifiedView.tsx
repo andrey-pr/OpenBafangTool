@@ -117,11 +117,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 info.serial_number,
                 i18n.t('serial_number_warning'),
             ),
-            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem(i18n.t('voltage'), info.voltage),
             generateSimpleStringListItem(
-                'Max current',
+                i18n.t('max_current'),
                 info.max_current,
-                'Note, that Voltage*Max Current is a maximal power, but not nominal. If you have legal motor certified as 250W, and Voltage*Max Current is twice or even triple bigger its normal - 250W is a nominal (continuous) power, and its legal to use device that can have bigger maximal power. For example, some of Shimano STEPS motors that certified for 250W pedelecs have 600W of max power.',
+                i18n.t('max_current_description'),
             ),
         ];
     }
@@ -134,12 +134,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'low_voltage_protection',
                 label: (
                     <>
-                        Battery cutoff voltage
+                        {i18n.t('battery_low_limit')}
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Increase it if you system shuts down unexpectedly by
-                            BMS inside of battery
+                            {i18n.t('battery_low_limit_description')}
                         </Typography.Text>
                     </>
                 ),
@@ -163,9 +162,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
     getPhysicalParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
@@ -505,32 +504,32 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Settings
+                    {i18n.t('uart_motor_parameters_title')}
                 </Typography.Title>
                 <br />
                 <br />
                 <Descriptions
                     bordered
-                    title="Info"
+                    title={i18n.t('info')}
                     items={this.getInfoItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Electrical parameters"
+                    title={i18n.t('electric_parameters')}
                     items={this.getElectricalParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Physical parameters"
+                    title={i18n.t('mechanical_parameters')}
                     items={this.getPhysicalParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
-                <Title level={5}>Assist levels</Title>
+                <Title level={5}>{i18n.t('assist_table_title')}</Title>
                 <AssistLevelTableComponent
                     assist_profiles={this.state.assist_profiles}
                     onChange={(assist_profiles) =>
@@ -540,7 +539,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 />
                 <Descriptions
                     bordered
-                    title="Drive parameters"
+                    title={i18n.t('driving_parameters')}
                     items={this.getDriveParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}

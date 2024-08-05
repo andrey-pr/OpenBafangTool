@@ -127,7 +127,7 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_uart_motor_settings_simplified',
                         icon: <SettingOutlined />,
-                        label: 'Parameters',
+                        label: i18n.t('parameters_tab'),
                     },
                     {
                         key: 'bafang_uart_motor_manual',
@@ -140,7 +140,7 @@ class MainView extends React.Component<MainProps, MainState> {
                             },
                             {
                                 key: `manual_${DocPages.BafangUartMotorParamsSimplifiedDocument}`,
-                                label: 'Parameters',
+                                label: i18n.t('parameters_manual'),
                             },
                         ],
                     },
@@ -154,12 +154,12 @@ class MainView extends React.Component<MainProps, MainState> {
                     {
                         key: 'bafang_uart_motor_info',
                         icon: <InfoCircleOutlined />,
-                        label: 'Info',
+                        label: i18n.t('uart_main_tab_title'),
                     },
                     {
                         key: 'bafang_uart_motor_settings',
                         icon: <SettingOutlined />,
-                        label: 'Parameters',
+                        label: i18n.t('parameters_tab'),
                     },
                     {
                         key: 'bafang_uart_motor_manual',
@@ -172,15 +172,15 @@ class MainView extends React.Component<MainProps, MainState> {
                             },
                             {
                                 key: `manual_${DocPages.BafangUartMotorParamsDocument}`,
-                                label: 'Parameters',
+                                label: i18n.t('parameters_manual'),
                             },
                             {
                                 key: `manual_${DocPages.BafangUartMotorAPIDocument}`,
-                                label: 'Motor Protocol',
+                                label: i18n.t('uart_motor_protocol_manual'),
                             },
                             {
                                 key: `manual_${DocPages.BafangUartProtocolDocument}`,
-                                label: 'UART Protocol',
+                                label: i18n.t('uart_protocol_manual'),
                             },
                         ],
                     },

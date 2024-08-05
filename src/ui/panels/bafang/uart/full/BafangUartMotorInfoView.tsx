@@ -33,10 +33,16 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            generateSimpleStringListItem(i18n.t('serial_number'), info.serial_number),
-            generateSimpleStringListItem('Model', info.model),
-            generateSimpleStringListItem(i18n.t('manufacturer'), info.manufacturer),
-            generateSimpleStringListItem('System code', info.system_code),
+            generateSimpleStringListItem(
+                i18n.t('serial_number'),
+                info.serial_number,
+            ),
+            generateSimpleStringListItem(i18n.t('model_number'), info.model),
+            generateSimpleStringListItem(
+                i18n.t('manufacturer'),
+                info.manufacturer,
+            ),
+            generateSimpleStringListItem(i18n.t('system_code'), info.system_code),
         ];
     }
 
@@ -45,7 +51,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const info = connection.getInfo();
         return [
             generateSimpleStringListItem(
-                'Firmware version',
+                i18n.t('software_version'),
                 info.firmware_version,
             ),
             generateSimpleStringListItem(
@@ -60,7 +66,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const info = connection.getInfo();
         return [
             generateSimpleStringListItem(i18n.t('voltage'), info.voltage),
-            generateSimpleStringListItem('Max current', info.max_current),
+            generateSimpleStringListItem(i18n.t('max_current'), info.max_current),
         ];
     }
 
@@ -74,26 +80,26 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Info
+                    {i18n.t('uart_main_tab_title')}
                 </Typography.Title>
                 <br />
                 <Descriptions
                     bordered
-                    title="Codes"
+                    title={i18n.t('uart_motor_codes')}
                     items={this.getCodeItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Versions"
+                    title={i18n.t('uart_motor_versions')}
                     items={this.getVersionItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Electrical parameters"
+                    title={i18n.t('electric_parameters')}
                     items={this.getElectricalParameterItems()}
                     column={1}
                 />
