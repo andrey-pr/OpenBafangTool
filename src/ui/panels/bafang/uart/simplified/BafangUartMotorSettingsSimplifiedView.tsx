@@ -15,13 +15,10 @@ import {
     BafangUartMotorBasicParameters,
     BafangUartMotorInfo,
     BafangUartMotorPedalParameters,
-    BafangUartMotorThrottleParameters,
     ParameterNames,
     PedalSensorSignals,
     SimplifiedPedalSpeedLimitOptions,
     SpeedLimitByDisplay,
-    ThrottleMode,
-    ThrottleModeOptions,
 } from '../../../../../types/BafangUartMotorTypes';
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../../components/ParameterInput';
@@ -40,10 +37,8 @@ type SettingsProps = {
 
 type SettingsState = BafangUartMotorInfo &
     BafangUartMotorBasicParameters &
-    BafangUartMotorPedalParameters &
-    BafangUartMotorThrottleParameters & {
+    BafangUartMotorPedalParameters & {
         lastUpdateTime: number;
-        throttle_on: boolean;
     };
 
 /* eslint-disable camelcase */
@@ -57,8 +52,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
 
     private initial_pedal_parameters: BafangUartMotorPedalParameters;
 
-    private initial_throttle_parameters: BafangUartMotorThrottleParameters;
-
     private packages_written: number;
 
     constructor(props: SettingsProps) {
@@ -67,17 +60,12 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         this.initial_info = connection.getInfo();
         this.initial_basic_parameters = connection.getBasicParameters();
         this.initial_pedal_parameters = connection.getPedalParameters();
-        this.initial_throttle_parameters = connection.getThrottleParameters();
         this.packages_written = 0;
         this.state = {
             ...this.initial_info,
             ...this.initial_basic_parameters,
             ...this.initial_pedal_parameters,
-            ...this.initial_throttle_parameters,
             lastUpdateTime: 0,
-            throttle_on:
-                this.initial_throttle_parameters.throttle_start_voltage <
-                this.initial_throttle_parameters.throttle_end_voltage,
         };
         this.getInfoItems = this.getInfoItems.bind(this);
         this.getElectricalParameterItems =
@@ -85,7 +73,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         this.getPhysicalParameterItems =
             this.getPhysicalParameterItems.bind(this);
         this.getDriveParameterItems = this.getDriveParameterItems.bind(this);
-        this.getThrottleItems = this.getThrottleItems.bind(this);
         this.saveParameters = this.saveParameters.bind(this);
         this.updateData = this.updateData.bind(this);
         this.onWriteSuccess = this.onWriteSuccess.bind(this);
@@ -206,7 +193,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             {
                                 value: this.initial_pedal_parameters
                                     .pedal_speed_limit,
-                                label: `Leave old value -&nbsp;
+                                label: `Leave old value - 
                                         ${
                                             this.initial_pedal_parameters
                                                 .pedal_speed_limit ===
@@ -321,141 +308,15 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         ];
     }
 
-    getThrottleItems(): DescriptionsProps['items'] {
-        const {
-            throttle_start_voltage,
-            throttle_end_voltage,
-            throttle_mode,
-            throttle_speed_limit,
-        } = this.state;
-        return [
-            {
-                key: 'throttle_start_voltage',
-                label: (
-                    <>
-                        Throttle start voltage
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            This parameter means voltage from throttle lever
-                            that will start motor
-                        </Typography.Text>
-                    </>
-                ),
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_start_voltage}
-                        unit="V"
-                        min={1}
-                        max={4.2}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_start_voltage: e,
-                            });
-                        }}
-                        warningText="Its not recommended to set lower start voltage than 1.1V"
-                        warningBelow={1.1}
-                        decimalPlaces={1}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_end_voltage',
-                label: (
-                    <>
-                        Throttle end voltage
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            This parameter means maximal voltage from throttle
-                            lever
-                        </Typography.Text>
-                    </>
-                ),
-                children: (
-                    <ParameterInputComponent
-                        value={throttle_end_voltage}
-                        unit="V"
-                        min={1}
-                        max={4.2}
-                        onNewValue={(e) => {
-                            this.setState({
-                                throttle_end_voltage: e,
-                            });
-                        }}
-                        decimalPlaces={1}
-                    />
-                ),
-            },
-            {
-                key: 'throttle_mode',
-                label: (
-                    <>
-                        Throttle mode
-                        <br />
-                        <br />
-                        <Typography.Text italic>
-                            This parameter if throttle lever will control speed
-                            or current
-                        </Typography.Text>
-                    </>
-                ),
-                children: (
-                    <SelectParameterComponent
-                        value={throttle_mode}
-                        options={ThrottleModeOptions}
-                        onChange={(e) =>
-                            this.setState({ throttle_mode: e as ThrottleMode })
-                        }
-                    />
-                ),
-            },
-            {
-                key: 'throttle_speed_limit',
-                label: 'Throttle speed limit',
-                children: (
-                    <Radio.Group
-                        onChange={(e) => {
-                            this.setState({
-                                throttle_speed_limit: e.target.value,
-                            });
-                        }}
-                        value={throttle_speed_limit}
-                    >
-                        <Radio
-                            value={
-                                this.initial_throttle_parameters
-                                    .throttle_speed_limit
-                            }
-                        >
-                            Leave old value -&nbsp;
-                            {this.initial_throttle_parameters
-                                .throttle_speed_limit === SpeedLimitByDisplay
-                                ? 'By display'
-                                : `${this.initial_throttle_parameters.throttle_speed_limit} km/h`}
-                        </Radio>
-                        <Radio value={25}>25 km/h</Radio>
-                        <Radio value={32}>32 km/h</Radio>
-                        <Radio value={SpeedLimitByDisplay}>
-                            By limit in display module
-                        </Radio>
-                    </Radio.Group>
-                ),
-            },
-        ];
-    }
-
     updateData(): void {
         const { connection } = this.props;
         this.initial_info = connection.getInfo();
         this.initial_basic_parameters = connection.getBasicParameters();
         this.initial_pedal_parameters = connection.getPedalParameters();
-        this.initial_throttle_parameters = connection.getThrottleParameters();
         this.setState({
             ...this.initial_info,
             ...this.initial_basic_parameters,
             ...this.initial_pedal_parameters,
-            ...this.initial_throttle_parameters,
             lastUpdateTime: Date.now(),
         });
         console.log(
@@ -463,7 +324,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             this.initial_info,
             this.initial_basic_parameters,
             this.initial_pedal_parameters,
-            this.initial_throttle_parameters,
         );
     }
 
@@ -474,12 +334,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
             .state as BafangUartMotorBasicParameters;
         const pedal_parameters: BafangUartMotorPedalParameters = this
             .state as BafangUartMotorPedalParameters;
-        const throttle_parameters: BafangUartMotorThrottleParameters = this
-            .state as BafangUartMotorThrottleParameters;
         connection.setSerialNumber(info.serial_number);
         connection.setBasicParameters(basic_parameters);
         connection.setPedalParameters(pedal_parameters);
-        connection.setThrottleParameters(throttle_parameters);
         this.packages_written = 0;
         connection.saveData();
         setTimeout(() => {
@@ -493,7 +350,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
 
     render() {
         const { connection } = this.props;
-        const { throttle_on } = this.state;
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
@@ -537,40 +393,6 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
-                <Typography.Title level={5} style={{ margin: 0 }}>
-                    Turn throttle on
-                </Typography.Title>
-                <Typography.Text italic>
-                    (WARNING! Its illegal in most countries, check your local
-                    rules before installing throttle lever!) &nbsp;&nbsp;
-                </Typography.Text>
-                <Switch
-                    checked={throttle_on}
-                    onChange={(value) => {
-                        this.setState({
-                            throttle_on: value,
-                            throttle_start_voltage: value
-                                ? this.initial_throttle_parameters
-                                      .throttle_start_voltage
-                                : this.initial_throttle_parameters
-                                      .throttle_end_voltage,
-                            throttle_end_voltage:
-                                this.initial_throttle_parameters
-                                    .throttle_end_voltage,
-                        });
-                    }}
-                />
-                {throttle_on && (
-                    <>
-                        <br />
-                        <br />
-                        <Descriptions
-                            bordered
-                            items={this.getThrottleItems()}
-                            column={1}
-                        />
-                    </>
-                )}
                 <FloatButton
                     icon={<SyncOutlined />}
                     type="primary"
