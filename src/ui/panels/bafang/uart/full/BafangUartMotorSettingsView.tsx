@@ -125,13 +125,12 @@ class BafangUartMotorSettingsView extends React.Component<
     getElectricalParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Low voltage battery protection',
+                i18n.t('battery_low_limit'),
                 this.state.low_battery_protection,
-                `Its not recommended to set low voltage battery protection lower than ${
-                    lowVoltageLimits[this.state.voltage].min
-                }V and higher that ${
-                    lowVoltageLimits[this.state.voltage].max
-                }V on your system`,
+                i18n.t('battery_low_limit_warning', {
+                    min: lowVoltageLimits[this.state.voltage].min,
+                    max: lowVoltageLimits[this.state.voltage].max,
+                }),
                 lowVoltageLimits[this.state.voltage].min,
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
@@ -141,7 +140,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItem(
-                'Current limit',
+                i18n.t('current_limit'),
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
                 i18n.t('a'),
@@ -160,9 +159,9 @@ class BafangUartMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItemWithWarning(
-                'Throttle start voltage',
+                i18n.t('throttle_start_voltage'),
                 this.state.throttle_start_voltage,
-                'Its not recommended to set lower start voltage than 1.1V',
+                i18n.t('throttle_start_voltage_warning'),
                 1.1,
                 20,
                 (throttle_start_voltage) =>
@@ -203,9 +202,9 @@ class BafangUartMotorSettingsView extends React.Component<
     getPhysicalParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
@@ -485,13 +484,12 @@ class BafangUartMotorSettingsView extends React.Component<
     getBasicParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Low battery protection',
+                i18n.t('low_battery_protection'),
                 this.state.low_battery_protection,
-                `Its not recommended to set low voltage battery protection lower than ${
-                    lowVoltageLimits[this.state.voltage].min
-                }V and higher that ${
-                    lowVoltageLimits[this.state.voltage].max
-                }V on your system`,
+                i18n.t('battery_low_limit_warning', {
+                    min: lowVoltageLimits[this.state.voltage].min,
+                    max: lowVoltageLimits[this.state.voltage].max,
+                }),
                 lowVoltageLimits[this.state.voltage].min,
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
@@ -501,7 +499,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItem(
-                'Current limit',
+                i18n.t('current_limit'),
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
                 i18n.t('a'),
@@ -509,9 +507,9 @@ class BafangUartMotorSettingsView extends React.Component<
                 this.state.max_current,
             ),
             generateEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),

@@ -227,5 +227,18 @@
     "max_current_description": "",
     "battery_low_limit": "",
     "battery_low_limit_description": "",
-    "wheel_diameter_warning": ""
+    "wheel_diameter_warning": "",
+    "leave_old_value": "",
+    "by_limit_in_display": "",
+    "pedal_speed_limit": "",
+    "pedal_speed_limit_description": "",
+    "start_degree": "",
+    "start_degree_description": "",
+    "stop_delay_simplified_description": "",
+    "none": "",
+    "dh_sensor_12": "",
+    "bb_sensor_32": "",
+    "double_signal_24": "",
+    "throttle_start_voltage_warning": "",
+    "low_battery_protection": ""
 }

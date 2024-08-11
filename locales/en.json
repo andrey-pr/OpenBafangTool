@@ -227,5 +227,20 @@
     "max_current_description": "Note, that Voltage*Max Current is a maximal power, but not nominal. If you have legal motor certified as 250W, and Voltage*Max Current is twice or even triple bigger its normal - 250W is a nominal (continuous) power, and its legal to use device that can have bigger maximal power. For example, some of Shimano STEPS motors that certified for 250W pedelecs have 600W of max power.",
     "battery_low_limit": "Battery cutoff voltage",
     "battery_low_limit_description": "Increase it if you system shuts down unexpectedly by BMS inside of battery",
-    "wheel_diameter_warning": "Usually bike wheels has size in range from 12 to 29 inches"
+    "wheel_diameter_warning": "Usually bike wheels has size in range from 12 to 29 inches",
+    "leave_old_value": "Leave old value",
+    "by_limit_in_display": "By limit in display module",
+    "pedal_speed_limit": "Pedal speed limit",
+    "pedal_speed_limit_description": "Note that its illegal to set bigger speed limit that its allowed in your country. Check your local laws before changing it",
+    "start_degree": "Start Degree",
+    "start_degree_description": "This parameter means on how big angle do you have to turn pedals to start motor",
+    "stop_delay_simplified_description": "This parameter means time between last signal from pedal sensor and motor stop. If parameter is too low, motor may work unstable on low cadence. If parameter is too big, braking distance will increase (so too big value is not available in Simplified mode)",
+    "none": "None",
+    "dh_sensor_12": "DH-Sensor-12",
+    "bb_sensor_32": "BB-Sensor-32",
+    "double_signal_24": "DoubleSignal-24",
+    "level": "Level",
+    "battery_low_limit_warning": "Its not recommended to set low voltage battery protection lower than %{min}V and higher that %{max}V on your system",
+    "throttle_start_voltage_warning": "Its not recommended to set lower start voltage than 1.1V",
+    "low_battery_protection": "Low battery protection"
 }
