@@ -71,6 +71,7 @@ export default class BafangUartMotor implements IConnection {
                 { current_limit: 0, speed_limit: 0 },
                 { current_limit: 0, speed_limit: 0 },
             ],
+            magnets_per_wheel_rotation: 0,
             wheel_diameter: 0,
             speedmeter_type: SpeedmeterType.External,
         };
@@ -218,6 +219,8 @@ export default class BafangUartMotor implements IConnection {
                 this.basic_parameters.wheel_diameter = data[22] / 2;
                 this.basic_parameters.speedmeter_type =
                     (data[23] & 0b11000000) >> 6;
+                this.basic_parameters.magnets_per_wheel_rotation =
+                    data[23] & 0b111111;
                 break; // basic parameters
             case 0x53:
                 this.pedal_parameters.pedal_type = data[0];
@@ -342,6 +345,7 @@ export default class BafangUartMotor implements IConnection {
                     { current_limit: 100, speed_limit: 100 },
                 ],
                 wheel_diameter: 28,
+                magnets_per_wheel_rotation: 1,
                 speedmeter_type: SpeedmeterType.External,
             };
             this.pedal_parameters = {
@@ -416,7 +420,6 @@ export default class BafangUartMotor implements IConnection {
             console.log(this.throttle_parameters);
             return true;
         }
-        const magnetsPerWheelRotation = 1;
         const basicParametersPacket: Uint8Array = new Uint8Array([
             this.basic_parameters.low_battery_protection,
             this.basic_parameters.current_limit,
@@ -442,7 +445,7 @@ export default class BafangUartMotor implements IConnection {
             this.basic_parameters.assist_profiles[9].speed_limit,
             this.basic_parameters.wheel_diameter * 2,
             ((this.basic_parameters.speedmeter_type & 0b11) << 6) +
-                (magnetsPerWheelRotation & 0b111111),
+                (this.basic_parameters.magnets_per_wheel_rotation & 0b111111),
         ]);
         const workMode = 10;
         const pedalParametersPacket: Uint8Array = new Uint8Array([

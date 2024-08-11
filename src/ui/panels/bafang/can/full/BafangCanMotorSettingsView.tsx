@@ -442,13 +442,14 @@ class BafangCanMotorSettingsView extends React.Component<
                 'Motor type',
                 MotorType[parameter1.motor_type],
             ),
-            generateEditableNumberListItem(
+            generateAnnotatedEditableNumberListItem(
                 'Number of magnets on speedmeter',
                 this.state.speedmeter_magnets_number,
                 (speedmeter_magnets_number: number) =>
                     this.setState({
                         speedmeter_magnets_number,
                     }),
+                'NEVER try to set wrong magnet number - its illegal, because it will lead to incorrect speed measurement',
                 '',
                 1,
                 10,

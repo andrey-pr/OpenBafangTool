@@ -30,6 +30,8 @@ import {
 import { lowVoltageLimits } from '../../../../../constants/parameter_limits';
 import ParameterInputComponent from '../../../../components/ParameterInput';
 import {
+    generateAnnotatedEditableNumberListItem,
+    generateAnnotatedEditableNumberListItemWithWarning,
     generateEditableNumberListItem,
     generateEditableNumberListItemWithWarning,
     generateEditableSelectListItem,
@@ -201,16 +203,30 @@ class BafangUartMotorSettingsView extends React.Component<
 
     getPhysicalParameterItems(): DescriptionsProps['items'] {
         return [
-            generateEditableNumberListItemWithWarning(
+            generateAnnotatedEditableNumberListItemWithWarning(
                 'Wheel diameter',
                 this.state.wheel_diameter,
                 'Usually bike wheels has size in range from 12 to 29 inches',
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
+                'NEVER try to set wrong wheel diameter - its illegal, because it will lead to incorrect speed measurement',
                 '″',
                 1,
                 100,
+            ),
+            generateAnnotatedEditableNumberListItemWithWarning(
+                'Number of speed meter magnets on wheel',
+                this.state.magnets_per_wheel_rotation,
+                'Normally bike have only one speed meter magnet. Incorrect value of this setting will lead to incorrect speed measuring',
+                1,
+                1,
+                (magnets_per_wheel_rotation) =>
+                    this.setState({ magnets_per_wheel_rotation }),
+                'NEVER try to set wrong magnet number - it may be illegal, because it will lead to incorrect speed measurement',
+                '',
+                1,
+                10,
             ),
             generateEditableSelectListItem(
                 'Speedmeter type',
@@ -511,6 +527,19 @@ class BafangUartMotorSettingsView extends React.Component<
                 '″',
                 1,
                 100,
+            ),
+            generateAnnotatedEditableNumberListItemWithWarning(
+                'Speed meter signals',
+                this.state.magnets_per_wheel_rotation,
+                'Normally bike have only one speed meter magnet. Incorrect value of this setting will lead to incorrect speed measuring',
+                1,
+                1,
+                (magnets_per_wheel_rotation) =>
+                    this.setState({ magnets_per_wheel_rotation }),
+                'NEVER try to set wrong magnet number - its illegal, because it will lead to incorrect speed measurement',
+                '',
+                1,
+                10,
             ),
             generateEditableSelectListItem(
                 'Speedmeter type',
