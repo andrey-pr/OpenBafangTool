@@ -282,6 +282,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ? null
                                 : pedal_speed_limit
                         }
+                        nullIsOk
                         unit={
                             <Select
                                 style={{ minWidth: '100px' }}
@@ -580,6 +581,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ? null
                                 : pedal_speed_limit
                         }
+                        nullIsOk
                         unit={
                             <Select
                                 style={{ minWidth: '100px' }}
