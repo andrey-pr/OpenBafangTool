@@ -46,6 +46,7 @@ export type BafangUartMotorBasicParameters = {
     current_limit: number;
     assist_profiles: BafangAssistProfile[];
     wheel_diameter: number;
+    magnets_per_wheel_rotation: number;
     speedmeter_type: SpeedmeterType;
 };
 
@@ -80,6 +81,12 @@ export function checkBasicParameters(
     if (
         basicParameters.wheel_diameter < 1 ||
         basicParameters.wheel_diameter > 100
+    ) {
+        return false;
+    }
+    if (
+        basicParameters.magnets_per_wheel_rotation < 1 ||
+        basicParameters.magnets_per_wheel_rotation > 10
     ) {
         return false;
     }

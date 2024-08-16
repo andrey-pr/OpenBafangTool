@@ -143,6 +143,47 @@ export function generateAnnotatedEditableNumberListItem(
     };
 }
 
+export function generateAnnotatedEditableNumberListItemWithWarning(
+    text: string,
+    content: number | null,
+    warningText: string,
+    warningBelow: number,
+    warningAbove: number,
+    onNewValue: (e: number) => void,
+    note: string,
+    content_unit?: ReactNode,
+    min?: number,
+    max?: number,
+    decimalPlaces?: number,
+): DescriptionsItemType {
+    return {
+        label: (
+            <>
+                {text}
+                {note && (
+                    <>
+                        <br /> <Text italic>{note}</Text>
+                    </>
+                )}
+            </>
+        ),
+        children: (
+            <ParameterInputComponent
+                value={content}
+                unit={content_unit}
+                min={min}
+                max={max}
+                decimalPlaces={decimalPlaces}
+                onNewValue={onNewValue}
+                warningText={warningText}
+                warningBelow={warningBelow}
+                warningAbove={warningAbove}
+            />
+        ),
+        contentStyle: { width: '50%' },
+    };
+}
+
 export function generateEditableNumberListItemWithWarning(
     text: string,
     content: number,
