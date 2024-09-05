@@ -77,6 +77,7 @@ type SettingsState = {
     model_number: string | null;
     serial_number: string | null;
     manufacturer: string | null;
+    walk_assist_speed: number | null;
     position_sensor_calibration_dialog: boolean;
 };
 
@@ -121,6 +122,9 @@ class BafangCanMotorSettingsView extends React.Component<
                 : null,
             lamps_always_on: controller.parameter1
                 ? controller.parameter1.lamps_always_on
+                : null,
+            walk_assist_speed: controller.parameter1
+                ? controller.parameter1.walk_assist_speed
                 : null,
             start_current: controller.parameter1
                 ? controller.parameter1.start_current
@@ -188,6 +192,7 @@ class BafangCanMotorSettingsView extends React.Component<
                     speedmeter_magnets_number:
                         parameter1.speedmeter_magnets_number,
                     lamps_always_on: parameter1.lamps_always_on,
+                    walk_assist_speed: parameter1.walk_assist_speed,
                     start_current: parameter1.start_current,
                     current_loading_time: parameter1.current_loading_time,
                     current_shedding_time: parameter1.current_shedding_time,
@@ -530,6 +535,19 @@ class BafangCanMotorSettingsView extends React.Component<
                         pedal_sensor_type: e as number,
                     }),
             ),
+            generateEditableNumberListItem(
+                // TODO
+                'Walk assist speed',
+                this.state.walk_assist_speed,
+                (walk_assist_speed: number) =>
+                    this.setState({
+                        walk_assist_speed,
+                    }),
+                'Km/H',
+                1,
+                6,
+                1,
+            ),
         ];
     }
 
@@ -734,6 +752,8 @@ class BafangCanMotorSettingsView extends React.Component<
                     this.state.speedmeter_magnets_number;
             if (this.state.lamps_always_on !== null)
                 parameter1.lamps_always_on = this.state.lamps_always_on;
+            if (this.state.walk_assist_speed !== null)
+                parameter1.walk_assist_speed = this.state.walk_assist_speed;
             if (this.state.start_current !== null)
                 parameter1.start_current = this.state.start_current;
             if (this.state.current_loading_time !== null)

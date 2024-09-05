@@ -78,6 +78,7 @@ export class BafangCanControllerParser {
             assist_levels: [],
             displayless_mode: packet.data[58] === 1,
             lamps_always_on: packet.data[59] === 1,
+            walk_assist_speed: ((packet.data[61] << 8) + packet.data[60]) / 100,
         };
         for (let i = 0; i < 9; i++) {
             pkg.assist_levels.push({
