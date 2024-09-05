@@ -47,8 +47,8 @@ export function prepareParameter1WritePromise(
     });
     new_pkg[58] = value.displayless_mode ? 1 : 0;
     new_pkg[59] = value.lamps_always_on ? 1 : 0;
-    new_pkg[60] = (value.walk_assist_speed * 10) & 0b11111111;
-    new_pkg[61] = (value.walk_assist_speed * 10) >> 8;
+    new_pkg[60] = (value.walk_assist_speed * 100) & 0b11111111;
+    new_pkg[61] = (value.walk_assist_speed * 100) >> 8;
     new_pkg[63] = calculateChecksum(new_pkg.slice(0, 63));
     addWritePromise(
         DeviceNetworkId.DRIVE_UNIT,
