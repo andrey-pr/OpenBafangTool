@@ -1,3 +1,4 @@
+import i18n from '../i18n/i18n';
 import { BafangAssistProfile } from './common';
 
 export type BafangCanControllerRealtime0 = {
@@ -27,15 +28,15 @@ export enum PedalSensorType {
 export const TriggerTypeOptions = [
     {
         value: PedalSensorType.TorqueSensor,
-        label: 'Torque sensor and throttle lever',
+        label: i18n.t('torque_and_lever'),
     },
     {
         value: PedalSensorType.CadenceSensor,
-        label: 'Cadence sensor and throttle lever',
+        label: i18n.t('cadence_and_lever'),
     },
     {
         value: PedalSensorType.ThrottleLeverOnly,
-        label: 'Throttle lever only',
+        label: i18n.t('throttle_lever_only'),
     },
 ];
 
@@ -85,6 +86,7 @@ export type BafangCanControllerParameter1 = {
     assist_levels: BafangAssistProfile[];
     displayless_mode: boolean;
     lamps_always_on: boolean;
+    walk_assist_speed: number;
 };
 
 export type TorqueProfile = {

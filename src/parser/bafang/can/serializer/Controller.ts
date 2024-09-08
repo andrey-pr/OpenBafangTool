@@ -1,12 +1,19 @@
-import { deepCopy } from "deep-copy-ts";
-import { CanCommand, CanWriteCommandsList } from "../../../../constants/BafangCanConstants";
-import BesstDevice from "../../../../device/besst/besst";
-import { DeviceNetworkId } from "../../../../device/besst/besst-types";
-import { BafangCanControllerParameter1, BafangCanControllerParameter2, BafangCanControllerSpeedParameters } from "../../../../types/BafangCanSystemTypes";
-import { RequestManager } from "../../../../utils/can/RequestManager";
-import { WriteFunctionType, addWritePromise } from "./common";
-import { calculateChecksum } from "../../../../utils/can/utils";
-import { intToByteArray } from "../../../../utils/utils";
+import { deepCopy } from 'deep-copy-ts';
+import {
+    CanCommand,
+    CanWriteCommandsList,
+} from '../../../../constants/BafangCanConstants';
+import BesstDevice from '../../../../device/besst/besst';
+import { DeviceNetworkId } from '../../../../device/besst/besst-types';
+import {
+    BafangCanControllerParameter1,
+    BafangCanControllerParameter2,
+    BafangCanControllerSpeedParameters,
+} from '../../../../types/BafangCanSystemTypes';
+import { RequestManager } from '../../../../utils/can/RequestManager';
+import { WriteFunctionType, addWritePromise } from './common';
+import { calculateChecksum } from '../../../../utils/can/utils';
+import { intToByteArray } from '../../../../utils/utils';
 
 export function prepareParameter1WritePromise(
     value: BafangCanControllerParameter1 | null,
@@ -40,6 +47,8 @@ export function prepareParameter1WritePromise(
     });
     new_pkg[58] = value.displayless_mode ? 1 : 0;
     new_pkg[59] = value.lamps_always_on ? 1 : 0;
+    new_pkg[60] = (value.walk_assist_speed * 100) & 0b11111111;
+    new_pkg[61] = (value.walk_assist_speed * 100) >> 8;
     new_pkg[63] = calculateChecksum(new_pkg.slice(0, 63));
     addWritePromise(
         DeviceNetworkId.DRIVE_UNIT,
@@ -93,7 +102,7 @@ export function prepareSpeedPackageWritePromise(
     besst_device: BesstDevice,
     request_manager: RequestManager,
 ): void {
-    if(!value) return;
+    if (!value) return;
     const data = [
         ...intToByteArray(value.speed_limit * 100, 2),
         value.wheel_diameter.code[0],

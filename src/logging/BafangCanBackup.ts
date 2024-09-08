@@ -29,7 +29,7 @@ export class BafangCanBackup {
                 model_number: controller.modelNumber,
                 manufacturer: controller.manufacturer,
             };
-        } else backup_obj['controller'] = 'Not available';
+        } else backup_obj['controller'] = null;
         if (display && display.available) {
             backup_obj['display'] = {
                 available: display.available,
@@ -43,7 +43,7 @@ export class BafangCanBackup {
                 manufacturer: display.manufacturer,
                 bootloader_version: display.bootloaderVersion,
             };
-        } else backup_obj['display'] = 'Not available';
+        } else backup_obj['display'] = null;
         if (sensor && sensor.available) {
             backup_obj['sensor'] = {
                 available: sensor.available,
@@ -52,7 +52,7 @@ export class BafangCanBackup {
                 software_version: sensor.softwareVersion,
                 model_number: sensor.modelNumber,
             };
-        } else backup_obj['sensor'] = 'Not available';
+        } else backup_obj['sensor'] = null;
         if (battery && battery.available) {
             backup_obj['battery'] = {
                 available: battery.available,
@@ -61,7 +61,7 @@ export class BafangCanBackup {
                 software_version: battery.softwareVersion,
                 model_number: battery.modelNumber,
             };
-        } else backup_obj['battery'] = 'Not available';
+        } else backup_obj['battery'] = null;
         let backup_text = JSON.stringify(backup_obj);
         let dir = path.join(getAppDataPath('open-bafang-tool'), `backups`);
         try {

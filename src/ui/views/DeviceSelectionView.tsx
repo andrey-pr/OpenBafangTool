@@ -22,6 +22,7 @@ import {
 import InterfaceType from '../../types/InterfaceType';
 import filterPorts from '../../device/serial/serial-patcher';
 import { listBesstDevices } from '../../device/besst/besst';
+import i18n from '../../i18n/i18n';
 
 const { Option } = Select;
 
@@ -121,14 +122,16 @@ class DeviceSelectionView extends React.Component<
                         );
                     }}
                 >
-                    <Typography.Title level={3}>Select device</Typography.Title>
+                    <Typography.Title level={3}>
+                        {i18n.t('select_device')}
+                    </Typography.Title>
                     <Form.Item
                         name="device_interface"
-                        label="Device protocol"
+                        label={i18n.t('device_protocol')}
                         rules={[
                             {
                                 required: true,
-                                message: 'Device protocol is required',
+                                message: i18n.t('protocol_required'),
                             },
                         ]}
                     >
@@ -157,11 +160,11 @@ class DeviceSelectionView extends React.Component<
                     {deviceInterface === DeviceInterface.UART && (
                         <Form.Item
                             name="interface_type"
-                            label="Interface type"
+                            label={i18n.t('interface_type')}
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Interface type is required',
+                                    message: i18n.t('interface_type_required'),
                                 },
                             ]}
                         >
@@ -176,20 +179,22 @@ class DeviceSelectionView extends React.Component<
                                 style={{ minWidth: '150px' }}
                             >
                                 <Option value={InterfaceType.Simplified}>
-                                    Simplified
+                                    {i18n.t('simplified_ui')}
                                 </Option>
-                                <Option value={InterfaceType.Full}>Full</Option>
+                                <Option value={InterfaceType.Full}>
+                                    {i18n.t('full_featured_ui')}
+                                </Option>
                             </Select>
                         </Form.Item>
                     )}
                     {deviceInterface === DeviceInterface.UART && (
                         <Form.Item
                             name="port"
-                            label="Serial port"
+                            label={i18n.t('serial_port')}
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Serial port is required',
+                                    message: i18n.t('port_required'),
                                 },
                             ]}
                         >
@@ -203,7 +208,9 @@ class DeviceSelectionView extends React.Component<
                                 allowClear
                                 style={{ minWidth: '150px' }}
                             >
-                                <Option value="demo">Demo</Option>
+                                <Option value="demo">
+                                    {i18n.t('demo_device')}
+                                </Option>
                                 {portComponents}
                             </Select>
                         </Form.Item>
@@ -211,11 +218,11 @@ class DeviceSelectionView extends React.Component<
                     {deviceInterface === DeviceInterface.CAN && (
                         <Form.Item
                             name="usb_device"
-                            label="USB device"
+                            label={i18n.t('usb_device')}
                             rules={[
                                 {
                                     required: true,
-                                    message: 'USB device is required',
+                                    message: i18n.t('usb_required'),
                                 },
                             ]}
                         >
@@ -229,7 +236,9 @@ class DeviceSelectionView extends React.Component<
                                 allowClear
                                 style={{ minWidth: '150px' }}
                             >
-                                <Option value="demo">Demo</Option>
+                                <Option value="demo">
+                                    {i18n.t('demo_device')}
+                                </Option>
                                 {besstDeviceList.map((item) => {
                                     return (
                                         <Option
@@ -255,7 +264,9 @@ class DeviceSelectionView extends React.Component<
                                         ? Promise.resolve()
                                         : Promise.reject(
                                               new Error(
-                                                  'You should obey the law',
+                                                  i18n.t(
+                                                      'law_disclaimer_error',
+                                                  ),
                                               ),
                                           ),
                             },
@@ -269,9 +280,9 @@ class DeviceSelectionView extends React.Component<
                             }}
                             style={{ fontSize: '12px' }}
                         >
-                            I checked local laws and regulations and
+                            {i18n.t('law_disclaimer_text_1')}
                             <br />
-                            will not use this program to violate them
+                            {i18n.t('law_disclaimer_text_2')}
                             <span style={{ color: 'red' }}>&nbsp;*</span>
                         </Checkbox>
                     </Form.Item>
@@ -287,7 +298,9 @@ class DeviceSelectionView extends React.Component<
                                         ? Promise.resolve()
                                         : Promise.reject(
                                               new Error(
-                                                  'Developer does not carry any responsibility',
+                                                  i18n.t(
+                                                      'responsibility_disclaimer_error',
+                                                  ),
                                               ),
                                           ),
                             },
@@ -301,12 +314,11 @@ class DeviceSelectionView extends React.Component<
                             }}
                             style={{ fontSize: '12px' }}
                         >
-                            I understand, that developer of this software
+                            {i18n.t('liability_disclaimer_text_1')}
                             <br />
-                            do not care responsibility for any consequences
+                            {i18n.t('liability_disclaimer_text_2')}
                             <br />
-                            of changing configuration of e-bike or any other
-                            device
+                            {i18n.t('liability_disclaimer_text_3')}
                             <span style={{ color: 'red' }}>&nbsp;*</span>
                         </Checkbox>
                     </Form.Item>
@@ -376,14 +388,14 @@ class DeviceSelectionView extends React.Component<
                                     interfaceType === null
                                 }
                             >
-                                Check connection
+                                {i18n.t('check_connection')}
                             </Button>
                             <Button
                                 type="primary"
                                 htmlType="submit"
                                 disabled={!connectionChecked}
                             >
-                                Select
+                                {i18n.t('select')}
                             </Button>
                         </Space>
                     </Form.Item>

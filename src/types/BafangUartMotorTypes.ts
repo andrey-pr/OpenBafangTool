@@ -1,3 +1,4 @@
+import i18n from '../i18n/i18n';
 import { BafangAssistProfile } from './common';
 
 export const Voltage = [24, 36, 48, 43];
@@ -29,15 +30,15 @@ export enum SpeedmeterType {
 export const SpeedmeterTypeOptions = [
     {
         value: SpeedmeterType.External,
-        label: 'External',
+        label: i18n.t('external'),
     },
     {
         value: SpeedmeterType.Internal,
-        label: 'Internal',
+        label: i18n.t('internal'),
     },
     {
         value: SpeedmeterType.Motorphase,
-        label: 'Motorphase',
+        label: i18n.t('motorphase'),
     },
 ];
 
@@ -46,6 +47,7 @@ export type BafangUartMotorBasicParameters = {
     current_limit: number;
     assist_profiles: BafangAssistProfile[];
     wheel_diameter: number;
+    magnets_per_wheel_rotation: number;
     speedmeter_type: SpeedmeterType;
 };
 
@@ -83,6 +85,12 @@ export function checkBasicParameters(
     ) {
         return false;
     }
+    if (
+        basicParameters.magnets_per_wheel_rotation < 1 ||
+        basicParameters.magnets_per_wheel_rotation > 10
+    ) {
+        return false;
+    }
     if (!(basicParameters.speedmeter_type in SpeedmeterType)) {
         return false;
     }
@@ -97,18 +105,18 @@ export enum PedalType {
 }
 
 export const PedalTypeOptions = [
-    { value: PedalType.None, label: 'None' },
+    { value: PedalType.None, label: i18n.t('none') },
     {
         value: PedalType.DHSensor12,
-        label: 'DH-Sensor-12',
+        label: i18n.t('dh_sensor_12'),
     },
     {
         value: PedalType.BBSensor32,
-        label: 'BB-Sensor-32',
+        label: i18n.t('bb_sensor_32'),
     },
     {
         value: PedalType.DoubleSignal24,
-        label: 'DoubleSignal-24',
+        label: i18n.t('double_signal_24'),
     },
 ];
 
@@ -131,47 +139,47 @@ export enum AssistLevel {
 export const AssistLevelOptions = [
     {
         value: AssistLevel.ByDisplay,
-        label: 'By display',
+        label: i18n.t('by_display'),
     },
     {
         value: AssistLevel.AssistLevel0,
-        label: 'Level 0',
+        label: `${i18n.t('level')} 0`,
     },
     {
         value: AssistLevel.AssistLevel1,
-        label: 'Level 1',
+        label: `${i18n.t('level')} 1`,
     },
     {
         value: AssistLevel.AssistLevel2,
-        label: 'Level 2',
+        label: `${i18n.t('level')} 2`,
     },
     {
         value: AssistLevel.AssistLevel3,
-        label: 'Level 3',
+        label: `${i18n.t('level')} 3`,
     },
     {
         value: AssistLevel.AssistLevel4,
-        label: 'Level 4',
+        label: `${i18n.t('level')} 4`,
     },
     {
         value: AssistLevel.AssistLevel5,
-        label: 'Level 5',
+        label: `${i18n.t('level')} 5`,
     },
     {
         value: AssistLevel.AssistLevel6,
-        label: 'Level 6',
+        label: `${i18n.t('level')} 6`,
     },
     {
         value: AssistLevel.AssistLevel7,
-        label: 'Level 7',
+        label: `${i18n.t('level')} 7`,
     },
     {
         value: AssistLevel.AssistLevel8,
-        label: 'Level 8',
+        label: `${i18n.t('level')} 8`,
     },
     {
         value: AssistLevel.AssistLevel9,
-        label: 'Level 9',
+        label: `${i18n.t('level')} 9`,
     },
 ];
 
@@ -179,16 +187,16 @@ export const SpeedLimitByDisplay: number = 255;
 
 export const SimplifiedPedalSpeedLimitOptions = [
     {
-        value: 25,
-        label: '25 km/h (EU region)',
+        value: 16,
+        label: `16 ${i18n.t('km/h')}`,
     },
     {
-        value: 32,
-        label: '32 km/h (USA region)',
+        value: 25,
+        label: `25 ${i18n.t('km/h')}`,
     },
     {
         value: SpeedLimitByDisplay,
-        label: 'By limit in display module',
+        label: i18n.t('by_limit_in_display'),
     },
 ];
 
@@ -273,11 +281,11 @@ export enum ThrottleMode {
 export const ThrottleModeOptions = [
     {
         value: ThrottleMode.Speed,
-        label: 'Speed',
+        label: i18n.t('speed'),
     },
     {
         value: ThrottleMode.Current,
-        label: 'Current',
+        label: i18n.t('current'),
     },
 ];
 
@@ -397,12 +405,12 @@ interface ParameterNamesStruct {
 }
 
 export const ParameterNames: ParameterNamesStruct = {
-    basic: 'Basic parameters',
-    pedal: 'Pedal parameters',
-    throttle: 'Throttle parameters',
-    low_voltage_limit: 'Low Voltage Limit',
-    current_limit: 'Current Limit',
-    assist_profile_0_current_limit: 'Assist Profile 0 Current Limit',
+    basic: i18n.t('basic_parameters'),
+    pedal: i18n.t('pedal_parameters'),
+    throttle: i18n.t('throttle_parameters'),
+    low_voltage_limit: i18n.t('battery_low_limit'),
+    current_limit: i18n.t('current_limit'),
+    assist_profile_0_current_limit: 'Assist Profile 0 Current Limit',//TODO
     assist_profile_0_current_speed: 'Assist Profile 0 Speed Limit',
     assist_profile_1_current_limit: 'Assist Profile 1 Current Limit',
     assist_profile_1_current_speed: 'Assist Profile 1 Speed Limit',
@@ -422,7 +430,7 @@ export const ParameterNames: ParameterNamesStruct = {
     assist_profile_8_current_speed: 'Assist Profile 8 Speed Limit',
     assist_profile_9_current_limit: 'Assist Profile 9 Current Limit',
     assist_profile_9_current_speed: 'Assist Profile 9 Speed Limit',
-    wheel_diameter: 'Wheel Diameter',
+    wheel_diameter: i18n.t('wheel_diameter'),
     speedmeter_type: 'Speedmeter Type',
     pedal_type: 'Pedal Type',
     pedal_assist_level: 'Pedal Assist Level',
@@ -432,8 +440,8 @@ export const ParameterNames: ParameterNamesStruct = {
     pedal_signals_before_start: 'Signals Before Start',
     unused: '',
     pedal_time_to_stop: 'Time To Stop',
-    pedal_current_decay: 'Current Decay',
-    pedal_stop_decay: 'Stop Decay',
+    pedal_current_decay: i18n.t('current_decay'),
+    pedal_stop_decay: i18n.t('pedal_stop_decay'),
     pedal_keep_current: 'Keep Current',
     throttle_start_voltage: 'Throttle Start Voltage',
     throttle_end_voltage: 'Throttle End Voltage',

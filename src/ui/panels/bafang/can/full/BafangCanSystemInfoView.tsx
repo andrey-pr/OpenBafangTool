@@ -16,6 +16,7 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import i18n from '../../../../../i18n/i18n';
 
 const { Text } = Typography;
 
@@ -214,50 +215,53 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Remaining capacity',
+                    i18n.t('remaining_capacity'),
                     controller_realtime0.remaining_capacity,
                     '%',
                 ),
                 generateSimpleNumberListItem(
-                    'Remaining trip distance',
+                    i18n.t('remaining_trip_distance'),
                     controller_realtime0.remaining_distance,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
-                    'Last trip distance',
+                    i18n.t('last_trip_distance'),
                     controller_realtime0.single_trip,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
-                    'Cadence',
+                    i18n.t('cadence'),
                     controller_realtime0.cadence,
-                    'RPM',
+                    i18n.t('rpm'),
                 ),
                 generateSimpleNumberListItem(
-                    'Torque value',
+                    i18n.t('torque_value'),
                     controller_realtime0.torque,
-                    'mV',
+                    i18n.t('mv'),
                 ),
             ];
         } else {
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Remaining capacity',
-                    'Not available yet',
+                    i18n.t('remaining_capacity'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Remaining trip distance',
-                    'Not available yet',
+                    i18n.t('remaining_trip_distance'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Last trip distance',
-                    'Not available yet',
+                    i18n.t('last_trip_distance'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem('Cadence', 'Not available yet'),
                 generateSimpleStringListItem(
-                    'Torque value',
-                    'Not available yet',
+                    i18n.t('cadence'),
+                    i18n.t('parameter_not_available_yet'),
+                ),
+                generateSimpleStringListItem(
+                    i18n.t('torque_value'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -265,69 +269,78 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Voltage',
+                    i18n.t('voltage'),
                     controller_realtime1.voltage,
-                    'V',
+                    i18n.t('v'),
                 ),
                 generateSimpleNumberListItem(
-                    'Controller temperature',
+                    i18n.t('controller_temperature'),
                     controller_realtime1.temperature,
-                    'C°',
+                    i18n.t('c_degree'),
                 ),
                 generateSimpleNumberListItem(
-                    'Motor temperature',
+                    i18n.t('motor_temperature'),
                     controller_realtime1.motor_temperature,
-                    'C°',
+                    i18n.t('c_degree'),
                 ),
                 generateSimpleNumberListItem(
-                    'Current',
+                    i18n.t('current'),
                     controller_realtime1.current,
-                    'A',
+                    i18n.t('a'),
                 ),
                 generateSimpleNumberListItem(
-                    'Speed',
+                    i18n.t('speed'),
                     controller_realtime1.speed,
-                    'Km/H',
+                    i18n.t('km/h'),
                 ),
             ];
         } else {
             items = [
                 ...items,
-                generateSimpleStringListItem('Voltage', 'Not available yet'),
                 generateSimpleStringListItem(
-                    'Controller temperature',
-                    'Not available yet',
+                    i18n.t('voltage'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Motor temperature',
-                    'Not available yet',
+                    i18n.t('controller_temperature'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem('Current', 'Not available yet'),
-                generateSimpleStringListItem('Speed', 'Not available yet'),
+                generateSimpleStringListItem(
+                    i18n.t('motor_temperature'),
+                    i18n.t('parameter_not_available_yet'),
+                ),
+                generateSimpleStringListItem(
+                    i18n.t('current'),
+                    i18n.t('parameter_not_available_yet'),
+                ),
+                generateSimpleStringListItem(
+                    i18n.t('speed'),
+                    i18n.t('parameter_not_available_yet'),
+                ),
             ];
         }
         items = [
             ...items,
             generateSimpleStringListItem(
-                'Manufacturer',
+                i18n.t('manufacturer'),
                 this.state.controller_manufacturer,
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.controller_software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.controller_hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.controller_model_number,
             ),
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.controller_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
         ];
         return items;
@@ -340,53 +353,53 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Assist levels number',
+                    i18n.t('total_assist_levels_number'),
                     display_realtime.assist_levels,
                 ),
                 generateSimpleBooleanListItem(
-                    'Mode',
+                    i18n.t('mode'),
                     display_realtime.ride_mode,
-                    'SPORT',
-                    'ECO',
+                    i18n.t('sport_mode'),
+                    i18n.t('eco_mode'),
                 ),
                 generateSimpleBooleanListItem(
-                    'Boost',
+                    i18n.t('boost'),
                     display_realtime.boost,
-                    'ON',
-                    'OFF',
+                    i18n.t('on'),
+                    i18n.t('off'),
                 ),
                 generateSimpleStringListItem(
-                    'Current assist',
+                    i18n.t('current_assist_level'),
                     display_realtime.current_assist_level,
                 ),
                 generateSimpleBooleanListItem(
-                    'Light',
+                    i18n.t('light'),
                     display_realtime.light,
-                    'ON',
-                    'OFF',
+                    i18n.t('on'),
+                    i18n.t('off'),
                 ),
                 generateSimpleBooleanListItem(
-                    'Button',
+                    i18n.t('button_pressed'),
                     display_realtime.button,
-                    'Pressed',
-                    'Not pressed',
+                    i18n.t('pressed'),
+                    i18n.t('not_pressed'),
                 ),
             ];
         } else {
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Assist levels number',
-                    'Not available yet',
+                    i18n.t('total_assist_levels_number'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem('Mode', 'Not available yet'),
-                generateSimpleStringListItem('Boost', 'Not available yet'),
+                generateSimpleStringListItem(i18n.t('mode'), i18n.t('parameter_not_available_yet')),
+                generateSimpleStringListItem(i18n.t('boost'), i18n.t('parameter_not_available_yet')),
                 generateSimpleStringListItem(
-                    'Current assist',
-                    'Not available yet',
+                    i18n.t('current_assist_level'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
-                generateSimpleStringListItem('Light', 'Not available yet'),
-                generateSimpleStringListItem('Button', 'Not available yet'),
+                generateSimpleStringListItem(i18n.t('light'), i18n.t('parameter_not_available_yet')),
+                generateSimpleStringListItem(i18n.t('button_pressed'), i18n.t('parameter_not_available_yet')),
             ];
         }
         if (this.state.display_data1) {
@@ -394,35 +407,35 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Total mileage',
+                    i18n.t('total_mileage'),
                     display_data1.total_mileage,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
-                    'Single mileage',
+                    i18n.t('single_trip_mileage'),
                     display_data1.single_mileage,
-                    'Km',
+                    i18n.t('km'),
                 ),
                 generateSimpleNumberListItem(
-                    'Max registered speed',
+                    i18n.t('max_registered_speed'),
                     display_data1.max_speed,
-                    'Km/H',
+                    i18n.t('km/h'),
                 ),
             ];
         } else {
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Total mileage',
-                    'Not available yet',
+                    i18n.t('total_mileage'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Single mileage',
-                    'Not available yet',
+                    i18n.t('single_trip_mileage'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Max registered speed',
-                    'Not available yet',
+                    i18n.t('max_registered_speed'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -431,58 +444,58 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Average speed',
+                    i18n.t('average_speed'),
                     display_data2.average_speed,
-                    'Km/H',
+                    i18n.t('km/h'),
                 ),
                 generateSimpleNumberListItem(
-                    'Mileage since last service',
+                    i18n.t('mileage_since_last_service'),
                     display_data2.service_mileage,
-                    'Km',
+                    i18n.t('km'),
                 ),
             ];
         } else {
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Average speed',
-                    'Not available yet',
+                    i18n.t('average_speed'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Mileage since last service',
-                    'Not available yet',
+                    i18n.t('mileage_since_last_service'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
         items = [
             ...items,
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.display_software_version,
             ),
             generateSimpleStringListItem(
-                'Manufacturer',
+                i18n.t('manufacturer'),
                 this.state.display_manufacturer,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.display_hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.display_model_number,
             ),
             generateSimpleStringListItem(
-                'Bootloader version',
+                i18n.t('bootloader_version'),
                 this.state.display_bootload_version,
             ),
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.display_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Customer number',
+                i18n.t('customer_number'),
                 this.state.display_customer_number,
             ),
         ];
@@ -492,20 +505,20 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     getSensorItems(): DescriptionsProps['items'] {
         const codesArray = [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.sensor_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.sensor_software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.sensor_hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.sensor_model_number,
             ),
         ];
@@ -513,21 +526,27 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         if (sensor_realtime) {
             return [
                 generateSimpleNumberListItem(
-                    'Torque value',
+                    i18n.t('torque_value'),
                     sensor_realtime.torque,
-                    'mV',
+                    i18n.t('mv'),
                 ),
                 generateSimpleNumberListItem(
-                    'Cadence',
+                    i18n.t('cadence'),
                     sensor_realtime.cadence,
-                    'RPM',
+                    i18n.t('rpm'),
                 ),
                 ...codesArray,
             ];
         }
         return [
-            generateSimpleStringListItem('Torque value', 'Not available yet'),
-            generateSimpleStringListItem('Cadence', 'Not available yet'),
+            generateSimpleStringListItem(
+                i18n.t('torque_value'),
+                i18n.t('parameter_not_available_yet'),
+            ),
+            generateSimpleStringListItem(
+                i18n.t('cadence'),
+                i18n.t('parameter_not_available_yet'),
+            ),
             ...codesArray,
         ];
     }
@@ -535,17 +554,17 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
     getBesstItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.besst_software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.besst_hardware_version,
             ),
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.besst_serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
         ];
     }
@@ -555,7 +574,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Info
+                    {i18n.t('can_main_tab_title')}
                 </Typography.Title>
                 <br />
                 {!connection.controller.available && (
@@ -595,7 +614,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 {connection.controller.available && (
                     <Descriptions
                         bordered
-                        title="Controller"
+                        title={i18n.t('controller')}
                         items={this.getControllerItems()}
                         column={1}
                         style={{ marginBottom: '20px' }}
@@ -604,7 +623,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 {connection.display?.available && (
                     <Descriptions
                         bordered
-                        title="Display"
+                        title={i18n.t('display')}
                         items={this.getDisplayItems()}
                         column={1}
                         style={{ marginBottom: '20px' }}
@@ -613,7 +632,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 {connection.sensor.available && (
                     <Descriptions
                         bordered
-                        title="Sensor"
+                        title={i18n.t('sensor')}
                         items={this.getSensorItems()}
                         column={1}
                         style={{ marginBottom: '20px' }}
@@ -621,7 +640,7 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                 )}
                 <Descriptions
                     bordered
-                    title="BESST Tool"
+                    title={i18n.t('besst_tool')}
                     items={this.getBesstItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
@@ -635,16 +654,19 @@ class BafangCanSystemInfoView extends React.Component<InfoProps, InfoState> {
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                             duration: 60,
                         });
                         connection.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );

@@ -12,6 +12,7 @@ import {
     BafangCanBatteryCapacityData,
     BafangCanBatteryStateData,
 } from '../../../../../types/BafangCanSystemTypes';
+import i18n from '../../../../../i18n/i18n';
 
 const { Text } = Typography;
 
@@ -75,9 +76,9 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         this.state.cells_voltage.forEach((voltage, cell) => {
             items?.push(
                 generateSimpleNumberMulticolumnListItem(
-                    `Cell ${cell + 1}`,
+                    i18n.t('cell', { number: cell + 1 }),
                     voltage,
-                    'V',
+                    i18n.t('v'),
                 ),
             );
         });
@@ -89,18 +90,30 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         if (capacity_data) {
             return [
                 generateSimpleNumberListItem(
-                    'Full capacity',
+                    i18n.t('full_capacity'),
                     capacity_data.full_capacity,
-                    'mAh',
+                    i18n.t('mah'),
                 ),
                 generateSimpleNumberListItem(
-                    'Capacity left',
+                    i18n.t('capacity_left'),
                     capacity_data.capacity_left,
-                    'mAh',
+                    i18n.t('mah'),
                 ),
-                generateSimpleNumberListItem('RSOC', capacity_data.rsoc, '%'),
-                generateSimpleNumberListItem('ASOC', capacity_data.asoc, '%'),
-                generateSimpleNumberListItem('SOH', capacity_data.soh, '%'),
+                generateSimpleNumberListItem(
+                    i18n.t('rsoc'),
+                    capacity_data.rsoc,
+                    '%',
+                ),
+                generateSimpleNumberListItem(
+                    i18n.t('asoc'),
+                    capacity_data.asoc,
+                    '%',
+                ),
+                generateSimpleNumberListItem(
+                    i18n.t('soh'),
+                    capacity_data.soh,
+                    '%',
+                ),
             ];
         }
     }
@@ -109,12 +122,20 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         const { state } = this.state;
         if (state) {
             return [
-                generateSimpleNumberListItem('Voltage', state.voltage, 'V'),
-                generateSimpleNumberListItem('Current', state.current, 'A'),
                 generateSimpleNumberListItem(
-                    'Temperature',
+                    i18n.t('voltage'),
+                    state.voltage,
+                    i18n.t('v'),
+                ),
+                generateSimpleNumberListItem(
+                    i18n.t('current'),
+                    state.current,
+                    i18n.t('a'),
+                ),
+                generateSimpleNumberListItem(
+                    i18n.t('temperature'),
                     state.temperature,
-                    'C°',
+                    i18n.t('c_degree'),
                 ),
             ];
         }
@@ -123,20 +144,20 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.model_number,
             ),
         ];
@@ -147,14 +168,14 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Battery
+                    {i18n.t('battery')}
                 </Typography.Title>
                 {this.state.cells_voltage && (
                     <>
                         <br />
                         <Descriptions
                             bordered
-                            title="Cell voltage"
+                            title={i18n.t('cell_voltage_array_title')}
                             items={this.getCellVoltageItems()}
                             column={2}
                         />
@@ -176,7 +197,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         <br />
                         <Descriptions
                             bordered
-                            title="Capacity info"
+                            title={i18n.t('capacity_info')}
                             items={this.getCapacityItems()}
                             column={1}
                         />
@@ -197,7 +218,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         <br />
                         <Descriptions
                             bordered
-                            title="Current state"
+                            title={i18n.t('current_state')}
                             items={this.getCurrentStateItems()}
                             column={1}
                         />
@@ -217,7 +238,7 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                 <br />
                 <Descriptions
                     bordered
-                    title="Other"
+                    title={i18n.t('version_list_title')}
                     items={this.getOtherItems()}
                     column={1}
                 />
@@ -230,16 +251,19 @@ class BafangCanBatteryView extends React.Component<ViewProps, ViewState> {
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                             duration: 60,
                         });
                         connection.battery.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );

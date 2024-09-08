@@ -8,6 +8,7 @@ import {
     generateSimpleNumberListItem,
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
+import i18n from '../../../../../i18n/i18n';
 
 const { Text } = Typography;
 
@@ -62,14 +63,14 @@ class BafangCanSensorSettingsView extends React.Component<
         if (realtime) {
             return [
                 generateSimpleNumberListItem(
-                    'Torque value',
+                    i18n.t('torque_value'),
                     realtime.torque,
-                    'mV',
+                    i18n.t('mv'),
                 ),
                 generateSimpleNumberListItem(
-                    'Cadence',
+                    i18n.t('cadence'),
                     realtime.cadence,
-                    'RPM',
+                    i18n.t('rpm'),
                 ),
             ];
         }
@@ -78,20 +79,20 @@ class BafangCanSensorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.model_number,
             ),
         ];
@@ -102,14 +103,14 @@ class BafangCanSensorSettingsView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Sensor settings
+                    {i18n.t('sensor')}
                 </Typography.Title>
                 {this.state.realtime && (
                     <>
                         <br />
                         <Descriptions
                             bordered
-                            title="Real-Time data"
+                            title={i18n.t('realtime_data')}
                             items={this.getRealtimeItems()}
                             column={1}
                         />
@@ -128,7 +129,7 @@ class BafangCanSensorSettingsView extends React.Component<
                 <br />
                 <Descriptions
                     bordered
-                    title="Other"
+                    title={i18n.t('version_list_title')}
                     items={this.getOtherItems()}
                     column={1}
                 />
@@ -141,16 +142,19 @@ class BafangCanSensorSettingsView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                             duration: 60,
                         });
                         connection.sensor.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );

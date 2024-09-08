@@ -39,6 +39,12 @@ Important notices:
 <!-- RELEASE NOTES -->
 ## Release Notes
 
+### 2.2.2
+
+- Added config for speed in "walk mode" for can systems
+- Added config for magnet number for uart systems
+- Started to add support of multi-language interface
+
 ### 2.2.1
 
 - Added support of bafang digital batteries (please note that not all of batteries installed on bike are digital; bafang motors could work with simple batteries with no digital interface)

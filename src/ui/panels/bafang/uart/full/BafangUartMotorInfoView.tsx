@@ -5,6 +5,7 @@ import { SyncOutlined } from '@ant-design/icons';
 import BafangUartMotor from '../../../../../device/high-level/BafangUartMotor';
 import { BafangUartMotorInfo } from '../../../../../types/BafangUartMotorTypes';
 import { generateSimpleStringListItem } from '../../../../utils/UIUtils';
+import i18n from '../../../../../i18n/i18n';
 
 type InfoProps = {
     connection: BafangUartMotor;
@@ -32,10 +33,16 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            generateSimpleStringListItem('Serial number', info.serial_number),
-            generateSimpleStringListItem('Model', info.model),
-            generateSimpleStringListItem('Manufacturer', info.manufacturer),
-            generateSimpleStringListItem('System code', info.system_code),
+            generateSimpleStringListItem(
+                i18n.t('serial_number'),
+                info.serial_number,
+            ),
+            generateSimpleStringListItem(i18n.t('model_number'), info.model),
+            generateSimpleStringListItem(
+                i18n.t('manufacturer'),
+                info.manufacturer,
+            ),
+            generateSimpleStringListItem(i18n.t('system_code'), info.system_code),
         ];
     }
 
@@ -44,11 +51,11 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const info = connection.getInfo();
         return [
             generateSimpleStringListItem(
-                'Firmware version',
+                i18n.t('software_version'),
                 info.firmware_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 info.hardware_version,
             ),
         ];
@@ -58,8 +65,8 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         const { connection } = this.props;
         const info = connection.getInfo();
         return [
-            generateSimpleStringListItem('Voltage', info.voltage),
-            generateSimpleStringListItem('Max current', info.max_current),
+            generateSimpleStringListItem(i18n.t('voltage'), info.voltage),
+            generateSimpleStringListItem(i18n.t('max_current'), info.max_current),
         ];
     }
 
@@ -73,26 +80,26 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Info
+                    {i18n.t('uart_main_tab_title')}
                 </Typography.Title>
                 <br />
                 <Descriptions
                     bordered
-                    title="Codes"
+                    title={i18n.t('uart_motor_codes')}
                     items={this.getCodeItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Versions"
+                    title={i18n.t('uart_motor_versions')}
                     items={this.getVersionItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Electrical parameters"
+                    title={i18n.t('electric_parameters')}
                     items={this.getElectricalParameterItems()}
                     column={1}
                 />
@@ -105,7 +112,7 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;
@@ -113,14 +120,14 @@ class BafangUartMotorInfoView extends React.Component<InfoProps, InfoState> {
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }

@@ -28,6 +28,7 @@ import {
 } from '../../../../../types/BafangCanSystemTypes';
 import { getErrorCodeText } from '../../../../../constants/BafangCanConstants';
 import NumberValueComponent from '../../../../components/NumberValueComponent';
+import i18n, { getTimePickerLocale } from '../../../../../i18n/i18n';
 
 const { Text } = Typography;
 
@@ -54,17 +55,17 @@ type SettingsState = {
 
 const errorCodesTableLayout = [
     {
-        title: 'Code',
+        title: i18n.t('code'),
         dataIndex: 'code',
         key: 'code',
     },
     {
-        title: 'Description',
+        title: i18n.t('description'),
         dataIndex: 'description',
         key: 'description',
     },
     {
-        title: 'Recommendations',
+        title: i18n.t('recommendations'),
         dataIndex: 'recommendations',
         key: 'recommendations',
     },
@@ -145,7 +146,7 @@ class BafangCanDisplaySettingsView extends React.Component<
             items = [
                 ...items,
                 generateEditableNumberListItem(
-                    'Total mileage',
+                    i18n.t('total_mileage'),
                     data1.total_mileage,
                     (e) => {
                         const { data1 } = this.state;
@@ -155,12 +156,12 @@ class BafangCanDisplaySettingsView extends React.Component<
                             data1,
                         });
                     },
-                    'Km',
+                    i18n.t('km'),
                     0,
                     1000000,
                 ),
                 generateEditableNumberListItem(
-                    'Single trip mileage',
+                    i18n.t('single_trip_mileage'),
                     data1.single_mileage,
                     (e) => {
                         const { data1 } = this.state;
@@ -170,30 +171,30 @@ class BafangCanDisplaySettingsView extends React.Component<
                             data1,
                         });
                     },
-                    'Km',
+                    i18n.t('km'),
                     0,
                     (data1.total_mileage as number) + 1,
                 ),
                 generateSimpleNumberListItem(
-                    'Max registered speed',
+                    i18n.t('max_registered_speed'),
                     data1.max_speed,
-                    'Km/H',
+                    i18n.t('km/h'),
                 ),
             ];
         } else {
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Total mileage',
-                    'Not available yet',
+                    i18n.t('total_mileage'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Single mileage',
-                    'Not available yet',
+                    i18n.t('single_trip_mileage'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Max registered speed',
-                    'Not available yet',
+                    i18n.t('max_registered_speed'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -201,29 +202,31 @@ class BafangCanDisplaySettingsView extends React.Component<
             items = [
                 ...items,
                 generateSimpleNumberListItem(
-                    'Average speed',
+                    i18n.t('average_speed'),
                     data2.average_speed,
-                    'Km/H',
+                    i18n.t('km/h'),
                 ),
                 {
                     key: 'service_mileage',
-                    label: 'Mileage since last service',
+                    label: i18n.t('mileage_since_last_service'),
                     children: (
                         <>
                             <NumberValueComponent
                                 value={data2.service_mileage}
-                                unit="Km"
+                                unit={i18n.t('km')}
                             />
                             <br />
                             <br />
                             <Popconfirm // TODO create separate component
-                                title="Erase service mileage"
-                                description="Are you sure to clean mileage since last service record?"
+                                title={i18n.t('erase_service_mileage_title')}
+                                description={i18n.t(
+                                    'erase_service_mileage_confirm',
+                                )}
                                 onConfirm={() => {
                                     message.open({
                                         key: 'cleaning_service_mileage',
                                         type: 'loading',
-                                        content: 'Cleaning mileage...',
+                                        content: i18n.t('cleaning_mileage'),
                                     });
                                     this.props.connection.display
                                         .cleanServiceMileage()
@@ -232,8 +235,9 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                 message.open({
                                                     key: 'cleaning_service_mileage',
                                                     type: 'success',
-                                                    content:
-                                                        'Cleaned sucessfully!',
+                                                    content: i18n.t(
+                                                        'cleaned_successfully',
+                                                    ),
                                                     duration: 2,
                                                 });
                                             } else {
@@ -241,7 +245,9 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                     key: 'cleaning_service_mileage',
                                                     type: 'error',
                                                     content:
-                                                        'Error during cleaning!',
+                                                        i18n.t(
+                                                            'cleaning_error',
+                                                        ),
                                                     duration: 2,
                                                 });
                                             }
@@ -251,15 +257,17 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                 key: 'cleaning_service_mileage',
                                                 type: 'error',
                                                 content:
-                                                    'Error during cleaning!',
+                                                    i18n.t('cleaning_error'),
                                                 duration: 2,
                                             });
                                         });
                                 }}
-                                okText="Yes"
-                                cancelText="No"
+                                okText={i18n.t('yes')}
+                                cancelText={i18n.t('no')}
                             >
-                                <Button type="primary">Erase record</Button>
+                                <Button type="primary">
+                                    {i18n.t('erase_record')}
+                                </Button>
                             </Popconfirm>
                         </>
                     ),
@@ -269,12 +277,12 @@ class BafangCanDisplaySettingsView extends React.Component<
             items = [
                 ...items,
                 generateSimpleStringListItem(
-                    'Average speed',
-                    'Not available yet',
+                    i18n.t('average_speed'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
                 generateSimpleStringListItem(
-                    'Mileage since last service',
-                    'Not available yet',
+                    i18n.t('mileage_since_last_service'),
+                    i18n.t('parameter_not_available_yet'),
                 ),
             ];
         }
@@ -282,30 +290,29 @@ class BafangCanDisplaySettingsView extends React.Component<
             ...items,
             {
                 key: 'current_time',
-                label: 'Set current time',
+                label: i18n.t('set_time'),
                 children: (
                     <>
                         <TimePicker
                             onChange={(time: dayjs.Dayjs | null) =>
                                 this.setState({ currentTimeToSet: time })
                             }
+                            locale={getTimePickerLocale()}
                         />
                         <br />
                         <br />
                         <Popconfirm
-                            title="Set new time on display"
-                            description="Are you sure to set new time on display clock?"
+                            title={i18n.t('set_time_title')}
+                            description={i18n.t('set_time_confirm')}
                             onConfirm={() => {
                                 if (this.state.currentTimeToSet === null) {
-                                    message.error(
-                                        'Time in input form is not chosen',
-                                    );
+                                    message.error(i18n.t('time_not_chosen'));
                                     return;
                                 }
                                 message.open({
                                     key: 'setting_time',
                                     type: 'loading',
-                                    content: 'Setting time...',
+                                    content: i18n.t('setting_time'),
                                 });
                                 this.props.connection.display
                                     .setTime(
@@ -318,7 +325,8 @@ class BafangCanDisplaySettingsView extends React.Component<
                                             message.open({
                                                 key: 'setting_time',
                                                 type: 'success',
-                                                content: 'Set sucessfully!',
+                                                content:
+                                                    i18n.t('set_successfully'),
                                                 duration: 2,
                                             });
                                         } else {
@@ -326,16 +334,18 @@ class BafangCanDisplaySettingsView extends React.Component<
                                                 key: 'setting_time',
                                                 type: 'error',
                                                 content:
-                                                    'Error during setting!',
+                                                    i18n.t('setting_error'),
                                                 duration: 2,
                                             });
                                         }
                                     });
                             }}
-                            okText="Yes"
-                            cancelText="No"
+                            okText={i18n.t('yes')}
+                            cancelText={i18n.t('no')}
                         >
-                            <Button type="primary">Set time on display</Button>
+                            <Button type="primary">
+                                {i18n.t('set_time_button')}
+                            </Button>
                         </Popconfirm>
                     </>
                 ),
@@ -348,36 +358,36 @@ class BafangCanDisplaySettingsView extends React.Component<
         if (!realtime_data) return [];
         return [
             generateSimpleNumberListItem(
-                'Assist levels number',
+                i18n.t('total_assist_levels_number'),
                 realtime_data.assist_levels,
             ),
             generateSimpleBooleanListItem(
-                'Mode',
+                i18n.t('mode'),
                 realtime_data.ride_mode,
-                'SPORT',
-                'ECO',
+                i18n.t('sport_mode'),
+                i18n.t('eco_mode'),
             ),
             generateSimpleBooleanListItem(
-                'Boost',
+                i18n.t('boost'),
                 realtime_data.boost,
-                'ON',
-                'OFF',
+                i18n.t('on'),
+                i18n.t('off'),
             ),
             generateSimpleStringListItem(
-                'Current assist',
+                i18n.t('current_assist_level'),
                 realtime_data.current_assist_level,
             ),
             generateSimpleBooleanListItem(
-                'Light',
+                i18n.t('light'),
                 realtime_data.light,
-                'ON',
-                'OFF',
+                i18n.t('on'),
+                i18n.t('off'),
             ),
             generateSimpleBooleanListItem(
-                'Button',
+                i18n.t('button_pressed'),
                 realtime_data.button,
-                'Pressed',
-                'Not pressed',
+                i18n.t('pressed'),
+                i18n.t('not_pressed'),
             ),
         ];
     }
@@ -403,29 +413,32 @@ class BafangCanDisplaySettingsView extends React.Component<
         const { serial_number, customer_number, manufacturer } = this.state;
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
             generateSimpleStringListItem(
-                'Software version',
+                i18n.t('software_version'),
                 this.state.software_version,
             ),
             generateSimpleStringListItem(
-                'Hardware version',
+                i18n.t('hardware_version'),
                 this.state.hardware_version,
             ),
             generateSimpleStringListItem(
-                'Model number',
+                i18n.t('model_number'),
                 this.state.model_number,
             ),
-            generateEditableStringListItem('Manufacturer', manufacturer, (e) =>
-                this.setState({
-                    manufacturer: e,
-                }),
+            generateEditableStringListItem(
+                i18n.t('manufacturer'),
+                manufacturer,
+                (e) =>
+                    this.setState({
+                        manufacturer: e,
+                    }),
             ),
             generateEditableStringListItem(
-                'Customer number',
+                i18n.t('customer_number'),
                 customer_number,
                 (e) =>
                     this.setState({
@@ -433,7 +446,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                     }),
             ),
             generateSimpleStringListItem(
-                'Bootloader version',
+                i18n.t('bootloader_version'),
                 this.state.bootload_version,
             ),
         ];
@@ -453,16 +466,19 @@ class BafangCanDisplaySettingsView extends React.Component<
         message.open({
             key: 'writing',
             type: 'loading',
-            content: 'Writing...',
+            content: i18n.t('writing'),
             duration: 60,
         });
         connection.display.emitter.once(
             'write-finish',
-            (readedSuccessfully, readededUnsuccessfully) => {
+            (wroteSuccessfully, wroteUnsuccessfully) => {
                 message.open({
                     key: 'writing',
                     type: 'info',
-                    content: `Wrote ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                    content: i18n.t('wrote_x_parameters', {
+                        successfully: wroteSuccessfully,
+                        nonSuccessfully: wroteUnsuccessfully,
+                    }),
                     duration: 5,
                 });
                 this.writingInProgress = false;
@@ -475,12 +491,12 @@ class BafangCanDisplaySettingsView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Display settings
+                    {i18n.t('display')}
                 </Typography.Title>
                 <br />
                 <Descriptions
                     bordered
-                    title="Records"
+                    title={i18n.t('records_title')}
                     items={this.getRecordsItems()}
                     column={1}
                 />
@@ -489,7 +505,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                         <br />
                         <Descriptions
                             bordered
-                            title="State"
+                            title={i18n.t('state_title')}
                             items={this.getRealtimeItems()}
                             column={1}
                         />
@@ -509,7 +525,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                     <>
                         <br />
                         <Typography.Title level={5} style={{ margin: 0 }}>
-                            Error codes
+                            {i18n.t('error_codes_title')}
                         </Typography.Title>
                         <br />
                         <Table
@@ -534,7 +550,7 @@ class BafangCanDisplaySettingsView extends React.Component<
                 <br />
                 <Descriptions
                     bordered
-                    title="Other"
+                    title={i18n.t('version_list_title')}
                     items={this.getOtherItems()}
                     column={1}
                 />
@@ -547,27 +563,30 @@ class BafangCanDisplaySettingsView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                             duration: 60,
                         });
                         connection.display.emitter.once(
                             'read-finish',
-                            (readedSuccessfully, readededUnsuccessfully) =>
+                            (readedSuccessfully, readedUnsuccessfully) =>
                                 message.open({
                                     key: 'loading',
                                     type: 'info',
-                                    content: `Loaded ${readedSuccessfully} parameters succesfully, ${readededUnsuccessfully} not succesfully`,
+                                    content: i18n.t('loaded_x_parameters', {
+                                        successfully: readedSuccessfully,
+                                        nonSuccessfully: readedUnsuccessfully,
+                                    }),
                                     duration: 5,
                                 }),
                         );
                     }}
                 />
                 <Popconfirm
-                    title="Parameter writing"
-                    description="Are you sure that you want to write all parameters on device?"
+                    title={i18n.t('parameter_writing_title')}
+                    description={i18n.t('parameter_writing_confirm')}
                     onConfirm={this.saveParameters}
-                    okText="Yes"
-                    cancelText="No"
+                    okText={i18n.t('yes')}
+                    cancelText={i18n.t('no')}
                 >
                     <FloatButton
                         icon={<DeliveredProcedureOutlined />}
