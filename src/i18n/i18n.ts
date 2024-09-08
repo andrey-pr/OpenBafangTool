@@ -8,8 +8,8 @@ const i18n = new I18n({
     blank: { ...blank },
 });
 
-i18n.defaultLocale = 'blank';
-i18n.locale = 'blank';
+i18n.defaultLocale = 'en';
+i18n.locale = 'en';
 i18n.enableFallback = true;
 
 export function getTimePickerLocale(): PickerLocale {

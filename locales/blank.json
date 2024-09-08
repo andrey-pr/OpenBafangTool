@@ -240,5 +240,7 @@
     "bb_sensor_32": "",
     "double_signal_24": "",
     "throttle_start_voltage_warning": "",
-    "low_battery_protection": ""
+    "low_battery_protection": "",
+    "current_decay": "",
+    "pedal_stop_decay": ""
 }

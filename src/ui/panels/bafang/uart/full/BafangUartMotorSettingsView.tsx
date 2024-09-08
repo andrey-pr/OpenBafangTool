@@ -283,7 +283,10 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
-                                        pedal_speed_limit: SpeedLimitByDisplay,
+                                        pedal_speed_limit:
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 25,
                                         pedal_speed_limit_unit: value,
                                     })
                                 }
@@ -303,6 +306,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
+                        always_available
                     />
                 ),
             },
@@ -334,7 +338,9 @@ class BafangUartMotorSettingsView extends React.Component<
                                 onChange={(value) =>
                                     this.setState({
                                         throttle_speed_limit:
-                                            SpeedLimitByDisplay,
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 5,
                                         throttle_speed_limit_unit: value,
                                     })
                                 }
@@ -354,6 +360,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
+                        always_available
                     />
                 ),
             },
@@ -414,7 +421,7 @@ class BafangUartMotorSettingsView extends React.Component<
             ),
             {
                 key: 'stop_decay',
-                label: 'Stop decay',
+                label: i18n.t('pedal_stop_decay'),
                 children: (
                     <ParameterInputComponent
                         value={pedal_stop_decay}
@@ -573,7 +580,10 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
-                                        pedal_speed_limit: SpeedLimitByDisplay,
+                                        pedal_speed_limit:
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 25,
                                         pedal_speed_limit_unit: value,
                                     })
                                 }
@@ -593,6 +603,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={25}
                         disabled={pedal_speed_limit_unit === 'by_display'}
+                        always_available
                     />
                 ),
             },
@@ -652,7 +663,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 ),
             },
             generateEditableNumberListItemWithWarning(
-                'Current decay',
+                i18n.t('current_decay_old'),
                 this.state.pedal_current_decay,
                 'Its not recommended to set this parameter lower than 4 and bigger than 8',
                 4,
@@ -664,7 +675,7 @@ class BafangUartMotorSettingsView extends React.Component<
             ),
             {
                 key: 'stop_decay',
-                label: 'Stop decay',
+                label: i18n.t('pedal_stop_decay_old'),
                 children: (
                     <ParameterInputComponent
                         value={Math.floor(pedal_stop_decay / 10)}
@@ -783,7 +794,9 @@ class BafangUartMotorSettingsView extends React.Component<
                                 onChange={(value) =>
                                     this.setState({
                                         throttle_speed_limit:
-                                            SpeedLimitByDisplay,
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 5,
                                         throttle_speed_limit_unit: value,
                                     })
                                 }
@@ -803,6 +816,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         warningBelow={0}
                         warningAbove={0}
                         disabled={throttle_speed_limit_unit === 'by_display'}
+                        always_available
                     />
                 ),
             },

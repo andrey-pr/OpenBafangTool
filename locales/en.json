@@ -153,7 +153,7 @@
     "minimum_current": "Minimum current",
     "maximum_current": "Maximum current",
     "start_pulse": "Start pulse",
-    "current_decay_time": "Current decay time",
+    "current_decay_time": "Current fade time",
     "stop_delay": "Stop delay",
     "system_voltage": "System voltage",
     "current_limit": "Current limit",
@@ -242,5 +242,9 @@
     "level": "Level",
     "battery_low_limit_warning": "Its not recommended to set low voltage battery protection lower than %{min}V and higher that %{max}V on your system",
     "throttle_start_voltage_warning": "Its not recommended to set lower start voltage than 1.1V",
-    "low_battery_protection": "Low battery protection"
+    "low_battery_protection": "Low battery protection",
+    "current_decay": "Current Fading",
+    "pedal_stop_decay": "Pedalling Stop Timeout",
+    "current_decay_old": "Current Fading (\"Current Decay\")",
+    "pedal_stop_decay_old": "Pedalling Stop Timeout (\"Stop Decay\")"
 }

@@ -15,6 +15,7 @@ type ParameterInputProps = {
     disabled?: boolean;
     decimalPlaces?: number;
     direct?: boolean;
+    always_available?: boolean;
 };
 
 type ParameterInputState = {
@@ -36,6 +37,7 @@ class ParameterInputComponent extends React.Component<
         decimalPlaces: 0,
         min: undefined,
         max: undefined,
+        always_available: false,
     };
 
     constructor(props: any) {
@@ -69,8 +71,9 @@ class ParameterInputComponent extends React.Component<
             checkValue,
             disabled,
             decimalPlaces,
+            always_available,
         } = this.props;
-        if(value === null) return i18n.t('not_available');
+        if (!always_available && value === null) return i18n.t('not_available');
         return (
             <Tooltip title={warningText} trigger="click" open={warning}>
                 <InputNumber

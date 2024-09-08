@@ -152,18 +152,18 @@ Time from end of pedalling to stop. Usual value from factory is `250ms`. Recomme
 \
 Unit: In usual view: `ms`. In old style view: `10ms`=`0.01s`.
 
-#### Current decay
+#### Current fading ("Current decay")
 
-The Current Decay setting determines the point at which the drive unit starts to reduce power as the pedal cadence rpm increases, with a higher value indicating a later onset of power reduction. This setting is not tied to specific rpm speeds, and a lower value will result in the drive unit cutting back on power at a lower pedal cadence rpm. Recomended value: `4`-`8`.\
+The Current Fading setting determines the point at which the drive unit starts to reduce power as the pedal cadence rpm increases, with a higher value indicating a later onset of power reduction. This setting is not tied to specific rpm speeds, and a lower value will result in the drive unit cutting back on power at a lower pedal cadence rpm. Recomended value: `4`-`8`.\
 \
 Range: from 1 to 8.\
 No unit.
 
-#### Stop decay
+#### Pedalling Stop Timeout ("Stop decay")
 
-> ⚠️ Warning: use this parameter carefully. Too big value can be dangerous for life.
+> ⚠️ Warning: use this parameter carefully. Too big value can be dangerous.
 
-Stop decay setting determines how long the decay system takes to cut after pedaling stops. A higher value will result in a slower decay, while a lower value will result in a faster decay. Recommmended value is `0` (200ms still safe, higher unknown).\
+Pedalling stop timeout setting determines how long the it takes to stop motor after pedaling stops. A higher value will result in a slower power fade, while a lower value will result in a faster fade. Recommmended value is `0` (200ms still seems to be safe, higher unknown).\
 \
 Unit: In usual view: `ms`. In old style view: `10ms`=`0.01s`.
 
