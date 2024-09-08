@@ -4,6 +4,7 @@ import Column from 'antd/es/table/Column';
 import { deepCopy } from 'deep-copy-ts';
 import ParameterInputComponent from './ParameterInput';
 import { TorqueProfile } from '../../types/BafangCanSystemTypes';
+import i18n from '../../i18n/i18n';
 
 type TorqueTableRow = {
     key: React.Key;
@@ -67,9 +68,13 @@ class TorqueTableComponent extends React.Component<
                 style={{ marginBottom: '20px' }}
                 scroll={{ x: true }}
             >
-                <Column title="Assist level" dataIndex="level" key="level" />
                 <Column
-                    title="Start torque value"
+                    title={i18n.t('assist_levels') as string}
+                    dataIndex="level"
+                    key="level"
+                />
+                <Column
+                    title={i18n.t('start_torque_value') as string}
                     dataIndex="start_torque_value"
                     key="start_torque_value"
                     render={(_: any, record: TorqueTableRow) => (
@@ -91,7 +96,7 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Max torque value"
+                    title={i18n.t('start_torque_value') as string}
                     dataIndex="max_torque_value"
                     key="max_torque_value"
                     render={(_: any, record: TorqueTableRow) => (
@@ -112,7 +117,7 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Return torque value"
+                    title={i18n.t('return_torque_value') as string}
                     dataIndex="return_torque_value"
                     key="return_torque_value"
                     render={(_: any, record: TorqueTableRow) => (
@@ -134,7 +139,7 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Minimum current"
+                    title={i18n.t('minimum_current') as string}
                     dataIndex="min_current"
                     key="min_current"
                     render={(_: any, record: TorqueTableRow) => (
@@ -155,7 +160,7 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Maximum current"
+                    title={i18n.t('maximum_current') as string}
                     dataIndex="max_current"
                     key="max_current"
                     render={(_: any, record: TorqueTableRow) => (
@@ -176,7 +181,7 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Start pulse"
+                    title={i18n.t('start_pulse') as string}
                     dataIndex="start_pulse"
                     key="start_pulse"
                     render={(_: any, record: TorqueTableRow) => (
@@ -196,13 +201,13 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Current decay time"
+                    title={i18n.t('current_decay_time') as string}
                     dataIndex="current_decay_time"
                     key="current_decay_time"
                     render={(_: any, record: TorqueTableRow) => (
                         <ParameterInputComponent
                             value={record.current_decay_time}
-                            unit="ms"
+                            unit={i18n.t('ms')}
                             min={1}
                             max={1275}
                             onNewValue={(e) => {
@@ -219,13 +224,13 @@ class TorqueTableComponent extends React.Component<
                     )}
                 />
                 <Column
-                    title="Stop delay"
+                    title={i18n.t('stop_delay') as string}
                     dataIndex="stop_delay"
                     key="stop_delay"
                     render={(_: any, record: TorqueTableRow) => (
                         <ParameterInputComponent
                             value={record.stop_delay}
-                            unit="ms"
+                            unit={i18n.t('ms')}
                             min={1}
                             max={510}
                             onNewValue={(e) => {

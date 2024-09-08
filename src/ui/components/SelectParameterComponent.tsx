@@ -1,5 +1,6 @@
 import { Select } from 'antd';
 import React from 'react';
+import i18n from '../../i18n/i18n';
 
 type SelectParameterProps = {
     value: string | number | boolean | null;
@@ -26,7 +27,7 @@ class SelectParameterComponent extends React.Component<
 
     render() {
         const { value, options } = this.props;
-        if (value === null) return 'Value not available';
+        if (value === null) return i18n.t('not_available');
         return (
             <Select
                 value={value}

@@ -38,6 +38,7 @@ import {
     generateSimpleStringListItem,
 } from '../../../../utils/UIUtils';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
+import i18n from '../../../../../i18n/i18n';
 
 const { Title } = Typography;
 
@@ -126,26 +127,25 @@ class BafangUartMotorSettingsView extends React.Component<
     getElectricalParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Low voltage battery protection',
+                i18n.t('battery_low_limit'),
                 this.state.low_battery_protection,
-                `Its not recommended to set low voltage battery protection lower than ${
-                    lowVoltageLimits[this.state.voltage].min
-                }V and higher that ${
-                    lowVoltageLimits[this.state.voltage].max
-                }V on your system`,
+                i18n.t('battery_low_limit_warning', {
+                    min: lowVoltageLimits[this.state.voltage].min,
+                    max: lowVoltageLimits[this.state.voltage].max,
+                }),
                 lowVoltageLimits[this.state.voltage].min,
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
                     this.setState({ low_battery_protection }),
-                'V',
+                i18n.t('v'),
                 0,
                 100,
             ),
             generateEditableNumberListItem(
-                'Current limit',
+                i18n.t('current_limit'),
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
-                'A',
+                i18n.t('a'),
                 1,
                 this.state.max_current,
             ),
@@ -161,14 +161,14 @@ class BafangUartMotorSettingsView extends React.Component<
                 100,
             ),
             generateEditableNumberListItemWithWarning(
-                'Throttle start voltage',
+                i18n.t('throttle_start_voltage'),
                 this.state.throttle_start_voltage,
-                'Its not recommended to set lower start voltage than 1.1V',
+                i18n.t('throttle_start_voltage_warning'),
                 1.1,
                 20,
                 (throttle_start_voltage) =>
                     this.setState({ throttle_start_voltage }),
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -181,7 +181,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 20,
                 (throttle_end_voltage) =>
                     this.setState({ throttle_end_voltage }),
-                'V',
+                i18n.t('v'),
                 1,
                 20,
                 1,
@@ -204,9 +204,9 @@ class BafangUartMotorSettingsView extends React.Component<
     getPhysicalParameterItems(): DescriptionsProps['items'] {
         return [
             generateAnnotatedEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
@@ -292,15 +292,18 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
-                                        pedal_speed_limit: SpeedLimitByDisplay,
+                                        pedal_speed_limit:
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 25,
                                         pedal_speed_limit_unit: value,
                                     })
                                 }
@@ -333,6 +336,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ? null
                                 : throttle_speed_limit
                         }
+                        nullIsOk
                         unit={
                             <Select
                                 style={{ minWidth: '100px' }}
@@ -342,16 +346,18 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
                                         throttle_speed_limit:
-                                            SpeedLimitByDisplay,
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 5,
                                         throttle_speed_limit_unit: value,
                                     })
                                 }
@@ -404,7 +410,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={pedal_time_to_stop}
-                        unit="ms"
+                        unit={i18n.t('ms')}
                         min={1}
                         max={1000}
                         onNewValue={(e) => {
@@ -431,11 +437,11 @@ class BafangUartMotorSettingsView extends React.Component<
             ),
             {
                 key: 'stop_decay',
-                label: 'Stop decay',
+                label: i18n.t('pedal_stop_decay'),
                 children: (
                     <ParameterInputComponent
                         value={pedal_stop_decay}
-                        unit="ms"
+                        unit={i18n.t('ms')}
                         min={0}
                         max={500}
                         onNewValue={(e) => {
@@ -466,9 +472,9 @@ class BafangUartMotorSettingsView extends React.Component<
     getOtherItems(): DescriptionsProps['items'] {
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 this.state.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
         ];
     }
@@ -483,45 +489,50 @@ class BafangUartMotorSettingsView extends React.Component<
             max_current,
         } = this.state;
         return [
-            generateSimpleStringListItem('Manufacturer', manufacturer),
-            generateSimpleStringListItem('Model', model),
-            generateSimpleStringListItem('Hardware version', hardware_version),
-            generateSimpleStringListItem('Firmware version', firmware_version),
-            generateSimpleStringListItem('Voltage', voltage),
-            generateSimpleStringListItem('Max current', max_current),
+            generateSimpleStringListItem(i18n.t('manufacturer'), manufacturer),
+            generateSimpleStringListItem(i18n.t('model_number'), model),
+            generateSimpleStringListItem(
+                i18n.t('hardware_version'),
+                hardware_version,
+            ),
+            generateSimpleStringListItem(
+                i18n.t('software_version'),
+                firmware_version,
+            ),
+            generateSimpleStringListItem(i18n.t('voltage'), voltage),
+            generateSimpleStringListItem(i18n.t('max_current'), max_current),
         ];
     }
 
     getBasicParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Low battery protection',
+                i18n.t('low_battery_protection'),
                 this.state.low_battery_protection,
-                `Its not recommended to set low voltage battery protection lower than ${
-                    lowVoltageLimits[this.state.voltage].min
-                }V and higher that ${
-                    lowVoltageLimits[this.state.voltage].max
-                }V on your system`,
+                i18n.t('battery_low_limit_warning', {
+                    min: lowVoltageLimits[this.state.voltage].min,
+                    max: lowVoltageLimits[this.state.voltage].max,
+                }),
                 lowVoltageLimits[this.state.voltage].min,
                 lowVoltageLimits[this.state.voltage].max,
                 (low_battery_protection) =>
                     this.setState({ low_battery_protection }),
-                'V',
+                i18n.t('v'),
                 0,
                 100,
             ),
             generateEditableNumberListItem(
-                'Current limit',
+                i18n.t('current_limit'),
                 this.state.current_limit,
                 (current_limit) => this.setState({ current_limit }),
-                'A',
+                i18n.t('a'),
                 1,
                 this.state.max_current,
             ),
             generateEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
@@ -591,15 +602,18 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
-                                        pedal_speed_limit: SpeedLimitByDisplay,
+                                        pedal_speed_limit:
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 25,
                                         pedal_speed_limit_unit: value,
                                     })
                                 }
@@ -678,7 +692,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 ),
             },
             generateEditableNumberListItemWithWarning(
-                'Current decay',
+                i18n.t('current_decay_old'),
                 this.state.pedal_current_decay,
                 'Its not recommended to set this parameter lower than 4 and bigger than 8',
                 4,
@@ -690,7 +704,7 @@ class BafangUartMotorSettingsView extends React.Component<
             ),
             {
                 key: 'stop_decay',
-                label: 'Stop decay',
+                label: i18n.t('pedal_stop_decay_old'),
                 children: (
                     <ParameterInputComponent
                         value={Math.floor(pedal_stop_decay / 10)}
@@ -736,7 +750,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={throttle_start_voltage * 10}
-                        unit="100mV"
+                        unit={`100${i18n.t('mv')}`}
                         min={10}
                         max={1000}
                         onNewValue={(e) => {
@@ -755,7 +769,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 children: (
                     <ParameterInputComponent
                         value={throttle_end_voltage * 10}
-                        unit="100mV"
+                        unit={`100${i18n.t('mv')}`}
                         min={10}
                         max={1000}
                         onNewValue={(e) => {
@@ -769,7 +783,7 @@ class BafangUartMotorSettingsView extends React.Component<
                 ),
             },
             generateEditableSelectListItem(
-                'Mode',
+                i18n.t('mode'),
                 ThrottleModeOptions,
                 this.state.throttle_mode,
                 (e) => this.setState({ throttle_mode: e as ThrottleMode }),
@@ -791,6 +805,7 @@ class BafangUartMotorSettingsView extends React.Component<
                                 ? null
                                 : throttle_speed_limit
                         }
+                        nullIsOk
                         unit={
                             <Select
                                 style={{ minWidth: '100px' }}
@@ -800,16 +815,18 @@ class BafangUartMotorSettingsView extends React.Component<
                                         : 'kmh'
                                 }
                                 options={[
-                                    { value: 'kmh', label: 'km/h' },
+                                    { value: 'kmh', label: i18n.t('km/h') },
                                     {
                                         value: 'by_display',
-                                        label: 'By display',
+                                        label: i18n.t('by_display'),
                                     },
                                 ]}
                                 onChange={(value) =>
                                     this.setState({
                                         throttle_speed_limit:
-                                            SpeedLimitByDisplay,
+                                            value === 'by_display'
+                                                ? SpeedLimitByDisplay
+                                                : 5,
                                         throttle_speed_limit_unit: value,
                                     })
                                 }
@@ -892,11 +909,11 @@ class BafangUartMotorSettingsView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Settings
+                    {i18n.t('uart_motor_parameters_title')}
                 </Typography.Title>
                 <br />
                 <Typography.Title level={5} style={{ margin: 0 }}>
-                    Old style layout&nbsp;&nbsp;
+                    {i18n.t('old_style_layout')}&nbsp;&nbsp;
                     <Switch
                         checked={oldStyle}
                         onChange={(value) => this.setState({ oldStyle: value })}
@@ -907,19 +924,19 @@ class BafangUartMotorSettingsView extends React.Component<
                     <>
                         <Descriptions
                             bordered
-                            title="Electrical parameters"
+                            title={i18n.t('electric_parameters')}
                             items={this.getElectricalParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Physical parameters"
+                            title={i18n.t('mechanical_parameters')}
                             items={this.getPhysicalParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
-                        <Title level={5}>Assist levels</Title>
+                        <Title level={5}>{i18n.t('assist_table_title')}</Title>
                         <AssistLevelTableComponent
                             assist_profiles={this.state.assist_profiles}
                             onChange={(assist_profiles) =>
@@ -929,14 +946,14 @@ class BafangUartMotorSettingsView extends React.Component<
                         />
                         <Descriptions
                             bordered
-                            title="Drive parameters"
+                            title={i18n.t('driving_parameters')}
                             items={this.getDriveParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Other"
+                            title={i18n.t('version_list_title')}
                             items={this.getOtherItems()}
                             column={1}
                         />
@@ -946,14 +963,14 @@ class BafangUartMotorSettingsView extends React.Component<
                     <>
                         <Descriptions
                             bordered
-                            title="Info"
+                            title={i18n.t('info')}
                             items={this.getInfoItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Basic parameters"
+                            title={i18n.t('basic_parameters')}
                             items={this.getBasicParameterItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
@@ -967,14 +984,14 @@ class BafangUartMotorSettingsView extends React.Component<
                         />
                         <Descriptions
                             bordered
-                            title="Pedal parameters"
+                            title={i18n.t('pedal_parameters')}
                             items={this.getPedalParametersItems()}
                             column={1}
                             style={{ marginBottom: '20px' }}
                         />
                         <Descriptions
                             bordered
-                            title="Throttle parameters"
+                            title={i18n.t('throttle_parameters')}
                             items={this.getThrottleParametersItems()}
                             column={1}
                         />
@@ -989,7 +1006,7 @@ class BafangUartMotorSettingsView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;
@@ -997,14 +1014,14 @@ class BafangUartMotorSettingsView extends React.Component<
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }
@@ -1012,11 +1029,11 @@ class BafangUartMotorSettingsView extends React.Component<
                     }}
                 />
                 <Popconfirm
-                    title="Parameter writing"
-                    description="Are you sure that you want to write all parameters on device?"
+                    title={i18n.t('parameter_writing_title')}
+                    description={i18n.t('parameter_writing_confirm')}
                     onConfirm={this.saveParameters}
-                    okText="Yes"
-                    cancelText="No"
+                    okText={i18n.t('yes')}
+                    cancelText={i18n.t('no')}
                 >
                     <FloatButton
                         icon={<DeliveredProcedureOutlined />}

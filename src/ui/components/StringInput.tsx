@@ -1,5 +1,6 @@
 import { Input, Tooltip } from 'antd';
 import React from 'react';
+import i18n from '../../i18n/i18n';
 
 type StringInputProps = {
     value: string | null;
@@ -45,18 +46,14 @@ class StringInputComponent extends React.Component<
         if (value === null) {
             return (
                 <Input
-                    value="Not available"
+                    value={i18n.t('not_available')}
                     style={{ minWidth: '150px' }}
                     disabled
                 />
             );
         }
         return (
-            <Tooltip
-                title="This field should not be empty"
-                trigger="click"
-                open={error}
-            >
+            <Tooltip title={i18n.t('field_empty')} trigger="click" open={error}>
                 <Input
                     value={value as string}
                     style={{ minWidth: '150px' }}

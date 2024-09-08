@@ -28,6 +28,7 @@ import {
 } from '../../../../utils/UIUtils';
 import AssistLevelTableComponent from '../../../../components/AssistLevelTableComponent';
 import SelectParameterComponent from '../../../../components/SelectParameterComponent';
+import i18n from '../../../../../i18n/i18n';
 
 const { Title } = Typography;
 
@@ -99,15 +100,15 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         const info = connection.getInfo();
         return [
             generateSimpleStringListItem(
-                'Serial number',
+                i18n.t('serial_number'),
                 info.serial_number,
-                'Please note, that serial number could be easily changed, so it should never be used for security',
+                i18n.t('serial_number_warning'),
             ),
-            generateSimpleStringListItem('Voltage', info.voltage),
+            generateSimpleStringListItem(i18n.t('voltage'), info.voltage),
             generateSimpleStringListItem(
-                'Max current',
+                i18n.t('max_current'),
                 info.max_current,
-                'Note, that Voltage*Max Current is a maximal power, but not nominal. If you have legal motor certified as 250W, and Voltage*Max Current is twice or even triple bigger its normal - 250W is a nominal (continuous) power, and its legal to use device that can have bigger maximal power. For example, some of Shimano STEPS motors that certified for 250W pedelecs have 600W of max power.',
+                i18n.t('max_current_description'),
             ),
         ];
     }
@@ -120,12 +121,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'low_voltage_protection',
                 label: (
                     <>
-                        Battery cutoff voltage
+                        {i18n.t('battery_low_limit')}
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Increase it if you system shuts down unexpectedly by
-                            BMS inside of battery
+                            {i18n.t('battery_low_limit_description')}
                         </Typography.Text>
                     </>
                 ),
@@ -149,9 +149,9 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
     getPhysicalParameterItems(): DescriptionsProps['items'] {
         return [
             generateEditableNumberListItemWithWarning(
-                'Wheel diameter',
+                i18n.t('wheel_diameter'),
                 this.state.wheel_diameter,
-                'Usually bike wheels has size in range from 12 to 29 inches',
+                i18n.t('wheel_diameter_warning'),
                 12,
                 29,
                 (wheel_diameter) => this.setState({ wheel_diameter }),
@@ -174,15 +174,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 key: 'pedal_speed_limit',
                 label: (
                     <>
-                        Pedal speed limit
+                        {i18n.t('pedal_speed_limit')}
                         <br />
                         <br />
                         <Typography.Text italic>
-                            Note that its illegal to set bigger speed limit that
-                            <br />
-                            its allowed in your country. Check your local laws
-                            <br />
-                            before changing it
+                            {i18n.t('pedal_speed_limit_description')}
                         </Typography.Text>
                     </>
                 ),
@@ -193,13 +189,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                             {
                                 value: this.initial_pedal_parameters
                                     .pedal_speed_limit,
-                                label: `Leave old value - 
+                                label: `${i18n.t('leave_old_value')} - 
                                         ${
                                             this.initial_pedal_parameters
                                                 .pedal_speed_limit ===
                                             SpeedLimitByDisplay
-                                                ? 'By display'
-                                                : `${this.initial_pedal_parameters.pedal_speed_limit} km/h`
+                                                ? i18n.t('by_display')
+                                                : i18n.t('x_km/h', {
+                                                      speed: this
+                                                          .initial_pedal_parameters
+                                                          .pedal_speed_limit,
+                                                  })
                                         }`,
                             },
                             ...SimplifiedPedalSpeedLimitOptions,
@@ -211,17 +211,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         }}
                     />
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'signals_before_assist',
                 label: (
                     <>
-                        Start Degree
+                        {i18n.t('start_degree')}
                         <br />
                         <br />
                         <Typography.Text italic>
-                            This parameter means on how big angle do you have to
-                            turn pedals to start motor
+                            {i18n.t('start_degree_description')}
                         </Typography.Text>
                     </>
                 ),
@@ -241,7 +241,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                     .pedal_signals_before_start
                             }
                         >
-                            Leave old value -&nbsp;
+                            {i18n.t('leave_old_value')} -&nbsp;
                             {(360 / PedalSensorSignals[pedal_type]) *
                                 this.initial_pedal_parameters
                                     .pedal_signals_before_start}
@@ -260,21 +260,17 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         </Radio>
                     </Radio.Group>
                 ),
+                contentStyle: { width: '50%' },
             },
             {
                 key: 'time_before_end_of_assist',
                 label: (
                     <>
-                        Stop Delay
+                        {i18n.t('stop_delay')}
                         <br />
                         <br />
                         <Typography.Text italic>
-                            This parameter means time between last signal from
-                            pedal sensor and motor stop. If parameter is too
-                            low, motor may work unstable on low cadence. If
-                            parameter is too big, braking distance will increase
-                            (so too big value is not available in Simplified
-                            mode)
+                            {i18n.t('stop_delay_simplified_description')}
                         </Typography.Text>
                     </>
                 ),
@@ -293,17 +289,18 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                 this.initial_pedal_parameters.pedal_time_to_stop
                             }
                         >
-                            Leave old value -&nbsp;
+                            {i18n.t('leave_old_value')} -&nbsp;
                             {this.initial_pedal_parameters.pedal_time_to_stop}
-                            ms
+                            {i18n.t('ms')}
                         </Radio>
-                        <Radio value={50}>50ms</Radio>
-                        <Radio value={100}>100ms</Radio>
-                        <Radio value={150}>150ms</Radio>
-                        <Radio value={200}>200ms</Radio>
-                        <Radio value={250}>250ms</Radio>
+                        <Radio value={50}>50{i18n.t('ms')}</Radio>
+                        <Radio value={100}>100{i18n.t('ms')}</Radio>
+                        <Radio value={150}>150{i18n.t('ms')}</Radio>
+                        <Radio value={200}>200{i18n.t('ms')}</Radio>
+                        <Radio value={250}>250{i18n.t('ms')}</Radio>
                     </Radio.Group>
                 ),
+                contentStyle: { width: '50%' },
             },
         ];
     }
@@ -353,32 +350,32 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
         return (
             <div style={{ margin: '36px' }}>
                 <Typography.Title level={2} style={{ margin: 0 }}>
-                    Settings
+                    {i18n.t('uart_motor_parameters_title')}
                 </Typography.Title>
                 <br />
                 <br />
                 <Descriptions
                     bordered
-                    title="Info"
+                    title={i18n.t('info')}
                     items={this.getInfoItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Electrical parameters"
+                    title={i18n.t('electric_parameters')}
                     items={this.getElectricalParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
                 <Descriptions
                     bordered
-                    title="Physical parameters"
+                    title={i18n.t('mechanical_parameters')}
                     items={this.getPhysicalParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
                 />
-                <Title level={5}>Assist levels</Title>
+                <Title level={5}>{i18n.t('assist_table_title')}</Title>
                 <AssistLevelTableComponent
                     assist_profiles={this.state.assist_profiles}
                     onChange={(assist_profiles) =>
@@ -388,7 +385,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                 />
                 <Descriptions
                     bordered
-                    title="Drive parameters"
+                    title={i18n.t('driving_parameters')}
                     items={this.getDriveParameterItems()}
                     column={1}
                     style={{ marginBottom: '20px' }}
@@ -402,7 +399,7 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                         message.open({
                             key: 'loading',
                             type: 'loading',
-                            content: 'Loading...',
+                            content: i18n.t('loading'),
                         });
                         setTimeout(() => {
                             const { lastUpdateTime } = this.state;
@@ -410,14 +407,14 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                                 message.open({
                                     key: 'loading',
                                     type: 'success',
-                                    content: 'Read sucessfully!',
+                                    content: i18n.t('loaded_successfully'),
                                     duration: 2,
                                 });
                             } else {
                                 message.open({
                                     key: 'loading',
                                     type: 'error',
-                                    content: 'Error during reading!',
+                                    content: i18n.t('loading_error'),
                                     duration: 2,
                                 });
                             }
@@ -425,11 +422,11 @@ class BafangUartMotorSettingsSimplifiedView extends React.Component<
                     }}
                 />
                 <Popconfirm
-                    title="Parameter writing"
-                    description="Are you sure that you want to write all parameters on device?"
+                    title={i18n.t('parameter_writing_title')}
+                    description={i18n.t('parameter_writing_confirm')}
                     onConfirm={this.saveParameters}
-                    okText="Yes"
-                    cancelText="No"
+                    okText={i18n.t('yes')}
+                    cancelText={i18n.t('no')}
                 >
                     <FloatButton
                         icon={<DeliveredProcedureOutlined />}

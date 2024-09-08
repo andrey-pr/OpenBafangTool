@@ -1,5 +1,6 @@
 import { InputNumber, Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
+import i18n from '../../i18n/i18n';
 
 type ParameterInputProps = {
     value: number | null;
@@ -71,7 +72,7 @@ class ParameterInputComponent extends React.Component<
             disabled,
             decimalPlaces,
         } = this.props;
-        if (value === null && !this.props.nullIsOk) return 'Value is not available';
+        if (value === null && !this.props.nullIsOk) return i18n.t('not_available');
         return (
             <Tooltip title={warningText} trigger="click" open={warning}>
                 <InputNumber
