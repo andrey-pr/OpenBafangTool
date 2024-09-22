@@ -132,7 +132,7 @@ Many Linux distros, such as Ubuntu, blocks direct access to HID device. To fix i
 4. Replug your device
 
 ##### For UART
-Connection error might occur if connecting to the serial port needs elevated privileges (experienced on Fedora 40).
+Connection error might occur if connecting to the serial port needs elevated privileges (experienced on Fedora 40 and kubuntu 24.04).
 
 1. Check device permissions the following command `ls -la /dev/ttyUSB0` (adapt ttyUSB0 to the value in the serial port field)
 ```
