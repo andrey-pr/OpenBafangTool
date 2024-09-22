@@ -132,14 +132,14 @@ Many Linux distros, such as Ubuntu, blocks direct access to HID device. To fix i
 4. Replug your device
 
 ##### For UART
-Connection error might occur if connecting to the serial port needs elevated privileges.
+Connection error might occur if connecting to the serial port needs elevated privileges (experienced on Fedora 40).
 
 1. Check device permissions the following command `ls -la /dev/ttyUSB0` (adapt ttyUSB0 to the value in the serial port field)
 ```
 $ ls -la /dev/ttyUSB0
 crw-rw----. 1 root dialout 188, 0 Jul  9 17:55 /dev/ttyUSB0
 ```
-3. in he case above, device belongs to roo, and is accessible to members of group dialout. To access it without elevated, you need to add your linux user to the dialout group with `sudo usermod -a -G dialout yourusername`. You might have to log out and in so group membership apply.
+3. in he case above, device belongs to root, and is accessible to members of group dialout. To access it without elevated privilieges, you need to add your linux user to the dialout group with `sudo usermod -a -G dialout yourusername`. You might have to log out and in so group membership apply.
 4. Try again to conect Open Bafang Tool to your device.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
