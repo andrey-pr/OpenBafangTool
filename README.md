@@ -122,10 +122,11 @@ Also better to have USB isolator, that will protect your computer in case when m
 
 Current build of program are portable, so just download executable and launch it. Also, if you use Linux, you may need to unblock your serial ports or hid device in way, dependent on your distributive.
 
-#### HID troubleshooting on Linux
+#### For CAN
+
+##### HID troubleshooting on Linux
 
 Many Linux distros, such as Ubuntu, blocks direct access to HID device. To fix it, do next things:
-
 1. Create file `/etc/udev/rules.d/51-bessttool.rules` (name may be different, but compatible with udev).
 2. Write following content in file (if pid or vid if different on your device, change it in file):
    ```
@@ -135,6 +136,17 @@ Many Linux distros, such as Ubuntu, blocks direct access to HID device. To fix i
    ```
 3. Execute folowing command: `sudo udevadm control --reload-rules`
 4. Replug your device
+
+#### For UART
+Connection error might occur if connecting to the serial port needs elevated privileges (experienced on Fedora 40 and kubuntu 24.04).
+
+1. Check device permissions the following command `ls -la /path/to/your/serial/device`
+```
+$ ls -la /dev/ttyUSB0
+crw-rw----. 1 root dialout 188, 0 Jul  9 17:55 /dev/ttyUSB0
+```
+2. in he case above, device belongs to root, and is accessible to members of group dialout. To access it without elevated privilieges, you need to add your linux user to the dialout group with `sudo usermod -a -G dialout yourusername`.
+3. Reboot your computer to apply changes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
