@@ -27,14 +27,22 @@
 
 ![Display connector](docs/assets/readme/uart_can_connectors.png)
 
-All kinds of modern bafang hardware with CAN bus are supported: all mid-drive motors, all hub motors with bafang controller, all displays and all digital torque sensors, as well as all kinds of motors with UART (but not displays with UART).
+All kinds of modern Bafang hardware with the CAN bus are supported: 
 
-Also, you may encount bafang electrics with label of other brand: I tested motors branded for Qwic and AEG, also there is information about bafangs branded for Prophete, E-Novation and Blaupunkt (but I not tested them).
+All mid-drive motors, all hub motors with Bafang controller, all displays, and all digital torque sensors, as well as all kinds of motors with UART (but not displays with UART)
+
+There are also Bafang motors made for Prophete, E-Novation, and Blaupunkt, but I haven't tried them yet.
 
 Important notices:
-1. Some devices have firmware with limited configurable parameters, and it does not depends on model. For example, I tested 3 absolutely same M420 mid-drives, and two of them have all configurable paramters available, and one of them does not have most of parameters.
-2. If you have bike with bafang hub motor, check brand of it's controller: some bike manufacturers may install bafang hub motor with third-party controller.
-3. Sub-brands usually also have branded motors from other manufacturers; some of sub-branded models are non-bafang, so you need to search information right for model of your device.
+1. Some devices have firmware with limited configurable parameters, and it does not depend on model.
+
+For example, I tested 3 absolutely idendical M420 mid-drive models, and two of them had all configurable parameters available, and one of them does not offer most of the parameters.
+
+3. If you have a bike with a Bafang hub motor, check the brand of it's controller: Some bike manufacturers may install Bafang hub motors with third-party controllers.
+
+We cant support them.
+   
+4. Sub-brands usually also have branded motors from other manufacturers; some of those sub-branded models are non-bafang, so you need to search information right for model of your device.
 
 <!-- RELEASE NOTES -->
 ## Release Notes
@@ -47,7 +55,7 @@ Important notices:
 
 ### 2.2.1
 
-- Added support of bafang digital batteries (please note that not all of batteries installed on bike are digital; bafang motors could work with simple batteries with no digital interface)
+- Added support of Bafang digital batteries (please note that not all of the batteries installed on a bike are digital; Some Bafang motors could work with simple batteries with no digital interface)
 
 ### 2.1.1
 
@@ -64,7 +72,7 @@ Important notices:
 ### 1.0.1
 
 - Published project in Beta
-- Added Simplified Mode for beginners
+- Added simplified Mode for beginners
 
 ### 1.0.0
 
@@ -81,9 +89,11 @@ Important notices:
 
 **Please report about your expirience of using this program on [forum](https://endless-sphere.com/sphere/threads/openbafangtool-new-open-source-bafang-configuration-tool.122809) to help me make programm better**
 
-The goal of project is to replace official diagnostic tools for ebikes, that available only for official dealers, with open source alternative to let people repair and configure their bikes at home. For example, you can read and erase error codes, or limit power if physical power of your motor is too big for your country rules (possibilities depend on motor brand and model). Second goal of project is to document protocols of as much systems as possible to let other developers use them in their projects.
+The goal of the project is to replace the official diagnostic tools for ebikes, that are available only for official dealers, with open source alternatives to let people repair and configure their bikes at home. For example, you can read and erase error codes, or limit power if the physical power of your motor is too big for your country rules (possibilities depend on motor brand and model). Second goal of project is to document protocols of as much systems as possible to let other developers use them in their projects.
 
-Currently this program supports any kinds of Bafang - motors with UART (BBS01, BBS02, etc) and with CAN (M500, M600, M420, etc). Currently not all features of CAN motors are supported, more features will be available in next versions.
+Currently this program supports any kinds of Bafang - motors with UART (BBS01, BBS02, etc) and with CAN (M500, M600, M420, etc). 
+
+Currently not all features of CAN motors are supported, more features will be available in further versions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -120,7 +130,9 @@ Also better to have USB isolator, that will protect your computer in case when m
 
 ### Installation
 
-Current build of program are portable, so just download executable and launch it. Also, if you use Linux, you may need to unblock your serial ports or hid device in way, dependent on your distributive.
+Current builds of program are portable, so just download the executable and launch it. 
+
+Also, if you use Linux, you may need to unblock your serial ports or HID device in some way, dependent on your distribution.
 
 #### For CAN
 
