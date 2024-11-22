@@ -34,15 +34,11 @@ All mid-drive motors, all hub motors with Bafang controller, all displays, and a
 There are also Bafang motors made for Prophete, E-Novation, and Blaupunkt, but I haven't tried them yet.
 
 Important notices:
-1. Some devices have firmware with limited configurable parameters, and it does not depend on model.
+1. Some devices have firmware with limited configurable parameters, and it does not depend on model. For example, I tested 3 absolutely idendical M420 mid-drive models, and two of them had all configurable parameters available, and one of them does not offer most of the parameters.
 
-For example, I tested 3 absolutely idendical M420 mid-drive models, and two of them had all configurable parameters available, and one of them does not offer most of the parameters.
-
-3. If you have a bike with a Bafang hub motor, check the brand of it's controller: Some bike manufacturers may install Bafang hub motors with third-party controllers.
-
-We cant support them.
+2. If you have a bike with a Bafang hub motor, check the brand of it's controller: Some bike manufacturers may install Bafang hub motors with third-party controllers. I can not support them.
    
-4. Sub-brands usually also have branded motors from other manufacturers; some of those sub-branded models are non-bafang, so you need to search information right for model of your device.
+3. Sub-brands usually also have branded motors from other manufacturers; some of those sub-branded models are non-bafang, so you need to search information right for model of your device.
 
 <!-- RELEASE NOTES -->
 ## Release Notes
@@ -55,7 +51,7 @@ We cant support them.
 
 ### 2.2.1
 
-- Added support of Bafang digital batteries (please note that not all of the batteries installed on a bike are digital; Some Bafang motors could work with simple batteries with no digital interface)
+- Added support of Bafang digital batteries (please note that not all of the batteries installed on a bike are digital; Bafang motors could work with simple batteries with no digital interface)
 
 ### 2.1.1
 
@@ -72,7 +68,7 @@ We cant support them.
 ### 1.0.1
 
 - Published project in Beta
-- Added simplified Mode for beginners
+- Added Simplified Mode for beginners
 
 ### 1.0.0
 
@@ -130,7 +126,9 @@ Also better to have USB isolator, that will protect your computer in case when m
 
 ### Installation
 
-Current builds of program are portable, so just download the executable and launch it. 
+If you use Windows, just launch installation file and wait for the installation process to complete.
+
+Current builds for Linux are portable, so just download the executable and launch it. 
 
 Also, if you use Linux, you may need to unblock your serial ports or HID device in some way, dependent on your distribution.
 
